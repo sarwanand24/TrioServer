@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { io } from "./app.js";
+import { io } from "./index.js";
 import admin from "firebase-admin";
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
