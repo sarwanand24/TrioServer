@@ -13,7 +13,7 @@ const handleConnection = async (socket) => {
   console.log('A user/restaurant/rider connected', socket.id);
 
   socket.on("FoodyOrderPlaced", async (data) => {
-    console.log(data);
+    console.log("Server data", data);
     //get the device token and send the notification
     await admin.messaging().sendEachForMulticast({
       tokens: [data.deviceToken],
@@ -21,15 +21,7 @@ const handleConnection = async (socket) => {
         title: 'You Received an Order',
         body: 'A user Placed a order',  // Add food items details also
         imageUrl: 'https://my-cdn.com/app-logo.png',
-      },
-      apns: {
-        payload: {
-          aps: {
-            'content-available': true,
-             priority: 'high',
-          },
-        },
-      },
+      }
     });
 
     socket.emit("RestaurantOrderInform", data)
@@ -38,6 +30,11 @@ const handleConnection = async (socket) => {
   socket.on("RestaurantRejectedOrder", async(data)=> {
     //handle foregroundnotification and send socket.emit
     socket.emit("OrderRejectedbyRestaurant", data)
+  })
+
+  socket.on("RestaurantAcceptedOrder", async(data)=> {
+    //handle foregroundnotification and send socket.emit
+    socket.emit("OrderAcceptedbyRestaurant", data)
   })
 
   // Disconnect event
