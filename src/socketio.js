@@ -15,7 +15,7 @@ const handleConnection = async (socket) => {
   socket.on("FoodyOrderPlaced", async (data) => {
     console.log("Server data", data);
     //get the device token and send the notification
-    await admin.messaging().sendEachForMulticast({
+   const msg = await admin.messaging().sendEachForMulticast({
       tokens: [data.deviceToken],
       notification: {
         title: 'You Received an Order',
@@ -23,18 +23,23 @@ const handleConnection = async (socket) => {
         imageUrl: 'https://my-cdn.com/app-logo.png',
       }
     });
+    console.log("Message", msg);
 
-    socket.emit("RestaurantOrderInform", data)
+    await new Promise(resolve => setTimeout(resolve, 15000));
+    console.log("After 15 sec");
+    io.emit("RestaurantOrderInform", data) //afterwards send to specific restro
   })
 
   socket.on("RestaurantRejectedOrder", async(data)=> {
     //handle foregroundnotification and send socket.emit
-    socket.emit("OrderRejectedbyRestaurant", data)
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    io.emit("OrderRejectedbyRestaurant", data) //send to specific user
   })
 
   socket.on("RestaurantAcceptedOrder", async(data)=> {
     //handle foregroundnotification and send socket.emit
-    socket.emit("OrderAcceptedbyRestaurant", data)
+    await new Promise(resolve => setTimeout(resolve, 10000));
+    io.emit("OrderAcceptedbyRestaurant", data) //send to specific user
   })
 
   // Disconnect event
