@@ -5,8 +5,7 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "node --experimental-json-modules index.js",
-    "start": "node index.js"
+    "test": "node --experimental-json-modules index.js"
   },
   "keywords": [
     "Trio",
