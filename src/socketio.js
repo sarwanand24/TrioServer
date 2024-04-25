@@ -8,6 +8,7 @@ import { RiderAcceptReject } from "./models/RiderAcceptReject.model.js";
 import { FoodyOrders } from "./models/FoodyOrders.model.js";
 import { Restaurant } from "./models/Retaurant.model.js";
 import { User } from "./models/User.model.js";
+import { ApiError } from "./utils/ApiError.js";
 const require = createRequire(import.meta.url);
 const trioRestroServiceAccount = require('../TrioRestaurantServiceAccount.json');
 const trioServiceAccount = require('../TrioServiceAccount.json');

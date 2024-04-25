@@ -893,7 +893,7 @@ const fetchAcceptReject = asyncHandler( async(req, res) => {
 
    return res.
    status(200)
-   .json(new ApiResponse(200, rider[0], "Successfull in fetching Accept/Reject"))
+   .json(new ApiResponse(200, rider, "Successfull in fetching Accept/Reject"))
 })
 
 export {
