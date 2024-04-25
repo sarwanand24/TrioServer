@@ -15,9 +15,6 @@ const riderAcceptRejectSchema = new Schema(
         userDeviceToken: {
             type: String
         },
-        userSocket: {
-            type: String
-        },
         userAddress: {
             type: String
         },

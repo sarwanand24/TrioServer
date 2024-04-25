@@ -46,7 +46,6 @@ const handleConnection = async (socket) => {
       totalItems: data.newTotalItem,
       bill: data.newTotalAmount,
       userDeviceToken: data.userDeviceToken,
-      userSocket: data.socketId,
       userAddress: data.userAddress,
       userId: data.userId
     })
@@ -145,13 +144,13 @@ const handleConnection = async (socket) => {
     });
     console.log("Message", msg2);
     console.log("RestroId", restro.restaurantId);
+    console.log("Data or Checking FoodItems", data);
     const rider2 = await RiderAcceptReject.create({
       riderId: rider[randomIndex]._id,
       restaurantName: data.restroName,
       restaurantAddress: data.restroAddress,
       userDeviceToken: restro.userDeviceToken,
       userAddress: data.userAddress,
-      userSocket: data.socket,
       userId: data.userId,
       restaurantId: restro.restaurantId,
       foodItems: data.foodItems,
