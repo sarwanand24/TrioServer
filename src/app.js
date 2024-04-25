@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 const app = express();
 
 app.use(cors({
-    origin: "https://trio-server.vercel.app",
+    origin: "https://ced3-2409-40e1-14-5735-b4e1-cb27-dcb2-1981.ngrok-free.app",
     credentials: true
 }))
 app.use(express.json({limit: "16kb"}))
@@ -20,7 +20,7 @@ app.use(cookieParser())
 const server = http.createServer(app);
 const io = new Server(server, {
    cors: {
-    origin: "https://trio-server.vercel.app",
+    origin: "https://ced3-2409-40e1-14-5735-b4e1-cb27-dcb2-1981.ngrok-free.app",
     credentials: true,
     methods: ["GET", "POST"]
    } 

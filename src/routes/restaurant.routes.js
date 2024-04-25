@@ -3,7 +3,7 @@ import {
     addNonVegFoods,
     addToOrderHistory,
     addVegFoods,
-    changeCurrentPassword, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, loginRestaurant, logoutRestaurant,
+    changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, loginRestaurant, logoutRestaurant,
     refreshAccessToken, registerRestaurant, removeNonVegFoods, removeOrderHistory, removeVegFoods, setDeviceToken, signoutRestaurant,
     updateAccountDetails
 } from "../controllers/restaurant.controller.js";
@@ -47,5 +47,7 @@ router.route("/getAllVegFoods").get(verifyRestaurantsJWT, getAllVegFoods)
 router.route("/getAllNonVegFoods").get(verifyRestaurantsJWT, getAllNonVegFoods)
 
 router.route("/set-device-token").post(verifyRestaurantsJWT, setDeviceToken);
+
+router.route("/fetchAccept-Reject").get(verifyRestaurantsJWT, fetchAcceptReject);
 
 export default router

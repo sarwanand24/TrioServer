@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 const riderSchema = new Schema(
     {
@@ -97,6 +97,13 @@ const riderSchema = new Schema(
         },
         deviceToken: {
           type: String
+        },
+        zone: {
+            type: String
+        },
+        city: {
+            type: String,
+            required: true
         }
     }, {
     timestamps: true

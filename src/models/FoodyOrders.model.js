@@ -18,10 +18,10 @@ const foodyOrdersSchema = new Schema(
             type: String,
             required: true
         },
-        items: [{
-            type: String,
+        items: {
+            type: Array,
             required: true
-        }],
+        },
         orderStatus: {
             type: String
         },

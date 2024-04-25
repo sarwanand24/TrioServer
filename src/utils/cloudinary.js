@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 import {v2 as cloudinary} from 'cloudinary';
 import fs from "fs";
 dotenv.config({
-  path: '../.env'
+  path: './.env'
 })
 
 cloudinary.config({ 

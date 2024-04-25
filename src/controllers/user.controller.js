@@ -63,7 +63,7 @@ const registerUser = asyncHandler(async (req, res) => {
 
    const profilePhotoLocalPath = profileImg; //uncomment it when testing with react native frontend
 
-  //const profilePhotoLocalPath = req.file?.path;
+   //const profilePhotoLocalPath = req.file?.path;
 
    if (!profilePhotoLocalPath) {
       res.status(400).json(new ApiResponse(400, "ProfilePhoto File is required"))

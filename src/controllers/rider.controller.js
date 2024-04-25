@@ -3,6 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { RiderAcceptReject } from "../models/RiderAcceptReject.model.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 
@@ -35,7 +36,7 @@ const registerRider = asyncHandler(async (req, res) => {
    //return res
 
    const { riderName, email, password, address, mobileNo, alternateMobileNo, profileImg, drivingLiscenceImg,
-       vehicleName, vehicleNo, aadharImg } = req.body;
+       vehicleName, vehicleNo, aadharImg, zone, city } = req.body;
 
    let altMob;
    if(alternateMobileNo?.length) {
@@ -100,7 +101,9 @@ const registerRider = asyncHandler(async (req, res) => {
       alternateMobileNo: altMob?.alternateMobileNo || "",
       mobileNo,
       vehicleName,
-      vehicleNo
+      vehicleNo,
+      zone,
+      city
    })
 
    if (!rider) {
@@ -871,6 +874,28 @@ const setDeviceToken = asyncHandler( async(req, res) => {
 
 })
 
+const fetchAcceptReject = asyncHandler( async(req, res) => {
+
+   const rider = await RiderAcceptReject.aggregate([
+      {
+         $match: {
+            riderId: req.rider._id,
+            status: false
+         }
+      }
+   ])
+
+   console.log(rider[0]);
+
+   if(!rider){
+     throw new ApiError(400, "Error in fetching Accept/Reject");
+   }
+
+   return res.
+   status(200)
+   .json(new ApiResponse(200, rider[0], "Successfull in fetching Accept/Reject"))
+})
+
 export {
    registerRider,
    loginRider,
@@ -896,5 +921,6 @@ export {
    removeFromCyrMedicoRideHistory,
    getCyrMedicoRideHistory,
    toggleAvailableStatus,
-   setDeviceToken
+   setDeviceToken,
+   fetchAcceptReject
 }

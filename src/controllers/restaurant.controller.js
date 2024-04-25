@@ -7,6 +7,7 @@ import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { VegFoods } from "../models/VegFoods.model.js";
 import { NonVegFoods } from "../models/NonVegFoods.model.js";
+import { RestroAcceptReject } from "../models/RestaurantAcceptReject.model.js";
 
 const generateAccessAndRefreshTokens = async (restaurantId) => {
    try {
@@ -37,7 +38,7 @@ const registerRestaurant = asyncHandler(async (req, res) => {
    //return res
 
    const { restaurantName, ownerName, email, password, address, mobileNo, alternateMobileNo,
-      restaurantPhotoImg, fssaiNo, fssaiExpiryDate, openingTime, closingTime } = req.body;
+      restaurantPhotoImg, fssaiNo, fssaiExpiryDate, openingTime, closingTime, zone, city } = req.body;
 
    let altMob;
    if (alternateMobileNo?.length) {
@@ -487,7 +488,6 @@ const getAllRatings = asyncHandler(async (req, res) => {
    //return res
 
    const allRating = await Restaurant.aggregate([
-      [
          {
             $match: {
                _id: new mongoose.Types.ObjectId(req.restaurant._id),
@@ -511,7 +511,6 @@ const getAllRatings = asyncHandler(async (req, res) => {
                ]
             }
          }
-      ]
    ])
    console.log(allRating);
    return res
@@ -799,6 +798,27 @@ const setDeviceToken = asyncHandler( async(req, res) => {
 
 })
 
+const fetchAcceptReject = asyncHandler( async(req, res) => {
+    console.log(req.restaurant._id);
+    const restro = await RestroAcceptReject.aggregate([
+      {
+         $match: {
+            restaurantId: req.restaurant._id,
+            status: false
+         }
+      }
+   ])
+
+    console.log(restro[0]);
+    if(!restro){
+      throw new ApiError(400, "Error in fetching Accept/Reject");
+    }
+
+    return res.
+    status(200)
+    .json(new ApiResponse(200, restro, "Successfull in fetching Accept/Reject"))
+})
+
 export {
    registerRestaurant,
    loginRestaurant,
@@ -823,5 +843,6 @@ export {
    removeNonVegFoods,
    getAllVegFoods,
    getAllNonVegFoods,
-   setDeviceToken
+   setDeviceToken,
+   fetchAcceptReject
 }

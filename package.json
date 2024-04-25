@@ -17,7 +17,7 @@
   "author": "Nikhil Dhamgay",
   "license": "ISC",
   "dependencies": {
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cloudinary": "^2.0.3",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
@@ -28,7 +28,6 @@
     "mongoose": "^8.2.2",
     "mongoose-aggregate-paginate-v2": "^1.0.7",
     "multer": "^1.4.5-lts.1",
-    "node-gyp": "^10.1.0",
     "nodemon": "^3.1.0",
     "socket.io": "^4.7.5",
     "stripe": "^15.1.0"
