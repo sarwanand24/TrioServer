@@ -53,7 +53,7 @@ const createRatings = asyncHandler(async (req, res) => {
     console.log("riderRating", riderRating);
     console.log("Average Rating", riderRating[0]);
 
-    const rider = Rider.findByIdAndUpdate(new mongoose.Types.ObjectId(riderId),
+    const rider = await Rider.findByIdAndUpdate(new mongoose.Types.ObjectId(riderId),
         {
            $set: {
             cyrRatings: riderRating[0].averageRating
