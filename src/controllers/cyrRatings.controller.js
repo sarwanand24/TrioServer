@@ -36,7 +36,7 @@ const createRatings = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Error in creating Ratings")
     }
 
-    const riderRating = CYRRating.aggregate([
+    const riderRating = await CYRRating.aggregate([
         {
             $match: {
                 rider: new mongoose.Types.ObjectId(riderId)
