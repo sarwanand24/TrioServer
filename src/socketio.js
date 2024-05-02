@@ -271,7 +271,7 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in creating order")
     }
 
-    io.emit("OrderAcceptedbyRider", {data, orderId: order._id})
+    io.emit("OrderAcceptedbyRider", {data, orderId: order._id, riderId: rider.riderId})
 
     const restroOrder = await Restaurant.findByIdAndUpdate(
       rider.restaurantId,

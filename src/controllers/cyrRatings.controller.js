@@ -1,7 +1,8 @@
 import { CYRRating } from "../models/CYRRating.model.js";
-import {asyncHandler} from "../utils/asyncHandler.js";
-import {ApiError} from "../utils/ApiError.js";
-import {ApiResponse} from "../utils/ApiResponse.js";
+import { Rider } from "../models/Rider.model.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 
 const createRatings = asyncHandler(async (req, res) => {
@@ -33,6 +34,32 @@ const createRatings = asyncHandler(async (req, res) => {
     if (!ratings) {
         throw new ApiError(400, "Error in creating Ratings")
     }
+
+    const riderRating = CYRRating.aggregate([
+        {
+            $match: {
+                rider: new mongoose.Types.ObjectId(riderId)
+            }
+        },
+        {
+            $group: {
+                _id: null, // Group by null to calculate aggregate over all documents
+                averageRating: { $avg: "$rating" } // Calculate average of the 'rating' field
+            }
+        }
+    ])
+
+    console.log(riderRating);
+    console.log("Average Rating", riderRating[0].averageRating);
+
+    const rider = Rider.findByIdAndUpdate(new mongoose.Types.ObjectId(riderId),
+        {
+           $set: {
+            cyrRatings: riderRating[0].averageRating
+           }
+        })
+
+        console.log(rider);
 
     return res
         .status(200)
@@ -70,13 +97,13 @@ const updateRatings = asyncHandler(async (req, res) => {
             new: true
         })
 
-        if (!ratings) {
-            throw new ApiError(400, "Error in updating Ratings")
-        }
-    
-        return res
-            .status(200)
-            .json(new ApiResponse(200, ratings, "Successfully updated Ratings"))
+    if (!ratings) {
+        throw new ApiError(400, "Error in updating Ratings")
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, ratings, "Successfully updated Ratings"))
 
 })
 
@@ -93,11 +120,11 @@ const deleteRatings = asyncHandler(async (req, res) => {
     }
 
     const ratings = await CYRRating.findByIdAndDelete(new mongoose.Types.ObjectId(ratingsId),
-    {
-        $unset: {
-            _id: 1
-        }
-    })
+        {
+            $unset: {
+                _id: 1
+            }
+        })
 
     if (!ratings?.length) {
         throw new ApiError(400, "Error in deleting Ratings")

@@ -1057,7 +1057,7 @@ const getCyrRatings = asyncHandler(async (req, res) => {
 
      
    const cyrRating = await User.aggregate([
-      [
+    
          {
            $match: {
              _id: new mongoose.Types.ObjectId(req.user._id),
@@ -1081,7 +1081,7 @@ const getCyrRatings = asyncHandler(async (req, res) => {
              ]
            }
          }
-       ]
+      
    ])
    console.log(cyrRating);
       return res
