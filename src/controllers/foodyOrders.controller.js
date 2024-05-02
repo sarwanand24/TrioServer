@@ -3,6 +3,7 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import { cancelOrder } from "./cyrCancelledRides.controller.js";
 
 const placeOrder = asyncHandler(async (req, res)=> {
 
@@ -79,11 +80,43 @@ const getOrderById = asyncHandler(async (req, res)=> {
         throw new ApiError(400, "orderId is required")
     }
 
-    const order = await FoodyOrders.find(new mongoose.types.ObjectId(orderId))
+    const order = await FoodyOrders.aggregate([
+        {
+            $match: {
+                _id: new mongoose.Types.ObjectId(orderId)
+            }
+        },
+        {
+            $lookup: {
+              from: "users",
+              localField: "orderedBy",
+              foreignField: "_id",
+              as: "User",
+            }
+        },
+        {
+            $lookup: {
+              from: "restaurants",
+              localField: "restaurant",
+              foreignField: "_id",
+              as: "Restaurant",
+            }
+        },
+        {
+            $lookup: {
+              from: "riders",
+              localField: "rider",
+              foreignField: "_id",
+              as: "Rider",
+            }
+        }
+    ])
 
     if(!order?.length){
         throw new ApiError(400, "Error in fectching the order")
     }
+
+    console.log(order);
 
     return res
     .status(200)
