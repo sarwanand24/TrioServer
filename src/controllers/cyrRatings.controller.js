@@ -14,21 +14,22 @@ const createRatings = asyncHandler(async (req, res) => {
     //return res
 
     const { riderId } = req.params
-    const { rating, feedback } = req.body
+    const { rating } = req.body
 
     if (!riderId) {
         throw new ApiError(400, "RiderId is required")
     }
 
-    if (!(rating || feedback)) {
+    console.log("Rating", rating);
+
+    if (!rating) {
         throw new ApiError(400, "Rating or Feedback is required")
     }
 
     const ratings = await CYRRating.create({
         rider: new mongoose.Types.ObjectId(riderId),
         ratedBy: new mongoose.Types.ObjectId(req.user._id),
-        rating,
-        feedback
+        rating
     })
 
     if (!ratings) {
