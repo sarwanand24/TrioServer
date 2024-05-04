@@ -37,6 +37,8 @@ const handleConnection = async (socket) => {
       notification: {
         title: 'You Received an Order',
         body: 'A user Placed a order',  // Add food items details also
+        sound: "order_tone.mp3",
+        android_channel_id: "order_channel",
         imageUrl: 'https://my-cdn.com/app-logo.png',
       }
     });
