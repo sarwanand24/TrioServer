@@ -37,12 +37,12 @@ const handleConnection = async (socket) => {
       notification: {
         title: 'You Received an Order',
         body: 'A user Placed a order',  // Add food items details also
-        sound: "order_tone.mp3",
+        sound: 'order_tone.mp3',
         android_channel_id: "order_channel",
-        imageUrl: 'https://my-cdn.com/app-logo.png',
+        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
       }
     });
-    console.log("Message", msg);
+    console.log("Message", msg.responses[0].error);
     const restro = await RestroAcceptReject.create({
       restaurantId: data.restroId,
       foodItems: data.newSelectedFoods,
