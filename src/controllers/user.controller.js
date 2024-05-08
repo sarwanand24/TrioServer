@@ -1361,8 +1361,16 @@ const getAllHotelsByCity = asyncHandler(async (req, res) => {
       }
    ])
 
+   console.log(hotel);
+
    if(!hotel){
       throw new ApiError(401, `Error in finding hotel with city name ${city}`)
+   }
+
+   if(!(hotel.length > 0)){
+      return res
+      .status(200)
+      .json(new ApiResponse(200, {check:{noHotel: true}}, "No hotel Found With this city name"))
    }
 
    return res
