@@ -9,7 +9,13 @@ import {
     getAllVegFoods,
     getAllNonVegFoods,
     getAllRestaurants,
-    setDeviceToken
+    setDeviceToken,
+    getAllHotels,
+    getAllHotelsByCity,
+    getAllHotelsForCoupleStay,
+    getAllHotelsForFamilyStay,
+    getAllFlats,
+    getAllFlatsByCity
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -67,6 +73,18 @@ router.route("/getAllNonVegFoods").post(getAllNonVegFoods)
 
 router.route("/getAllRestaurants").get(getAllRestaurants)
 
-router.route("/set-device-token").post(verifyUsersJWT, setDeviceToken);
+router.route("/set-device-token").post(verifyUsersJWT, setDeviceToken)
+
+router.route("/getAllHotels").get(getAllHotels)
+
+router.route("/get-all-hotels-by-city").post(getAllHotelsByCity)
+
+router.route("/get-all-couple-hotels").post(getAllHotelsForCoupleStay)
+
+router.route("/get-all-family-hotels").post(getAllHotelsForFamilyStay)
+
+router.route("/getAllFlats").get(getAllFlats)
+
+router.route("/get-all-flats-by-city").post(getAllFlatsByCity)
 
 export default router

@@ -6,6 +6,8 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { Restaurant } from "../models/Retaurant.model.js";
+import { Hotel } from "../models/Hotel.model.js";
+import { Flat } from "../models/Flat.model.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
    try {
@@ -38,8 +40,8 @@ const registerUser = asyncHandler(async (req, res) => {
    const { fullName, username, email, password, address, mobileNo, alternateMobileNo, profileImg } = req.body;
 
    let altMob;
-   if(alternateMobileNo?.length) {
-       altMob = {
+   if (alternateMobileNo?.length) {
+      altMob = {
          alternateMobileNo
       }
    }
@@ -118,7 +120,7 @@ const loginUser = asyncHandler(async (req, res) => {
       throw new ApiError(400, "MobileNo is required")
    }
 
-   const user = await User.find({mobileNo})
+   const user = await User.find({ mobileNo })
 
    if (!user?.length) {
       res.status(400).json(new ApiResponse(400, "User doesn't exists"))
@@ -342,13 +344,13 @@ const signoutUser = asyncHandler(async (req, res) => {
          }
       })
 
-      if(!user){
-         throw new ApiError(400, "Error in SigningOut User")
-      }
+   if (!user) {
+      throw new ApiError(400, "Error in SigningOut User")
+   }
 
-      return res
+   return res
       .status(200)
-      .json(new ApiResponse(200,{ signedOutUser: user }, "User SignedOut Successfully" ))
+      .json(new ApiResponse(200, { signedOutUser: user }, "User SignedOut Successfully"))
 
 })
 
@@ -358,30 +360,30 @@ const addTofoodyOrderHistory = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res
 
-   const {orderId} = req.params
+   const { orderId } = req.params
 
-   if(!orderId){
-     throw new ApiError(400, "Didn't got the order Id")
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
    }
 
    const order = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           foodyOrderHistory: new mongoose.Types.ObjectId(orderId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            foodyOrderHistory: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!order){
-     throw new ApiError(400, "Error in adding order history")
+   if (!order) {
+      throw new ApiError(400, "Error in adding order history")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, order, "Successfully added to order history"))
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to order history"))
 })
 
 const getfoodyOrderHistory = asyncHandler(async (req, res) => {
@@ -393,47 +395,47 @@ const getfoodyOrderHistory = asyncHandler(async (req, res) => {
    const foodyHistory = await User.aggregate([
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "foodyorders",
-             localField: "foodyOrderHistory",
-             foreignField: "_id",
-             as: "foodyOrderHistory",
-             pipeline: [
-                {
             $lookup: {
-             from: "restaurants",
-             localField: "restaurant",
-             foreignField: "_id",
-             as: "restaurant"
-           }
-         },
-                {
-            $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+               from: "foodyorders",
+               localField: "foodyOrderHistory",
+               foreignField: "_id",
+               as: "foodyOrderHistory",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "restaurants",
+                        localField: "restaurant",
+                        foreignField: "_id",
+                        as: "restaurant"
+                     }
+                  },
+                  {
+                     $lookup: {
+                        from: "riders",
+                        localField: "rider",
+                        foreignField: "_id",
+                        as: "rider"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-       ]
+      ]
    ])
    console.log(foodyHistory);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          foodyHistory[0].foodyOrderHistory,
-          "Order History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            foodyHistory[0].foodyOrderHistory,
+            "Order History fetched Succesfully"
+         )
       )
 
 })
@@ -444,30 +446,30 @@ const addToCyrMedicoOrderHistory = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res
 
-   const {orderId} = req.params
+   const { orderId } = req.params
 
-   if(!orderId){
-     throw new ApiError(400, "Didn't got the order Id")
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
    }
 
    const order = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           cyrMedicoOrderHistory: new mongoose.Types.ObjectId(orderId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            cyrMedicoOrderHistory: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!order){
-     throw new ApiError(400, "Error in adding order history")
+   if (!order) {
+      throw new ApiError(400, "Error in adding order history")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, order, "Successfully added to order history"))
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to order history"))
 })
 
 const getCyrMedicoOrderHistory = asyncHandler(async (req, res) => {
@@ -479,46 +481,46 @@ const getCyrMedicoOrderHistory = asyncHandler(async (req, res) => {
    const cyrMedicoHistory = await User.aggregate(
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "cyrmedicoorders",
-             localField: "cyrMedicoOrderHistory",
-             foreignField: "_id",
-             as: "cyrMedicoOrderHistory",
-             pipeline: [
-                {
             $lookup: {
-             from: "restaurants",
-             localField: "restaurant",
-             foreignField: "_id",
-             as: "restaurant"
-           }
-         },
-                {
-            $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+               from: "cyrmedicoorders",
+               localField: "cyrMedicoOrderHistory",
+               foreignField: "_id",
+               as: "cyrMedicoOrderHistory",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "restaurants",
+                        localField: "restaurant",
+                        foreignField: "_id",
+                        as: "restaurant"
+                     }
+                  },
+                  {
+                     $lookup: {
+                        from: "riders",
+                        localField: "rider",
+                        foreignField: "_id",
+                        as: "rider"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-   ])
+      ])
    console.log(cyrMedicoHistory);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          cyrMedicoHistory[0].cyrMedicoOrderHistory,
-          "Order History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            cyrMedicoHistory[0].cyrMedicoOrderHistory,
+            "Order History fetched Succesfully"
+         )
       )
 
 })
@@ -529,30 +531,30 @@ const addTocyrOrderHistory = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res
 
-   const {orderId} = req.params
+   const { orderId } = req.params
 
-   if(!orderId){
-     throw new ApiError(400, "Didn't got the order Id")
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
    }
 
    const order = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           cyrOrderHistory: new mongoose.Types.ObjectId(orderId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            cyrOrderHistory: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!order){
-     throw new ApiError(400, "Error in adding order history")
+   if (!order) {
+      throw new ApiError(400, "Error in adding order history")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, order, "Successfully added to order history"))
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to order history"))
 
 })
 
@@ -565,39 +567,39 @@ const getcyrOrderHistory = asyncHandler(async (req, res) => {
    const cyrHistory = await User.aggregate([
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "cyrorders",
-             localField: "cyrOrderHistory",
-             foreignField: "_id",
-             as: "cyrOrderHistory",
-             pipeline: [
-                {
             $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+               from: "cyrorders",
+               localField: "cyrOrderHistory",
+               foreignField: "_id",
+               as: "cyrOrderHistory",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "riders",
+                        localField: "rider",
+                        foreignField: "_id",
+                        as: "rider"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-       ]
+      ]
    ])
    console.log(cyrHistory);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          cyrHistory[0].cyrOrderHistory,
-          "Order History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            cyrHistory[0].cyrOrderHistory,
+            "Order History fetched Succesfully"
+         )
       )
 
 })
@@ -608,30 +610,30 @@ const addTofoodyCancelledOrders = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res
 
-   const {orderId} = req.params
+   const { orderId } = req.params
 
-   if(!orderId){
-     throw new ApiError(400, "Didn't got the order Id")
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
    }
 
    const order = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           foodyCancelledOrders: new mongoose.Types.ObjectId(orderId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            foodyCancelledOrders: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!order){
-     throw new ApiError(400, "Error in adding Cancelled Order history")
+   if (!order) {
+      throw new ApiError(400, "Error in adding Cancelled Order history")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, order, "Successfully added to Cancelled Order history"))
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to Cancelled Order history"))
 
 })
 
@@ -641,51 +643,51 @@ const getfoodyCancelledOrders = asyncHandler(async (req, res) => {
    //check for the above data
    //return res
 
-   
+
    const foodyHistory = await User.aggregate([
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "foodycancelledorders",
-             localField: "foodyCancelledOrders",
-             foreignField: "_id",
-             as: "foodyCancelledOrders",
-             pipeline: [
-                {
             $lookup: {
-             from: "restaurants",
-             localField: "restaurant",
-             foreignField: "_id",
-             as: "restaurant"
-           }
-         },
-                {
-            $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+               from: "foodycancelledorders",
+               localField: "foodyCancelledOrders",
+               foreignField: "_id",
+               as: "foodyCancelledOrders",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "restaurants",
+                        localField: "restaurant",
+                        foreignField: "_id",
+                        as: "restaurant"
+                     }
+                  },
+                  {
+                     $lookup: {
+                        from: "riders",
+                        localField: "rider",
+                        foreignField: "_id",
+                        as: "rider"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-       ]
+      ]
    ])
    console.log(foodyHistory);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          foodyHistory[0].foodyCancelledOrders,
-          "Order History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            foodyHistory[0].foodyCancelledOrders,
+            "Order History fetched Succesfully"
+         )
       )
 
 })
@@ -696,30 +698,30 @@ const addToCyrMedicoCancelledOrders = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res
 
-   const {orderId} = req.params
+   const { orderId } = req.params
 
-   if(!orderId){
-     throw new ApiError(400, "Didn't got the order Id")
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
    }
 
    const order = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           cyrMedicoCancelledOrders: new mongoose.Types.ObjectId(orderId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            cyrMedicoCancelledOrders: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!order){
-     throw new ApiError(400, "Error in adding Cancelled Order history")
+   if (!order) {
+      throw new ApiError(400, "Error in adding Cancelled Order history")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, order, "Successfully added to Cancelled Order history"))
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to Cancelled Order history"))
 
 })
 
@@ -729,50 +731,50 @@ const getCyrMedicoCancelledOrders = asyncHandler(async (req, res) => {
    //check for the above data
    //return res
 
-   
+
    const cyrMedicoHistory = await User.aggregate(
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "cyrmedicocancelledorders",
-             localField: "cyrMedicoCancelledOrders",
-             foreignField: "_id",
-             as: "cyrMedicoCancelledOrders",
-             pipeline: [
-                {
             $lookup: {
-             from: "medicals",
-             localField: "medical",
-             foreignField: "_id",
-             as: "medical"
-           }
-         },
-                {
-            $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+               from: "cyrmedicocancelledorders",
+               localField: "cyrMedicoCancelledOrders",
+               foreignField: "_id",
+               as: "cyrMedicoCancelledOrders",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "medicals",
+                        localField: "medical",
+                        foreignField: "_id",
+                        as: "medical"
+                     }
+                  },
+                  {
+                     $lookup: {
+                        from: "riders",
+                        localField: "rider",
+                        foreignField: "_id",
+                        as: "rider"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-   ])
+      ])
    console.log(cyrMedicoHistory);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          cyrMedicoHistory[0].cyrMedicoCancelledOrders,
-          "Order History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            cyrMedicoHistory[0].cyrMedicoCancelledOrders,
+            "Order History fetched Succesfully"
+         )
       )
 
 })
@@ -783,30 +785,30 @@ const addTocyrCancelledOrders = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res
 
-   const {orderId} = req.params
+   const { orderId } = req.params
 
-   if(!orderId){
-     throw new ApiError(400, "Didn't got the order Id")
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
    }
 
    const order = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           cyrCancelledOrders: new mongoose.Types.ObjectId(orderId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            cyrCancelledOrders: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!order){
-     throw new ApiError(400, "Error in adding Cancelled Order history")
+   if (!order) {
+      throw new ApiError(400, "Error in adding Cancelled Order history")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, order, "Successfully added to Cancelled Order history"))
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to Cancelled Order history"))
 
 })
 
@@ -816,43 +818,43 @@ const getcyrCancelledOrders = asyncHandler(async (req, res) => {
    //check for the above data
    //return res
 
-   
+
    const cyrHistory = await User.aggregate([
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "cyrcancelledrides",
-             localField: "cyrCancelledOrders",
-             foreignField: "_id",
-             as: "cyrCancelledOrders",
-             pipeline: [
-                {
             $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+               from: "cyrcancelledrides",
+               localField: "cyrCancelledOrders",
+               foreignField: "_id",
+               as: "cyrCancelledOrders",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "riders",
+                        localField: "rider",
+                        foreignField: "_id",
+                        as: "rider"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-       ]
+      ]
    ])
    console.log(cyrHistory);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          cyrHistory[0].cyrcyrCancelledOrders,
-          "Order History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            cyrHistory[0].cyrcyrCancelledOrders,
+            "Order History fetched Succesfully"
+         )
       )
 
 })
@@ -863,30 +865,30 @@ const addToFoodyRatings = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res 
 
-   const {ratingId} = req.params
+   const { ratingId } = req.params
 
-   if(!ratingId){
-     throw new ApiError(400, "Didn't got the rating Id")
+   if (!ratingId) {
+      throw new ApiError(400, "Didn't got the rating Id")
    }
 
    const rating = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           foodyRatings: new mongoose.Types.ObjectId(ratingId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            foodyRatings: new mongoose.Types.ObjectId(ratingId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!rating){
-     throw new ApiError(400, "Error in adding foody Ratings")
+   if (!rating) {
+      throw new ApiError(400, "Error in adding foody Ratings")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, rating, "Successfully added to foody Ratings"))
+      .status(200)
+      .json(new ApiResponse(200, rating, "Successfully added to foody Ratings"))
 
 })
 
@@ -896,43 +898,43 @@ const getFoodyRatings = asyncHandler(async (req, res) => {
    //check for the above data
    //return res 
 
-     
+
    const foodyRating = await User.aggregate([
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "foodyratings",
-             localField: "foodyRatings",
-             foreignField: "_id",
-             as: "foodyRatings",
-             pipeline: [
-                {
             $lookup: {
-             from: "restaurants",
-             localField: "restaurant",
-             foreignField: "_id",
-             as: "restaurant"
-           }
+               from: "foodyratings",
+               localField: "foodyRatings",
+               foreignField: "_id",
+               as: "foodyRatings",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "restaurants",
+                        localField: "restaurant",
+                        foreignField: "_id",
+                        as: "restaurant"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-       ]
+      ]
    ])
    console.log(foodyRating);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          foodyRating[0].foodyRatings,
-          "Rating Rating fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            foodyRating[0].foodyRatings,
+            "Rating Rating fetched Succesfully"
+         )
       )
 
 })
@@ -943,30 +945,30 @@ const addToCyrMedicoRatings = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res 
 
-   const {ratingId} = req.params
+   const { ratingId } = req.params
 
-   if(!ratingId){
-     throw new ApiError(400, "Didn't got the rating Id")
+   if (!ratingId) {
+      throw new ApiError(400, "Didn't got the rating Id")
    }
 
    const rating = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           cyrMedicoRatings: new mongoose.Types.ObjectId(ratingId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            cyrMedicoRatings: new mongoose.Types.ObjectId(ratingId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!rating){
-     throw new ApiError(400, "Error in adding cyrMedico Ratings")
+   if (!rating) {
+      throw new ApiError(400, "Error in adding cyrMedico Ratings")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, rating, "Successfully added to cyrMedico Ratings"))
+      .status(200)
+      .json(new ApiResponse(200, rating, "Successfully added to cyrMedico Ratings"))
 
 })
 
@@ -976,42 +978,42 @@ const getCyrMedicoRatings = asyncHandler(async (req, res) => {
    //check for the above data
    //return res 
 
-     
+
    const cyrMedicoRating = await User.aggregate(
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(req.user._id),
+            },
          },
          {
-           $lookup: {
-             from: "cyrmedicoratings",
-             localField: "cyrMedicoRatings",
-             foreignField: "_id",
-             as: "cyrMedicoRatings",
-             pipeline: [
-                {
             $lookup: {
-             from: "medicals",
-             localField: "medical",
-             foreignField: "_id",
-             as: "medical"
-           }
+               from: "cyrmedicoratings",
+               localField: "cyrMedicoRatings",
+               foreignField: "_id",
+               as: "cyrMedicoRatings",
+               pipeline: [
+                  {
+                     $lookup: {
+                        from: "medicals",
+                        localField: "medical",
+                        foreignField: "_id",
+                        as: "medical"
+                     }
+                  }
+               ]
+            }
          }
-             ]
-           }
-         }
-   ])
+      ])
    console.log(cyrMedicoRating);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          cyrMedicoRating[0].cyrMedicoRatings,
-          "Rating Rating fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            cyrMedicoRating[0].cyrMedicoRatings,
+            "Rating Rating fetched Succesfully"
+         )
       )
 
 })
@@ -1022,30 +1024,30 @@ const addToCyrRatings = asyncHandler(async (req, res) => {
    //push to the array and check it
    //return res 
 
-   const {ratingId} = req.params
+   const { ratingId } = req.params
 
-   if(!ratingId){
-     throw new ApiError(400, "Didn't got the rating Id")
+   if (!ratingId) {
+      throw new ApiError(400, "Didn't got the rating Id")
    }
 
    const rating = await User.findByIdAndUpdate(
-     req.user._id,
-     {
-        $push: {
-           cyrRatings: new mongoose.Types.ObjectId(ratingId)
-        }
-     },
-     {
-        new: true
-     })
+      req.user._id,
+      {
+         $push: {
+            cyrRatings: new mongoose.Types.ObjectId(ratingId)
+         }
+      },
+      {
+         new: true
+      })
 
-   if(!rating){
-     throw new ApiError(400, "Error in adding cyr Ratings")
+   if (!rating) {
+      throw new ApiError(400, "Error in adding cyr Ratings")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, rating, "Successfully added to cyr Ratings"))
+      .status(200)
+      .json(new ApiResponse(200, rating, "Successfully added to cyr Ratings"))
 
 })
 
@@ -1055,49 +1057,49 @@ const getCyrRatings = asyncHandler(async (req, res) => {
    //check for the above data
    //return res
 
-     
+
    const cyrRating = await User.aggregate([
-    
-         {
-           $match: {
-             _id: new mongoose.Types.ObjectId(req.user._id),
-           },
+
+      {
+         $match: {
+            _id: new mongoose.Types.ObjectId(req.user._id),
          },
-         {
-           $lookup: {
-             from: "cyrratings",
-             localField: "cyrRatings",
-             foreignField: "_id",
-             as: "cyrRatings",
-             pipeline: [
-                {
-            $lookup: {
-             from: "riders",
-             localField: "rider",
-             foreignField: "_id",
-             as: "rider"
-           }
+      },
+      {
+         $lookup: {
+            from: "cyrratings",
+            localField: "cyrRatings",
+            foreignField: "_id",
+            as: "cyrRatings",
+            pipeline: [
+               {
+                  $lookup: {
+                     from: "riders",
+                     localField: "rider",
+                     foreignField: "_id",
+                     as: "rider"
+                  }
+               }
+            ]
          }
-             ]
-           }
-         }
-      
+      }
+
    ])
    console.log(cyrRating);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          cyrRating[0].cyrRatings,
-          "Rating History fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            cyrRating[0].cyrRatings,
+            "Rating History fetched Succesfully"
+         )
       )
 })
 
-const getAllVegFoods = asyncHandler(async (req, res)=> {
+const getAllVegFoods = asyncHandler(async (req, res) => {
 
-   const {restroId} = req.body;
+   const { restroId } = req.body;
    console.log(req.body);
 
    console.log("RestroId", restroId);
@@ -1105,60 +1107,60 @@ const getAllVegFoods = asyncHandler(async (req, res)=> {
    const allVegFoods = await Restaurant.aggregate(
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(restroId),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(restroId),
+            },
          },
          {
-           $lookup: {
-             from: "vegfoods",
-             localField: "vegFoods",
-             foreignField: "_id",
-             as: "VegFoodItems",
-           }
+            $lookup: {
+               from: "vegfoods",
+               localField: "vegFoods",
+               foreignField: "_id",
+               as: "VegFoodItems",
+            }
          }
-   ])
+      ])
    console.log("FoodVeg", allVegFoods);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          allVegFoods[0],
-          "All Veg Foods fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            allVegFoods[0],
+            "All Veg Foods fetched Succesfully"
+         )
       )
 })
 
-const getAllNonVegFoods = asyncHandler(async (req, res)=> {
+const getAllNonVegFoods = asyncHandler(async (req, res) => {
 
-   const {restroId} = req.body;
+   const { restroId } = req.body;
 
    const allNonVegFoods = await Restaurant.aggregate(
       [
          {
-           $match: {
-             _id: new mongoose.Types.ObjectId(restroId),
-           },
+            $match: {
+               _id: new mongoose.Types.ObjectId(restroId),
+            },
          },
          {
-           $lookup: {
-             from: "nonvegfoods",
-             localField: "nonvegFoods",
-             foreignField: "_id",
-             as: "NonVegFoodItems",
-           }
+            $lookup: {
+               from: "nonvegfoods",
+               localField: "nonvegFoods",
+               foreignField: "_id",
+               as: "NonVegFoodItems",
+            }
          }
-   ])
+      ])
    console.log(allNonVegFoods);
-      return res
+   return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          allNonVegFoods[0],
-          "All NonVeg Foods fetched Succesfully"
-          )
+         new ApiResponse(
+            200,
+            allNonVegFoods[0],
+            "All NonVeg Foods fetched Succesfully"
+         )
       )
 })
 
@@ -1166,49 +1168,323 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
    //check for all the restaurants open via mongoose aggregate
    //return res
 
-  const allrestro = await Restaurant.find({});
-  if(!allrestro){
-   throw new ApiError(400, "Didn't got the details")
-  }
+   const allrestro = await Restaurant.find({});
+   if (!allrestro) {
+      throw new ApiError(400, "Didn't got the details")
+   }
 
-  console.log(allrestro);
+   console.log(allrestro);
 
-  return res
-  .status(200)
-  .json(new ApiResponse(200, allrestro, "Successfully Fetched All Restaurants"))
+   return res
+      .status(200)
+      .json(new ApiResponse(200, allrestro, "Successfully Fetched All Restaurants"))
 
 })
 
-//Trio Application serviceAccount Key, sends notification only to Trio Application
 
-// import admin from "firebase-admin";
-// import serviceAccount from "../../TrioServiceAccount.json";
+const setDeviceToken = asyncHandler(async (req, res) => {
+   const { token } = req.body;
 
-// admin.initializeApp({
-//   credential: admin.credential.cert(serviceAccount)
-// });
-
-
-const setDeviceToken = asyncHandler( async(req, res) => {
-    const {token} = req.body;
-
-    const deviceToken = await User.findByIdAndUpdate(req.user._id,
-   {
-      $set: {
-         deviceToken: token
-      }
-   },{new: true})
+   const deviceToken = await User.findByIdAndUpdate(req.user._id,
+      {
+         $set: {
+            deviceToken: token
+         }
+      }, { new: true })
 
    console.log(deviceToken);
-   if(!deviceToken){
+   if (!deviceToken) {
       throw new ApiError(400, "Error in setting the device Token")
    }
 
    return res
-   .status(200)
-   .json(new ApiResponse(200, deviceToken, "Successfully stored device Token"))
+      .status(200)
+      .json(new ApiResponse(200, deviceToken, "Successfully stored device Token"))
 
 })
+
+
+const addTohotelRatings = asyncHandler(async (req, res) => {
+   //get the id from params
+   //validate the id
+   //push to the array and check it
+   //return res 
+
+   const { ratingId } = req.params
+
+   if (!ratingId) {
+      throw new ApiError(400, "Didn't got the rating Id")
+   }
+
+   const rating = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+         $push: {
+            hotelRatings: new mongoose.Types.ObjectId(ratingId)
+         }
+      },
+      {
+         new: true
+      })
+
+   if (!rating) {
+      throw new ApiError(400, "Error in adding hotel Ratings")
+   }
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, rating, "Successfully added to hotel Ratings"))
+
+})
+
+const addTohotelOrderHistory = asyncHandler(async (req, res) => {
+   //get the id from params
+   //validate the id
+   //push to the array and check it
+   //return res
+
+   const { orderId } = req.params
+
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
+   }
+
+   const order = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+         $push: {
+            hotelOrderHistory: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
+
+   if (!order) {
+      throw new ApiError(400, "Error in adding order history")
+   }
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to order history"))
+
+})
+
+
+const getAllHotels = asyncHandler(async (req, res) => {
+   //check for all the Hotels open via mongoose aggregate
+   //return res
+
+   const allhotel = await Hotel.aggregate([
+      {
+         $group: {
+            _id: '$city'
+         }
+      }
+   ])
+
+   if (!allhotel) {
+      throw new ApiError(400, "Didn't got the details")
+   }
+
+   console.log(allhotel);
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, allhotel, "Successfully Fetched All Hotels"))
+
+})
+
+const getAllHotelsForCoupleStay = asyncHandler(async (req, res) => {
+   //check for all the Hotels open via mongoose aggregate
+   //return res
+
+   const {city} = req.body;
+
+   const allhotel = await Hotel.aggregate([
+      {
+         $match: {
+            city: city,
+            isCoupleStayAllowed: true
+         }
+      }
+   ])
+
+   if (!allhotel) {
+      throw new ApiError(400, "Didn't got the details")
+   }
+
+   console.log(allhotel);
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, allhotel, "Successfully Fetched All Hotels"))
+
+})
+
+const getAllHotelsForFamilyStay = asyncHandler(async (req, res) => {
+   //check for all the Hotels open via mongoose aggregate
+   //return res
+
+   const {city} = req.body;
+
+   const allhotel = await Hotel.aggregate([
+      {
+         $match: {
+            city: city,
+            isFamilyStayAllowed: true
+         }
+      }
+   ])
+
+   if (!allhotel) {
+      throw new ApiError(400, "Didn't got the details")
+   }
+
+   console.log(allhotel);
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, allhotel, "Successfully Fetched All Hotels"))
+
+})
+
+const getAllHotelsByCity = asyncHandler(async (req, res) => {
+
+   const {city} = req.body;
+
+   const hotel = await Hotel.aggregate([
+      {
+         $match: {
+            city: city
+         }
+      }
+   ])
+
+   if(!hotel){
+      throw new ApiError(401, `Error in finding hotel with city name ${city}`)
+   }
+
+   return res
+   .status(200)
+   .json(new ApiResponse(200, hotel, "Successfully Fetched All Hotels by its city name"))
+
+})
+
+
+const addToFlatRatings = asyncHandler(async (req, res) => {
+   //get the id from params
+   //validate the id
+   //push to the array and check it
+   //return res 
+
+   const { ratingId } = req.params
+
+   if (!ratingId) {
+      throw new ApiError(400, "Didn't got the rating Id")
+   }
+
+   const rating = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+         $push: {
+            flatRatings: new mongoose.Types.ObjectId(ratingId)
+         }
+      },
+      {
+         new: true
+      })
+
+   if (!rating) {
+      throw new ApiError(400, "Error in adding hotel Ratings")
+   }
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, rating, "Successfully added to hotel Ratings"))
+
+})
+
+const addToFlatOrderHistory = asyncHandler(async (req, res) => {
+   //get the id from params
+   //validate the id
+   //push to the array and check it
+   //return res
+
+   const { orderId } = req.params
+
+   if (!orderId) {
+      throw new ApiError(400, "Didn't got the order Id")
+   }
+
+   const order = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+         $push: {
+            flatOrderHistory: new mongoose.Types.ObjectId(orderId)
+         }
+      },
+      {
+         new: true
+      })
+
+   if (!order) {
+      throw new ApiError(400, "Error in adding order history")
+   }
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, order, "Successfully added to order history"))
+
+})
+
+
+const getAllFlats = asyncHandler(async (req, res) => {
+   //check for all the Hotels open via mongoose aggregate
+   //return res
+
+   const allflat = await Flat.aggregate([
+      {
+         $group: {
+            _id: '$city'
+         }
+      }
+   ])
+
+   if (!allflat) {
+      throw new ApiError(400, "Didn't got the details")
+   }
+
+   console.log(allflat);
+
+   return res
+      .status(200)
+      .json(new ApiResponse(200, allflat, "Successfully Fetched All flats"))
+
+})
+
+const getAllFlatsByCity = asyncHandler(async (req, res) => {
+
+   const {city} = req.body;
+
+   const flat = await Flat.aggregate([
+      {
+         $match: {
+            city: city
+         }
+      }
+   ])
+
+   if(!flat){
+      throw new ApiError(401, `Error in finding flat with city name ${city}`)
+   }
+
+   return res
+   .status(200)
+   .json(new ApiResponse(200, flat, "Successfully Fetched All flats by its city name"))
+
+})
+
 
 
 export {
@@ -1244,5 +1520,15 @@ export {
    getAllVegFoods,
    getAllNonVegFoods,
    getAllRestaurants,
-   setDeviceToken
+   setDeviceToken,
+   addTohotelRatings,
+   addTohotelOrderHistory,
+   getAllHotels,
+   getAllHotelsForCoupleStay,
+   getAllHotelsForFamilyStay,
+   getAllHotelsByCity,
+   addToFlatRatings,
+   addToFlatOrderHistory,
+   getAllFlats,
+   getAllFlatsByCity
 }

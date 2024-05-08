@@ -35,6 +35,8 @@ io.on("connection", handleConnection)
 import userRouter from "./routes/user.routes.js";
 import restaurantRouter from "./routes/restaurant.routes.js";
 import riderRouter from "./routes/rider.routes.js";
+import hotelRouter from "./routes/hotel.routes.js";
+import flatRouter from "./routes/flat.routes.js";
 import foodyRatingRouter from "./routes/foodyRatings.routes.js";
 import foodyOrderRouter from "./routes/foodyOrders.routes.js";
 import foodyCancelledOrderRouter from "./routes/foodyCancelledOrders.routes.js";
@@ -48,6 +50,8 @@ import paymentRouter from "./routes/payments.routes.js";
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/restaurants", restaurantRouter);
 app.use("/api/v1/riders", riderRouter);
+app.use("/api/v1/hotels", hotelRouter);
+app.use("/api/v1/flats", flatRouter);
 app.use("/api/v1/foodyRating", foodyRatingRouter);
 app.use("/api/v1/foodyOrder", foodyOrderRouter);
 app.use("/api/v1/foodyCancelledOrder", foodyCancelledOrderRouter);
@@ -55,7 +59,7 @@ app.use("/api/v1/favouriteFood", favouriteFoodRouter);
 app.use("/api/v1/cyrRating", cyrRatingRouter);
 app.use("/api/v1/cyrOrder", cyrOrderRouter);
 app.use("/api/v1/cyrCancelledRide", cyrCancelledRide);
-app.use("/api/v1/payments", paymentRouter)
+app.use("/api/v1/payments", paymentRouter);
 
 export {
     app,

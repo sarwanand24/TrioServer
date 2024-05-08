@@ -65,6 +65,18 @@ const userSchema = new Schema(
         ref: "CYROrders"
       }
     ],
+    hotelOrderHistory: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "HotelOrders"
+      }
+    ],
+    flatOrderHistory: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "HotelOrders"
+      }
+    ],
     cyrMedicoOrderHistory: [
       {
         type: Schema.Types.ObjectId,
@@ -99,6 +111,18 @@ const userSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: "CYRRating"
+      }
+    ],
+    hotelRatings: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "HotelRating"
+      }
+    ],
+    flatRatings: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "FlatRating"
       }
     ],
     cyrMedicoRatings: [

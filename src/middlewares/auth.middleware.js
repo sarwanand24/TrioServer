@@ -5,6 +5,8 @@ import { User } from "../models/User.model.js";
 import { Rider } from "../models/Rider.model.js";
 import { Restaurant } from "../models/Retaurant.model.js";
 import { Medical } from "../models/Medical.model.js";
+import { Hotel } from "../models/Hotel.model.js";
+import { Flat } from "../models/Flat.model.js";
 
 //Below there is no use of res so we can also write it as _ in production level these things are done like e.g below
 //(req, _, next)
@@ -97,6 +99,55 @@ export const verifyMedicalsJWT = asyncHandler(async (req, res, next)=>{
      }
   
      req.medical = medical;
+     next()
+  } catch (error) {
+     throw new ApiError(401, error?.message || "Invalid Access Token")
+  }
+
+})
+
+
+export const verifyHotelsJWT = asyncHandler(async (req, res, next)=>{
+  try {
+      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+  
+      if(!token){
+          throw new ApiError(401, "Unauthorized Request");
+      }
+     
+     const decodedToken = jwt.verify(token, process.env.AccessTokenSecret);
+  
+     const hotel = await Hotel.findById(decodedToken?._id).select("-password -refreshToken");
+  
+     if(!hotel){
+      throw new ApiError(401, "Invalid Access Token");
+     }
+  
+     req.hotel = hotel;
+     next()
+  } catch (error) {
+     throw new ApiError(401, error?.message || "Invalid Access Token")
+  }
+
+})
+
+export const verifyFlatsJWT = asyncHandler(async (req, res, next)=>{
+  try {
+      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+  
+      if(!token){
+          throw new ApiError(401, "Unauthorized Request");
+      }
+     
+     const decodedToken = jwt.verify(token, process.env.AccessTokenSecret);
+  
+     const flat = await Flat.findById(decodedToken?._id).select("-password -refreshToken");
+  
+     if(!flat){
+      throw new ApiError(401, "Invalid Access Token");
+     }
+  
+     req.flat = flat;
      next()
   } catch (error) {
      throw new ApiError(401, error?.message || "Invalid Access Token")
