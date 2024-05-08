@@ -1316,6 +1316,12 @@ const getAllHotelsForCoupleStay = asyncHandler(async (req, res) => {
 
    console.log(allhotel);
 
+   if(!(allhotel.length > 0)){
+      return res
+      .status(200)
+      .json(new ApiResponse(200, {check:{noHotel: true}}, "No hotel Found With this city name"))
+   }
+
    return res
       .status(200)
       .json(new ApiResponse(200, allhotel, "Successfully Fetched All Hotels"))
@@ -1342,6 +1348,12 @@ const getAllHotelsForFamilyStay = asyncHandler(async (req, res) => {
    }
 
    console.log(allhotel);
+
+   if(!(allhotel.length > 0)){
+      return res
+      .status(200)
+      .json(new ApiResponse(200, {check:{noHotel: true}}, "No hotel Found With this city name"))
+   }
 
    return res
       .status(200)
@@ -1485,6 +1497,12 @@ const getAllFlatsByCity = asyncHandler(async (req, res) => {
 
    if(!flat){
       throw new ApiError(401, `Error in finding flat with city name ${city}`)
+   }
+
+   if(!(hotel.length > 0)){
+      return res
+      .status(200)
+      .json(new ApiResponse(200, {check:{noFlat: true}}, "No hotel Found With this city name"))
    }
 
    return res
