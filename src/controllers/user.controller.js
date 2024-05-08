@@ -1499,7 +1499,7 @@ const getAllFlatsByCity = asyncHandler(async (req, res) => {
       throw new ApiError(401, `Error in finding flat with city name ${city}`)
    }
 
-   if(!(hotel.length > 0)){
+   if(!(flat.length > 0)){
       return res
       .status(200)
       .json(new ApiResponse(200, {check:{noFlat: true}}, "No hotel Found With this city name"))
