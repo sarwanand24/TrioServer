@@ -7,7 +7,7 @@ import mongoose from "mongoose";
 const placeOrder = asyncHandler(async (req, res)=> {
 
     const {userId, hotelId} = req.params
-    const {bill, totalPerson} = req.body
+    const {bill, totalPerson, rooms, dates} = req.body
 
     if(!(userId || hotelId)){
         throw new ApiError(400, "RiderId is required")
@@ -25,7 +25,9 @@ const placeOrder = asyncHandler(async (req, res)=> {
         bookedBy: new mongoose.Types.ObjectId(userId),
         hotel: new mongoose.Types.ObjectId(hotelId),
         bill,
-        totalPerson
+        totalPerson,
+        rooms,
+        dates
      })
 
      if(!order){

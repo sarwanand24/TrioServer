@@ -16,6 +16,12 @@ const hotelOrdersSchema = new Schema(
         },
         totalPerson: {
             type: Number
+        },
+        rooms: {
+            type: Number
+        },
+        dates: {
+            type: Object
         }
     },
     { timestamps: true }
