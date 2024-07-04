@@ -7,7 +7,7 @@ import { Hotel } from "../models/Hotel.model.js";
 import { User } from "../models/User.model.js";
 
 const placeOrder = asyncHandler(async (req, res)=> {
-
+console.log('Entered');
     const {userId, hotelId} = req.params
     const {bill, totalPerson, rooms, dates} = req.body
 
@@ -37,7 +37,7 @@ const placeOrder = asyncHandler(async (req, res)=> {
      }
 
      const order2 = await Hotel.findByIdAndUpdate(
-      req.hotel._id,
+      hotelId,
       {
           $push: {
               OrderHistory: new mongoose.Types.ObjectId(order._id)
@@ -52,7 +52,7 @@ const placeOrder = asyncHandler(async (req, res)=> {
   }
 
   const order3 = await User.findByIdAndUpdate(
-   req.user._id,
+   userId,
    {
       $push: {
          hotelOrderHistory: new mongoose.Types.ObjectId(order._id)
