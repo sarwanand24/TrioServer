@@ -115,7 +115,7 @@ const loginHotel = asyncHandler(async (req, res) => {
     //send cookie
 
     const { mobileNo } = req.body
-
+console.log("Welcome");
     if (!mobileNo) {
         throw new ApiError(400, "MobileNO is required")
     }
@@ -158,7 +158,7 @@ const addToOrderHistory = asyncHandler(async (req, res) => {
     //return res
 
     const { orderId } = req.params
-
+    
     if (!orderId) {
         throw new ApiError(400, "Didn't got the order Id")
     }
@@ -184,9 +184,95 @@ const addToOrderHistory = asyncHandler(async (req, res) => {
 
 })
 
+const getOrderHistory = asyncHandler(async (req, res) => {
+    //get the restaurant_id from req.restaurant
+    //using mongoose aggregate filter the id from foodyOrderHistory and foodyOrders
+    //check for the above data
+    //return res
+ 
+ 
+    const orderHistory = await Hotel.aggregate([
+       [
+          {
+             $match: {
+                _id: new mongoose.Types.ObjectId(req.hotel._id),
+             },
+          },
+          {
+             $lookup: {
+                from: "hotelorders",
+                localField: "OrderHistory",
+                foreignField: "_id",
+                as: "OrderHistory",
+                pipeline: [
+                   {
+                      $lookup: {
+                         from: "users",
+                         localField: "bookedBy",
+                         foreignField: "_id",
+                         as: "guest"
+                      }
+                   }
+                ]
+             }
+          }
+       ]
+    ])
+    console.log(orderHistory);
+    return res
+       .status(200)
+       .json(
+          new ApiResponse(
+             200,
+             orderHistory[0].OrderHistory,
+             "Order History fetched Succesfully"
+          )
+       )
+ 
+ })
+
+ const toggleRoomStatus = asyncHandler(async (req, res)=> {
+
+      const {isRoomFull} = req.body;
+      console.log(isRoomFull);
+
+      if(isRoomFull === ''){
+        throw new ApiError(401, "Didnt got the status from frontend")
+      }
+
+      const status = await Hotel.findByIdAndUpdate( 
+        req.hotel._id,
+
+        {
+            $set: {
+                isRoomFull: isRoomFull
+            }
+        },{new: true}
+      )
+
+      if(!status){
+        throw new ApiError(401, "Error in updating room status")
+      }
+
+      return res
+      .status(200)
+      .json(new ApiResponse(200, status, "Successfully toggles Room Status"))
+
+ })
+
+ const getCurrentHotel = asyncHandler(async (req, res) => {
+    //return all info of the user in the db
+    return res
+       .status(200)
+       .json(new ApiResponse(200, req.hotel, "User Details fetched Successfully"))
+ })
+
 
 export {
     registerHotel,
     loginHotel,
-    addToOrderHistory
+    addToOrderHistory,
+    getOrderHistory,
+    toggleRoomStatus,
+    getCurrentHotel
 }

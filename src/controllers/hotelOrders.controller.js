@@ -3,6 +3,8 @@ import {asyncHandler} from "../utils/asyncHandler.js";
 import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
+import { Hotel } from "../models/Hotel.model.js";
+import { User } from "../models/User.model.js";
 
 const placeOrder = asyncHandler(async (req, res)=> {
 
@@ -33,6 +35,37 @@ const placeOrder = asyncHandler(async (req, res)=> {
      if(!order){
         throw new ApiError(400, "Error in creating order")
      }
+
+     const order2 = await Hotel.findByIdAndUpdate(
+      req.hotel._id,
+      {
+          $push: {
+              OrderHistory: new mongoose.Types.ObjectId(order._id)
+          }
+      },
+      {
+          new: true
+      })
+
+  if (!order2) {
+      throw new ApiError(400, "Error in adding order history of hotel")
+  }
+
+  const order3 = await User.findByIdAndUpdate(
+   req.user._id,
+   {
+      $push: {
+         hotelOrderHistory: new mongoose.Types.ObjectId(order._id)
+      }
+   },
+   {
+      new: true
+   })
+
+if (!order3) {
+   throw new ApiError(400, "Error in adding order history of user")
+}
+
 
      return res
      .status(200)
