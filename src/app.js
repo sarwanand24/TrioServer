@@ -7,7 +7,8 @@ import { Server } from "socket.io";
 const app = express();
 
 app.use(cors({
-    origin: "https://trioserver.onrender.com",
+    // origin: "https://trioserver.onrender.com",
+      origin: "*",
     credentials: true
 }))
 app.use(express.json({limit: "16kb"}))
@@ -20,7 +21,8 @@ app.use(cookieParser())
 const server = http.createServer(app);
 const io = new Server(server, {
    cors: {
-    origin: "https://trioserver.onrender.com",
+    // origin: "https://trioserver.onrender.com",
+      origin: "*",
     credentials: true,
     methods: ["GET", "POST"]
    } 
@@ -37,6 +39,9 @@ import restaurantRouter from "./routes/restaurant.routes.js";
 import riderRouter from "./routes/rider.routes.js";
 import hotelRouter from "./routes/hotel.routes.js";
 import flatRouter from "./routes/flat.routes.js";
+import laundryRouter from "./routes/laundry.routes.js";
+import laundryOrderRouter from "./routes/laundryOrders.routes.js";
+import laundryCancelledOrderRouter from "./routes/laundryCancelledOrders.routes.js";
 import foodyRatingRouter from "./routes/foodyRatings.routes.js";
 import foodyOrderRouter from "./routes/foodyOrders.routes.js";
 import foodyCancelledOrderRouter from "./routes/foodyCancelledOrders.routes.js";
@@ -53,6 +58,9 @@ app.use("/api/v1/restaurants", restaurantRouter);
 app.use("/api/v1/riders", riderRouter);
 app.use("/api/v1/hotels", hotelRouter);
 app.use("/api/v1/flats", flatRouter);
+app.use("/api/v1/laundry", laundryRouter);
+app.use("/api/v1/laundryOrder", laundryOrderRouter);
+app.use("/api/v1/laundryCancelledOrder", laundryCancelledOrderRouter);
 app.use("/api/v1/foodyRating", foodyRatingRouter);
 app.use("/api/v1/foodyOrder", foodyOrderRouter);
 app.use("/api/v1/foodyCancelledOrder", foodyCancelledOrderRouter);

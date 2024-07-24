@@ -105,6 +105,7 @@ const handleConnection = async (socket) => {
     if (!restro) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")
     }
+    
     console.log("UserDeviceToken", restro.userDeviceToken);
     const msg = await trioApp.messaging().sendEachForMulticast({
       tokens: [restro.userDeviceToken],

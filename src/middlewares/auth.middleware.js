@@ -7,6 +7,7 @@ import { Restaurant } from "../models/Retaurant.model.js";
 import { Medical } from "../models/Medical.model.js";
 import { Hotel } from "../models/Hotel.model.js";
 import { Flat } from "../models/Flat.model.js";
+import { Laundry } from "../models/Laundry.model.js";
 
 //Below there is no use of res so we can also write it as _ in production level these things are done like e.g below
 //(req, _, next)
@@ -148,6 +149,30 @@ export const verifyFlatsJWT = asyncHandler(async (req, res, next)=>{
      }
   
      req.flat = flat;
+     next()
+  } catch (error) {
+     throw new ApiError(401, error?.message || "Invalid Access Token")
+  }
+
+})
+
+export const verifyLaundryJWT = asyncHandler(async (req, res, next)=>{
+  try {
+      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+  
+      if(!token){
+          throw new ApiError(401, "Unauthorized Request");
+      }
+     
+     const decodedToken = jwt.verify(token, process.env.AccessTokenSecret);
+  
+     const laundry = await Laundry.findById(decodedToken?._id).select("-password -refreshToken");
+  
+     if(!laundry){
+      throw new ApiError(401, "Invalid Access Token");
+     }
+  
+     req.laundry = laundry;
      next()
   } catch (error) {
      throw new ApiError(401, error?.message || "Invalid Access Token")
