@@ -16,6 +16,8 @@ const placeOrder = asyncHandler(async (req, res) => {
     const {riderId, shopId, userId} = req.params
     const {fromLocation, toLocation} = req.body
 
+    console.log(riderId, shopId, userId, fromLocation, toLocation);
+
     if(!(riderId || userId)){
         throw new ApiError(400, "RiderId is required")
     }
@@ -35,6 +37,12 @@ const placeOrder = asyncHandler(async (req, res) => {
         fromLocation,
         toLocation
      })
+
+     console.log(order);
+
+     if(!order){
+        throw new ApiError(400, "Error in creating Laundry Order")
+     }
 
        // Find the laundry shop and update OrderHistory
        await Laundry.findByIdAndUpdate(shopName, {
