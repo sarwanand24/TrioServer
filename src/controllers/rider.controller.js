@@ -899,6 +899,9 @@ const fetchAcceptReject = asyncHandler( async(req, res) => {
 const updateRiderLocation = asyncHandler( async(req, res) => {
    try {
       const { latitude, longitude } = req.body;
+      if(!latitude && !longitude){
+         return res.status(404).send('LatLong Required')
+      }
       const rider = await Rider.findByIdAndUpdate(req.rider._id,
          {
             $set: {
@@ -906,6 +909,17 @@ const updateRiderLocation = asyncHandler( async(req, res) => {
             }
          },{new: true}
       )
+      if (!rider) {
+         console.error('Rider not found:', req.rider._id);
+         return res.status(404).send('Rider not found');
+       }
+   
+       console.log('Location updated successfully:', {
+         riderId: req.rider._id,
+         latitude,
+         longitude,
+       });
+
       res.status(200).send('Location updated');
     } catch (error) {
       res.status(500).send('Error updating location');
