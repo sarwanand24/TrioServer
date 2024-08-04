@@ -898,8 +898,11 @@ const fetchAcceptReject = asyncHandler( async(req, res) => {
 
 const updateRiderLocation = asyncHandler( async(req, res) => {
    try {
+      console.log('entryyyyyyy')
       const { latitude, longitude } = req.body;
-      if(!latitude && !longitude){
+      console.log(latitude, longitude);
+      
+      if(!(latitude && longitude)){
          return res.status(404).send('LatLong Required')
       }
       const rider = await Rider.findByIdAndUpdate(req.rider._id,
