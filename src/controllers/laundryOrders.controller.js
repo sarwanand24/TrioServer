@@ -12,7 +12,6 @@ const placeOrder = asyncHandler(async (req, res) => {
     //validate them all
     //create entry in db 
     //return res
-
     const {riderId, shopId, userId} = req.params
     const {fromLocation, toLocation} = req.body
 

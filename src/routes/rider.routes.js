@@ -10,7 +10,7 @@ import {
     setDeviceToken,
     signoutRider,
     toggleAvailableStatus,
-    updateAccountDetails, updateDrivingLiscence, updateRiderProfilePhoto
+    updateAccountDetails, updateDrivingLiscence, updateRiderLocation, updateRiderProfilePhoto
 }
     from "../controllers/rider.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -72,5 +72,7 @@ router.route("toggleAvailableStatus").get(verifyRidersJWT, toggleAvailableStatus
 router.route("/set-device-token").post(verifyRidersJWT, setDeviceToken);
 
 router.route("/fetchAccept-Reject").get(verifyRidersJWT, fetchAcceptReject);
+
+router.route("/update-rider-location").post(verifyRidersJWT, updateRiderLocation)
 
 export default router

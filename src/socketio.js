@@ -455,7 +455,7 @@ const handleConnection = async (socket) => {
     }, 30000);
 
   })
-
+  
   socket.on("RiderCurrentLocation", async (data) => {
     io.emit("CurrentLocationofRiderToUser", data)
   })

@@ -896,6 +896,22 @@ const fetchAcceptReject = asyncHandler( async(req, res) => {
    .json(new ApiResponse(200, rider, "Successfull in fetching Accept/Reject"))
 })
 
+const updateRiderLocation = asyncHandler( async(req, res) => {
+   try {
+      const { latitude, longitude } = req.body;
+      const rider = await Rider.findByIdAndUpdate(req.rider._id,
+         {
+            $set: {
+               latitude, longitude
+            }
+         },{new: true}
+      )
+      res.status(200).send('Location updated');
+    } catch (error) {
+      res.status(500).send('Error updating location');
+    }
+})
+
 export {
    registerRider,
    loginRider,
@@ -922,5 +938,6 @@ export {
    getCyrMedicoRideHistory,
    toggleAvailableStatus,
    setDeviceToken,
-   fetchAcceptReject
+   fetchAcceptReject,
+   updateRiderLocation
 }

@@ -15,7 +15,8 @@ import {
     getAllHotelsForCoupleStay,
     getAllHotelsForFamilyStay,
     getAllFlats,
-    getAllFlatsByCity
+    getAllFlatsByCity,
+    updateUserLocation
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -86,5 +87,7 @@ router.route("/get-all-family-hotels").post(getAllHotelsForFamilyStay)
 router.route("/getAllFlats").get(getAllFlats)
 
 router.route("/get-all-flats-by-city").post(getAllFlatsByCity)
+
+router.route("/update-user-location").post(verifyUsersJWT, updateUserLocation)
 
 export default router

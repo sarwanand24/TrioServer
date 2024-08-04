@@ -1511,7 +1511,21 @@ const getAllFlatsByCity = asyncHandler(async (req, res) => {
 
 })
 
-
+const updateUserLocation = asyncHandler( async(req, res) => {
+   try {
+      const { latitude, longitude } = req.body;
+      const user = await User.findByIdAndUpdate(req.user._id,
+         {
+            $set: {
+               latitude, longitude
+            }
+         },{new: true}
+      )
+      res.status(200).send('Location updated');
+    } catch (error) {
+      res.status(500).send('Error updating location');
+    }
+})
 
 export {
    registerUser,
@@ -1556,5 +1570,6 @@ export {
    addToFlatRatings,
    addToFlatOrderHistory,
    getAllFlats,
-   getAllFlatsByCity
+   getAllFlatsByCity,
+   updateUserLocation
 }
