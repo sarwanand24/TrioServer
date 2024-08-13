@@ -24,19 +24,9 @@ const generateAccessAndRefreshTokens = async (riderId) => {
 }
 
 const registerRider = asyncHandler(async (req, res) => {
-   //Take all fields from req.body
-   //validate the fields
-   //check if Rider already exists - Ridername, email
-   //check for avatar path
-   //upload to cloudinary
-   //check for upload
-   //create entry in db
-   //check for db
-   // remove password and refresh token field
-   //return res
 
    const { riderName, email, password, address, mobileNo, alternateMobileNo, profileImg, drivingLiscenceImg,
-       vehicleName, vehicleNo, aadharImg, zone, city } = req.body;
+       vehicleName, vehicleNo, aadharImg, city } = req.body;
 
    let altMob;
    if(alternateMobileNo?.length) {
@@ -102,7 +92,6 @@ const registerRider = asyncHandler(async (req, res) => {
       mobileNo,
       vehicleName,
       vehicleNo,
-      zone,
       city
    })
 
