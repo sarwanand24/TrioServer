@@ -62,11 +62,11 @@ const registerRider = asyncHandler(async (req, res) => {
       throw new ApiError(409, "Rider already exists, Please Login!")
    }
 
-   //const profilePhotoLocalPath = profileImg;
-   //const liscenceLocalPath = drivingLiscenceImg;
+   const profilePhotoLocalPath = profileImg;
+   const liscenceLocalPath = drivingLiscenceImg;
    //const aadharLocalPath = aadharImg;
-   const profilePhotoLocalPath = req.files?.profilePhoto[0]?.path;
-   const liscenceLocalPath = req.files?.drivingLiscence[0]?.path;
+   // const profilePhotoLocalPath = req.files?.profilePhoto[0]?.path;
+   // const liscenceLocalPath = req.files?.drivingLiscence[0]?.path;
   // const aadharLocalPath = req.files?.aadharCard[0]?.path;
 
    if (!(profilePhotoLocalPath && liscenceLocalPath)) {

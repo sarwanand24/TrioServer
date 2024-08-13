@@ -1513,7 +1513,11 @@ const getAllFlatsByCity = asyncHandler(async (req, res) => {
 
 const updateUserLocation = asyncHandler( async(req, res) => {
    try {
+      console.log('entryyyy in user')
       const { latitude, longitude } = req.body;
+      if(!(latitude && longitude)){
+         return res.status(404).send('LatLong Required')
+      }
       const user = await User.findByIdAndUpdate(req.user._id,
          {
             $set: {
@@ -1521,6 +1525,19 @@ const updateUserLocation = asyncHandler( async(req, res) => {
             }
          },{new: true}
       )
+
+      if (!user) {
+         console.error('User not found:', req.user._id);
+         return res.status(404).send('User not found');
+       }
+   
+       console.log('Location updated successfully:', {
+         userId: req.user._id,
+         latitude,
+         longitude,
+       });
+
+
       res.status(200).send('Location updated');
     } catch (error) {
       res.status(500).send('Error updating location');
