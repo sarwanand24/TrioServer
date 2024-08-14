@@ -35,8 +35,14 @@ const riderAcceptRejectSchema = new Schema(
         totalItems: {
             type: Number
         },
-        zone: {
-            type: String
+        fromLocation: {
+            type: String,
+        },
+        toLocation: {
+            type: String,
+        },
+        distance: {
+            type: String,
         },
         city: {
             type: String
@@ -44,6 +50,9 @@ const riderAcceptRejectSchema = new Schema(
         status: {
             type: Boolean,
             default: false
+        },
+        orderOf: {
+            type: String,
         }
     },
     { timestamps: true })

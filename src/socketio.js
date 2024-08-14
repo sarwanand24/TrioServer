@@ -12,7 +12,7 @@ import { ApiError } from "./utils/ApiError.js";
 const require = createRequire(import.meta.url);
 const trioRestroServiceAccount = require('../TrioRestaurantServiceAccount.json');
 const trioServiceAccount = require('../TrioServiceAccount.json');
-const trioRiderServiceAccount = require('../TrioRiderServiceAccount.json');
+const tiofyRiderServiceAccount = require('../TiofyRiderServiceAccount.json');
 
 const trioApp = admin.initializeApp({
   credential: admin.credential.cert(trioServiceAccount),
@@ -22,9 +22,9 @@ const trioRestaurantApp = admin.initializeApp({
   credential: admin.credential.cert(trioRestroServiceAccount),
 }, 'trioRestaurantApp');
 
-const trioRiderApp = admin.initializeApp({
-  credential: admin.credential.cert(trioRiderServiceAccount),
-}, 'trioRiderApp');
+const tiofyRiderApp = admin.initializeApp({
+  credential: admin.credential.cert(tiofyRiderServiceAccount),
+}, 'tiofyRiderApp');
 
 const handleConnection = async (socket) => {
   console.log('A user/restaurant/rider connected', socket.id);
@@ -89,10 +89,23 @@ const handleConnection = async (socket) => {
 
   })
 
+  const haversine = (lat1, lon1, lat2, lon2) => {
+    const toRad = (x) => x * Math.PI / 180;
+    const R = 6371; // Radius of Earth in km
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; // Distance in km
+  };
+  
   socket.on("RestaurantAcceptedOrder", async (data) => {
-
-    io.emit("OrderAcceptedbyRestaurant", data)
-
+  
+    io.emit("OrderAcceptedbyRestaurant", data);
+  
     const restro = await RestroAcceptReject.findByIdAndUpdate(
       data.restroId,
       {
@@ -100,61 +113,48 @@ const handleConnection = async (socket) => {
           status: true
         }
       },
-      { new: true })
-
+      { new: true }
+    );
+  
     if (!restro) {
-      throw new ApiError(400, "Error in Changing Status of Accept/Reject")
+      throw new ApiError(400, "Error in Changing Status of Accept/Reject");
     }
-    
-    console.log("UserDeviceToken", restro.userDeviceToken);
-    const msg = await trioApp.messaging().sendEachForMulticast({
-      tokens: [restro.userDeviceToken],
-      notification: {
-        title: 'Get Ready to Eat',
-        body: 'The Restaurant Accepted Order',  // Add food items details also
-        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+  
+    const restaurantLat = restro.latitude; // Assuming latitude field
+    const restaurantLon = restro.longitude; // Assuming longitude field
+  
+    const riders = await Rider.find({ city: data.city });
+  
+    if (!riders || riders.length === 0) {
+      throw new ApiError(400, "No Riders Found");
+    }
+  
+    let nearestRider = null;
+    let minDistance = Infinity;
+  
+    riders.forEach(rider => {
+      const distance = haversine(restaurantLat, restaurantLon, rider.latitude, rider.longitude);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestRider = rider;
       }
     });
-    console.log("Message", msg);
-
-    const rider = await Rider.aggregate([
-      {
-        $match: {
-          zone: data.zone,
-          city: data.city
-        }
-      }
-    ])
-
-    if (!rider) {
-      throw new ApiError(400, "Error in Finding Riders")
+  
+    if (!nearestRider) {
+      throw new ApiError(400, "Error in Finding Nearest Rider");
     }
-
-    let randomIndex;
-
-    if (rider.length === 1) {
-      // If the array has only one element, set the random index to 0
-      randomIndex = 0;
-    } else {
-      // If the array has more than one element, generate a random index as usual
-      randomIndex = Math.floor(Math.random() * rider.length);
-    }
-
-    console.log(randomIndex);
-    console.log("Rider Device Token", rider[randomIndex].deviceToken);
-    const msg2 = await trioRiderApp.messaging().sendEachForMulticast({
-      tokens: [rider[randomIndex].deviceToken],
+  
+    const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
+      tokens: [nearestRider.deviceToken],
       notification: {
         title: 'You Received an Order From Foody',
-        body: 'A user Placed a order',  // Add food items details also
+        body: 'A user Placed an order',  // Add food items details also
         imageUrl: 'https://my-cdn.com/app-logo.png',
       }
     });
-    console.log("Message", msg2);
-    console.log("RestroId", restro.restaurantId);
-    console.log("Data or Checking FoodItems", data);
+  
     const rider2 = await RiderAcceptReject.create({
-      riderId: rider[randomIndex]._id,
+      riderId: nearestRider._id,
       restaurantName: data.restroName,
       restaurantAddress: data.restroAddress,
       userDeviceToken: restro.userDeviceToken,
@@ -164,80 +164,82 @@ const handleConnection = async (socket) => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
-      zone: data.zone,
       city: data.city
-    })
-
+    });
+  
     if (!rider2) {
-      throw new ApiError(400, "Error in Creating of Accept/Reject")
+      throw new ApiError(400, "Error in Creating of Accept/Reject");
+    }
+  
+    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: rider2.riderId });
+  
+    // Start timeout for rider response
+setTimeout(async () => {
+  // Check if rider has responded within timeout
+  const updatedRiderOrder = await RiderAcceptReject.findById(rider2._id);
+  if (!updatedRiderOrder.status) {
+    console.log(`Rider ${rider2.riderId} did not respond to the order within 30 seconds.`);
+
+    // Delete the non-responsive rider's data from RiderAcceptReject
+    await RiderAcceptReject.findByIdAndDelete(rider2._id);
+
+    // Exclude the previous non-responsive rider and find the next nearest rider
+    const remainingRiders = riders.filter(rider => rider._id.toString() !== rider2.riderId.toString());
+
+    if (remainingRiders.length === 0) {
+      throw new ApiError(400, "No More Riders Available");
     }
 
-    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: rider2.riderId });
+    let nearestRider = null;
+    let minDistance = Infinity;
 
-    // Start timeout for rider response
-    setTimeout(async () => {
-      // Check if rider has responded within timeout
-      const updatedRiderOrder = await RiderAcceptReject.findById(rider2._id);
-      if (!updatedRiderOrder.status) {
-        console.log(`Rider ${rider2.riderId} did not respond to the order within 30sec seconds.`);
-        const anotherRider = await Rider.aggregate([
-          {
-            $match: {
-              zone: data.zone,
-              city: data.city
-            }
-          }
-        ])
-
-        if (!anotherRider) {
-          throw new ApiError(400, "Error in Finding Riders")
-        }
-
-        let randomIndex;
-
-        if (anotherRider.length === 1) {
-          // If the array has only one element, set the random index to 0
-          randomIndex = 0;
-        } else {
-          // If the array has more than one element, generate a random index as usual
-          randomIndex = Math.floor(Math.random() * anotherRider.length);
-        }
-
-        console.log(randomIndex);
-        console.log("Rider Device Token", anotherRider[randomIndex].deviceToken);
-        const msg2 = await trioRiderApp.messaging().sendEachForMulticast({
-          tokens: [anotherRider[randomIndex].deviceToken],
-          notification: {
-            title: 'You Received an Order From Foody',
-            body: 'A user Placed a order',  // Add food items details also
-            imageUrl: 'https://my-cdn.com/app-logo.png',
-          }
-        });
-        console.log("Message", msg2);
-        console.log("RestroId", restro.restaurantId);
-        console.log("Data or Checking FoodItems", data);
-        const anotherRider2 = await RiderAcceptReject.create({
-          riderId: anotherRider[randomIndex]._id,
-          restaurantName: data.restroName,
-          restaurantAddress: data.restroAddress,
-          userDeviceToken: restro.userDeviceToken,
-          userAddress: data.userAddress,
-          userId: data.userId,
-          restaurantId: restro.restaurantId,
-          foodItems: data.foodItems,
-          totalItems: data.totalItems,
-          bill: data.bill,
-          zone: data.zone,
-          city: data.city
-        })
-
-        if (!anotherRider2) {
-          throw new ApiError(400, "Error in Creating of Accept/Reject")
-        }
+    remainingRiders.forEach(rider => {
+      const distance = haversine(restaurantLat, restaurantLon, rider.latitude, rider.longitude);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestRider = rider;
       }
-    }, 30000);
+    });
 
-  })
+    if (!nearestRider) {
+      throw new ApiError(400, "Error in Finding Nearest Rider");
+    }
+
+    const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
+      tokens: [nearestRider.deviceToken],
+      notification: {
+        title: 'You Received an Order From Foody',
+        body: 'A user Placed an order',  // Add food items details also
+        imageUrl: 'https://my-cdn.com/app-logo.png',
+      }
+    });
+
+    const newRiderOrder = await RiderAcceptReject.create({
+      riderId: nearestRider._id,
+      restaurantName: data.restroName,
+      restaurantAddress: data.restroAddress,
+      userDeviceToken: restro.userDeviceToken,
+      userAddress: data.userAddress,
+      userId: data.userId,
+      restaurantId: restro.restaurantId,
+      foodItems: data.foodItems,
+      totalItems: data.totalItems,
+      bill: data.bill,
+      city: data.city
+    });
+
+    if (!newRiderOrder) {
+      throw new ApiError(400, "Error in Creating of Accept/Reject for New Rider");
+    }
+
+    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: newRiderOrder.riderId });
+
+    // You can also start a new timeout here if needed for the new rider
+  }
+}, 30000);
+
+  });
+  
 
   socket.on("RiderAcceptedOrder", async (data) => {
 
@@ -328,133 +330,160 @@ const handleConnection = async (socket) => {
   })
 
   socket.on("RiderRejectedOrder", async (data) => {
-    const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.riderId)
-
+    // Delete the rejected rider's data from RiderAcceptReject
+    const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.riderId);
+    
     if (!riderRejected) {
-      throw new ApiError(400, "Error in Deleting of Accept/Reject")
+      throw new ApiError(400, "Error in Deleting Accept/Reject");
     }
-
-    const rider = await Rider.aggregate([
-      {
-        $match: {
-          zone: data.zone,
-          city: data.city
-        }
+  
+    // Retrieve the restaurant's coordinates
+    const restaurant = await Restaurant.findById(data.restaurantId);
+    if (!restaurant) {
+      throw new ApiError(400, "Restaurant not found");
+    }
+    
+    const { latitude: restaurantLat, longitude: restaurantLon } = restaurant;
+  
+    // Find available riders in the city
+    const availableRiders = await Rider.find({
+      city: data.city,
+      _id: { $ne: riderRejected.riderId }  // Exclude the rejected rider
+    });
+  
+    if (availableRiders.length === 0) {
+      throw new ApiError(400, "No Available Riders in the City");
+    }
+  
+    // Calculate distance for each rider and find the nearest one
+    let nearestRider = null;
+    let minDistance = Infinity;
+  
+    for (const rider of availableRiders) {
+      const { latitude: riderLat, longitude: riderLon } = rider;
+  
+      const distance = haversine(restaurantLat, restaurantLon, riderLat, riderLon);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestRider = rider;
       }
-    ])
-
-    if (!rider) {
-      throw new ApiError(400, "Error in Finding Riders")
     }
-
-    let randomIndex;
-
-    if (rider.length === 1) {
-      // If the array has only one element, set the random index to 0
-      randomIndex = 0;
-    } else {
-      // If the array has more than one element, generate a random index as usual
-      randomIndex = Math.floor(Math.random() * rider.length);
+  
+    if (!nearestRider) {
+      throw new ApiError(400, "No suitable rider found");
     }
-
-    console.log(randomIndex);
-    console.log("Rider Device Token", rider[randomIndex].deviceToken);
-    const msg2 = await trioRiderApp.messaging().sendEachForMulticast({
-      tokens: [rider[randomIndex].deviceToken],
+  
+    console.log("Nearest Rider Device Token:", nearestRider.deviceToken);
+  
+    // Send a notification to the nearest rider
+    const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
+      tokens: [nearestRider.deviceToken],
       notification: {
         title: 'You Received an Order From Foody',
-        body: 'A user Placed a order',  // Add food items details also
+        body: 'A user placed an order',  // Add food items details also
         imageUrl: 'https://my-cdn.com/app-logo.png',
       }
     });
-    console.log("Message", msg2);
-    console.log("RestroId", data.restaurantId);
-    const rider2 = await RiderAcceptReject.create({
-      riderId: rider[randomIndex]._id,
+  
+    console.log("Message Sent:", msg2);
+  
+    // Create a new entry in RiderAcceptReject for the selected rider
+    const newRiderOrder = await RiderAcceptReject.create({
+      riderId: nearestRider._id,
       restaurantName: data.restroName,
       restaurantAddress: data.restroAddress,
       userDeviceToken: riderRejected.userDeviceToken,
       userAddress: data.userAddress,
       userSocket: data.socket,
       userId: data.userId,
-      restaurantId: riderRejected.restaurantId,
+      restaurantId: data.restaurantId,
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
-      zone: data.zone,
       city: data.city
-    })
-
-    if (!rider2) {
-      throw new ApiError(400, "Error in Creating of Accept/Reject")
+    });
+  
+    if (!newRiderOrder) {
+      throw new ApiError(400, "Error in Creating Accept/Reject Entry");
     }
-
-    io.emit("RiderOrderInform", { data, restaurantId: riderRejected.restaurantId, riderId: rider2.riderId });
-
-    // Start timeout for rider response (Could possibly be tested when rider app is built)
+  
+    // Emit event to inform the client about the new rider selection
+    io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: newRiderOrder.riderId });
+  
+    // Start timeout for the new rider's response
     setTimeout(async () => {
-      // Check if rider has responded within timeout
-      const updatedRiderOrder = await RiderAcceptReject.findById(rider2._id);
+      // Check if the new rider has responded within the timeout
+      const updatedRiderOrder = await RiderAcceptReject.findById(newRiderOrder._id);
       if (!updatedRiderOrder.status) {
-        console.log(`Rider ${rider2.riderId} did not respond to the order within 30sec seconds.`);
-        const anotherRider = await Rider.aggregate([
-          {
-            $match: {
-              zone: data.zone,
-              city: data.city
-            }
+        console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 30 seconds.`);
+        await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
+        // Handle the scenario where the rider doesn't respond...
+        // Find another nearest rider, excluding the ones who already rejected
+        const anotherAvailableRiders = await Rider.find({
+          city: data.city,
+          _id: { $ne: [riderRejected.riderId, newRiderOrder.riderId] }  // Exclude previous riders
+        });
+  
+        if (anotherAvailableRiders.length === 0) {
+          throw new ApiError(400, "No Available Riders in the City");
+        }
+  
+        let anotherNearestRider = null;
+        let anotherMinDistance = Infinity;
+  
+        for (const rider of anotherAvailableRiders) {
+          const { lat: riderLat, lon: riderLon } = rider;
+  
+          const distance = haversine(restaurantLat, restaurantLon, riderLat, riderLon);
+          if (distance < anotherMinDistance) {
+            anotherMinDistance = distance;
+            anotherNearestRider = rider;
           }
-        ])
-
-        if (!anotherRider) {
-          throw new ApiError(400, "Error in Finding Riders")
         }
-
-        let randomIndex;
-
-        if (anotherRider.length === 1) {
-          // If the array has only one element, set the random index to 0
-          randomIndex = 0;
-        } else {
-          // If the array has more than one element, generate a random index as usual
-          randomIndex = Math.floor(Math.random() * anotherRider.length);
+  
+        if (!anotherNearestRider) {
+          throw new ApiError(400, "No suitable rider found");
         }
-
-        console.log(randomIndex);
-        console.log("Rider Device Token", anotherRider[randomIndex].deviceToken);
-        const msg2 = await trioRiderApp.messaging().sendEachForMulticast({
-          tokens: [anotherRider[randomIndex].deviceToken],
+  
+        console.log("Another Nearest Rider Device Token:", anotherNearestRider.deviceToken);
+  
+        // Send a notification to the new nearest rider
+        const msg3 = await tiofyRiderApp.messaging().sendEachForMulticast({
+          tokens: [anotherNearestRider.deviceToken],
           notification: {
             title: 'You Received an Order From Foody',
-            body: 'A user Placed a order',  // Add food items details also
+            body: 'A user placed an order',  // Add food items details also
             imageUrl: 'https://my-cdn.com/app-logo.png',
           }
         });
-        console.log("Message", msg2);
-        console.log("RestroId", restro.restaurantId);
-        console.log("Data or Checking FoodItems", data);
-        const anotherRider2 = await RiderAcceptReject.create({
-          riderId: anotherRider[randomIndex]._id,
+  
+        console.log("Message Sent:", msg3);
+  
+        // Create a new entry in RiderAcceptReject for the new selected rider
+        const anotherNewRiderOrder = await RiderAcceptReject.create({
+          riderId: anotherNearestRider._id,
           restaurantName: data.restroName,
           restaurantAddress: data.restroAddress,
-          userDeviceToken: restro.userDeviceToken,
+          userDeviceToken: riderRejected.userDeviceToken,
           userAddress: data.userAddress,
           userId: data.userId,
-          restaurantId: restro.restaurantId,
+          restaurantId: data.restaurantId,
           foodItems: data.foodItems,
           totalItems: data.totalItems,
           bill: data.bill,
-          zone: data.zone,
           city: data.city
-        })
-
-        if (!anotherRider2) {
-          throw new ApiError(400, "Error in Creating of Accept/Reject")
+        });
+  
+        if (!anotherNewRiderOrder) {
+          throw new ApiError(400, "Error in Creating Accept/Reject Entry");
         }
+  
+        // Emit event to inform the client about the new rider selection
+        io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: anotherNewRiderOrder.riderId });
       }
     }, 30000);
-
-  })
+  });
+  
   
   socket.on("RiderCurrentLocation", async (data) => {
     io.emit("CurrentLocationofRiderToUser", data)
