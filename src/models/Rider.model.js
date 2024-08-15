@@ -55,7 +55,8 @@ const riderSchema = new Schema(
             type: Number
         },
         moneyEarned: {
-            type: Number
+            type: Number,
+            default: 0
         },
         cyrRideHistory: [
             {
