@@ -918,6 +918,15 @@ const updateRiderLocation = asyncHandler( async(req, res) => {
     }
 })
 
+const earning = asyncHandler( async(req, res) => {
+   const { distanceInKm } = req.body;
+
+   // Calculate earning based on the current rate
+   const earning = distanceInKm * 10;
+ 
+   res.json({ earning });
+})
+
 export {
    registerRider,
    loginRider,
@@ -945,5 +954,6 @@ export {
    toggleAvailableStatus,
    setDeviceToken,
    fetchAcceptReject,
-   updateRiderLocation
+   updateRiderLocation,
+   earning
 }

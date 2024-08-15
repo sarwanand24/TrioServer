@@ -3,7 +3,7 @@ import {
     addToCyrMedicoRideHistory,
     addToCyrRideHistory,
     addToFoodyRideHistory,
-    changeCurrentPassword, fetchAcceptReject, getCurrentRider, loginRider, logoutRider, refreshAccessToken, registerRider,
+    changeCurrentPassword, earning, fetchAcceptReject, getCurrentRider, loginRider, logoutRider, refreshAccessToken, registerRider,
     removeFromCyrMedicoRideHistory,
     removeFromCyrRideHistory,
     removeFromFoodyRideHistory,
@@ -73,6 +73,8 @@ router.route("/set-device-token").post(verifyRidersJWT, setDeviceToken);
 
 router.route("/fetchAccept-Reject").get(verifyRidersJWT, fetchAcceptReject);
 
-router.route("/update-rider-location").post(verifyRidersJWT, updateRiderLocation)
+router.route("/update-rider-location").post(verifyRidersJWT, updateRiderLocation);
+
+router.route("/calculateEarning").post(earning);
 
 export default router

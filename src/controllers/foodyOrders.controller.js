@@ -44,7 +44,7 @@ const placeOrder = asyncHandler(async (req, res)=> {
 const updateOrderStatus = asyncHandler(async (req, res)=> {
 
     const {orderId} = req.params
-    const {orderStatus} = req.body
+    const {orderStatus, riderEarning} = req.body
 
     if(!orderId){
         throw new ApiError(400, "OrderId is required")
@@ -57,11 +57,12 @@ const updateOrderStatus = asyncHandler(async (req, res)=> {
     const order = await FoodyOrders.findByIdAndUpdate(new mongoose.Types.ObjectId(orderId),
     {
         $set: {
-            orderStatus: orderStatus
+            orderStatus: orderStatus,
+            riderEarning
         }
     },{new: true})
 
-    if(!order?.length){
+    if(!order){
         throw new ApiError(400, "Error in updating the order Status")
     }
 
