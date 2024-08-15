@@ -587,7 +587,7 @@ const removeFromFoodyRideHistory = asyncHandler(async (req, res) => {
 })
 
 const getFoodyRideHistory = asyncHandler(async (req, res) => {
-   const rideHistory = await Rider.aggregate([
+   const rideHistory = await Rider.aggregate(
       [
          {
            $match: {
@@ -621,7 +621,7 @@ const getFoodyRideHistory = asyncHandler(async (req, res) => {
            }
          }
        ]
-   ])
+   )
    console.log(rideHistory);
       return res
       .status(200)

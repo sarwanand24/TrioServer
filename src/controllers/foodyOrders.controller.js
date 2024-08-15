@@ -4,6 +4,7 @@ import {ApiError} from "../utils/ApiError.js";
 import {ApiResponse} from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import { cancelOrder } from "./cyrCancelledRides.controller.js";
+import { Rider } from "../models/Rider.model.js";
 
 const placeOrder = asyncHandler(async (req, res)=> {
 
@@ -64,6 +65,21 @@ const updateOrderStatus = asyncHandler(async (req, res)=> {
 
     if(!order){
         throw new ApiError(400, "Error in updating the order Status")
+    }
+
+    //also update moneyEarnedBYRider
+       // Update the rider's earnings
+       if (order.rider) {
+        const rider = await Rider.findById(order.rider);
+
+        if (rider) {
+            rider.moneyEarned += riderEarning;
+            await rider.save();
+        } else {
+            throw new ApiError(404, "Rider not found");
+        }
+    } else {
+        throw new ApiError(400, "RiderId not associated with the order");
     }
 
     return res
