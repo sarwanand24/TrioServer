@@ -404,7 +404,13 @@ setTimeout(async () => {
         title: 'You Received an Order From Foody',
         body: 'A user placed an order',  // Add food items details also
         imageUrl: 'https://my-cdn.com/app-logo.png',
-      }
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
     });
   
     console.log("Message Sent:", msg2);
@@ -416,7 +422,6 @@ setTimeout(async () => {
       restaurantAddress: data.restroAddress,
       userDeviceToken: riderRejected.userDeviceToken,
       userAddress: data.userAddress,
-      userSocket: data.socket,
       userId: data.userId,
       restaurantId: data.restaurantId,
       foodItems: data.foodItems,
@@ -477,7 +482,13 @@ setTimeout(async () => {
             title: 'You Received an Order From Foody',
             body: 'A user placed an order',  // Add food items details also
             imageUrl: 'https://my-cdn.com/app-logo.png',
-          }
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
         });
   
         console.log("Message Sent:", msg3);
