@@ -125,7 +125,7 @@ const handleConnection = async (socket) => {
   
     const riders = await Rider.find({ city: data.city });
 
-    console.log('Restro lat Long', restaurantLat, restaurantLon);
+    console.log('Restro lat Long',restro, restaurantLat, restaurantLon);
     
   
     if (!riders || riders.length === 0) {
@@ -137,7 +137,7 @@ const handleConnection = async (socket) => {
   
     riders.forEach(rider => {
       console.log('entry456');
-      nsole.log('Rider lat Long',  rider.latitude, rider.longitude);
+      console.log('Rider lat Long',  rider.latitude, rider.longitude);
       const distance = haversine(restaurantLat, restaurantLon, rider.latitude, rider.longitude);
       console.log('distance', distance);
       if (distance < minDistance) {
