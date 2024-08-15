@@ -82,7 +82,7 @@ const handleConnection = async (socket) => {
       notification: {
         title: 'OOps',
         body: 'The Restaurant Rejected Order',  // Add food items details also
-        imageUrl: 'https://my-cdn.com/app-logo.png',
+        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
       }
     });
     console.log("Message", msg);
@@ -157,7 +157,7 @@ const handleConnection = async (socket) => {
       notification: {
         title: 'You Received an Order From Foody',
         body: 'A user Placed an order',  // Add food items details also
-        imageUrl: 'https://my-cdn.com/app-logo.png',
+        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
       },
       android: {
         notification: {
@@ -225,7 +225,7 @@ setTimeout(async () => {
       notification: {
         title: 'You Received an Order From Foody',
         body: 'A user Placed an order',  // Add food items details also
-        imageUrl: 'https://my-cdn.com/app-logo.png',
+        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
       },
       android: {
         notification: {
@@ -283,7 +283,7 @@ setTimeout(async () => {
       notification: {
         title: 'Get Ready to Eat',
         body: 'The Rider Accepted Order',  // Add food items details also
-        imageUrl: 'https://my-cdn.com/app-logo.png',
+        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
       }
     });
     console.log("Message", msg);
@@ -403,7 +403,7 @@ setTimeout(async () => {
       notification: {
         title: 'You Received an Order From Foody',
         body: 'A user placed an order',  // Add food items details also
-        imageUrl: 'https://my-cdn.com/app-logo.png',
+        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
       },
       android: {
         notification: {
@@ -481,7 +481,7 @@ setTimeout(async () => {
           notification: {
             title: 'You Received an Order From Foody',
             body: 'A user placed an order',  // Add food items details also
-            imageUrl: 'https://my-cdn.com/app-logo.png',
+            imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
           },
           android: {
             notification: {
