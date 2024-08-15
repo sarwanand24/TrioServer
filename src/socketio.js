@@ -158,7 +158,13 @@ const handleConnection = async (socket) => {
         title: 'You Received an Order From Foody',
         body: 'A user Placed an order',  // Add food items details also
         imageUrl: 'https://my-cdn.com/app-logo.png',
-      }
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
     });
   
     const rider2 = await RiderAcceptReject.create({
@@ -220,7 +226,13 @@ setTimeout(async () => {
         title: 'You Received an Order From Foody',
         body: 'A user Placed an order',  // Add food items details also
         imageUrl: 'https://my-cdn.com/app-logo.png',
-      }
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
     });
 
     const newRiderOrder = await RiderAcceptReject.create({
