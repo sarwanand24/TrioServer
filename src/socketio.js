@@ -119,13 +119,15 @@ const handleConnection = async (socket) => {
     if (!restro) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject");
     }
+
+    const restaurant = await Restaurant.findById(restro.restaurantId);
   
-    const restaurantLat = restro.latitude; // Assuming latitude field
-    const restaurantLon = restro.longitude; // Assuming longitude field
+    const restaurantLat = restaurant.latitude; // Assuming latitude field
+    const restaurantLon = restaurant.longitude; // Assuming longitude field
   
     const riders = await Rider.find({ city: data.city });
 
-    console.log('Restro lat Long',restro, restaurantLat, restaurantLon);
+    console.log('restaurant lat Long',restaurant, restaurantLat, restaurantLon);
     
   
     if (!riders || riders.length === 0) {
