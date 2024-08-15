@@ -124,6 +124,9 @@ const handleConnection = async (socket) => {
     const restaurantLon = restro.longitude; // Assuming longitude field
   
     const riders = await Rider.find({ city: data.city });
+
+    console.log('Restro&Rider lat Long', restaurantLat, restaurantLon, rider.latitude, rider.longitude);
+    
   
     if (!riders || riders.length === 0) {
       throw new ApiError(400, "No Riders Found");
@@ -133,7 +136,9 @@ const handleConnection = async (socket) => {
     let minDistance = Infinity;
   
     riders.forEach(rider => {
+      console.log('entry456');
       const distance = haversine(restaurantLat, restaurantLon, rider.latitude, rider.longitude);
+      console.log('distance', distance);
       if (distance < minDistance) {
         minDistance = distance;
         nearestRider = rider;
@@ -164,7 +169,8 @@ const handleConnection = async (socket) => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
-      city: data.city
+      city: data.city,
+      orderOf: 'Foody'
     });
   
     if (!rider2) {
@@ -225,7 +231,8 @@ setTimeout(async () => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
-      city: data.city
+      city: data.city,
+      orderOf: 'Foody'
     });
 
     if (!newRiderOrder) {
@@ -400,7 +407,8 @@ setTimeout(async () => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
-      city: data.city
+      city: data.city,
+      orderOf: 'Foody'
     });
   
     if (!newRiderOrder) {
@@ -471,7 +479,8 @@ setTimeout(async () => {
           foodItems: data.foodItems,
           totalItems: data.totalItems,
           bill: data.bill,
-          city: data.city
+          city: data.city,
+          orderOf: 'Foody'
         });
   
         if (!anotherNewRiderOrder) {
