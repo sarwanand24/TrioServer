@@ -77,6 +77,6 @@ router.route("/update-rider-location").post(verifyRidersJWT, updateRiderLocation
 
 router.route("/calculateEarning").post(earning);
 
-router.route("/foody-order-history").get(getFoodyRideHistory)
+router.route("/foody-order-history").get(verifyRidersJWT, getFoodyRideHistory)
 
 export default router
