@@ -89,6 +89,36 @@ const updateOrderStatus = asyncHandler(async (req, res)=> {
 
 })
 
+const updatePickupOrderStatus = asyncHandler(async (req, res)=> {
+
+    const {orderId} = req.params
+    const {orderStatus} = req.body
+
+    if(!orderId){
+        throw new ApiError(400, "OrderId is required")
+    }
+
+    if(!orderStatus){
+        throw new ApiError(400, "OrderStatus is required")
+    }
+
+    const order = await FoodyOrders.findByIdAndUpdate(new mongoose.Types.ObjectId(orderId),
+    {
+        $set: {
+            orderStatus: orderStatus
+        }
+    },{new: true})
+
+    if(!order){
+        throw new ApiError(400, "Error in updating the order Status")
+    }
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, order, "Successfully updated OrderStatus"))
+
+})
+
 const getOrderById = asyncHandler(async (req, res)=> {
     
     const {orderId} = req.params
@@ -140,9 +170,23 @@ const getOrderById = asyncHandler(async (req, res)=> {
     .json(new ApiResponse(200, order, "Order fetched Successfully"))
 })
 
+const getUndeliveredOrders = asyncHandler(async (req, res)=> {
+    try {
+        const orders = await FoodyOrders.find({
+          rider: req.rider._id,
+          orderStatus: { $ne: 'Delivered' }
+        });
+        res.status(200).json(orders);
+      } catch (error) {
+        res.status(500).json({ error: 'Server Error' });
+      }
+})
+
 
 export {
     placeOrder,
     updateOrderStatus,
-    getOrderById
+    updatePickupOrderStatus,
+    getOrderById,
+    getUndeliveredOrders
 }
