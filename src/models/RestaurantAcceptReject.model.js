@@ -25,6 +25,9 @@ const restroAcceptRejectSchema = new Schema(
         bill: {
             type: "Number"
         },
+        restroBill: {
+            type: "Number"
+        },
         status: {
             type: Boolean,
             default: false

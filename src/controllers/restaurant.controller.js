@@ -101,7 +101,7 @@ const registerRestaurant = asyncHandler(async (req, res) => {
    return res
       .status(200)
       .json(
-         new ApiResponse(200, { restaurant: createdRestaurant, accessToken }, "Restaurant Registered Successfully")
+         new ApiResponse(200, { Restaurant: createdRestaurant, accessToken, refreshToken }, "Restaurant Registered Successfully")
       )
 
 })
@@ -397,8 +397,7 @@ const getOrderHistory = asyncHandler(async (req, res) => {
    //check for the above data
    //return res
 
-
-   const orderHistory = await Restaurant.aggregate([
+   const orderHistory = await Restaurant.aggregate(
       [
          {
             $match: {
@@ -432,7 +431,7 @@ const getOrderHistory = asyncHandler(async (req, res) => {
             }
          }
       ]
-   ])
+   )
    console.log(orderHistory);
    return res
       .status(200)

@@ -51,6 +51,10 @@ const riderAcceptRejectSchema = new Schema(
             type: Boolean,
             default: false
         },
+        restroEarning: {
+            type: Number,
+            default: 0
+        },
         orderOf: {
             type: String,
         }

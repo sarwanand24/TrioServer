@@ -3,7 +3,7 @@ import {
     addNonVegFoods,
     addToOrderHistory,
     addVegFoods,
-    changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, loginRestaurant, logoutRestaurant,
+    changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, getOrderHistory, loginRestaurant, logoutRestaurant,
     refreshAccessToken, registerRestaurant, removeNonVegFoods, removeOrderHistory, removeVegFoods, setDeviceToken, signoutRestaurant,
     updateAccountDetails
 } from "../controllers/restaurant.controller.js";
@@ -33,6 +33,8 @@ router.route("/signout").delete(verifyRestaurantsJWT, signoutRestaurant)
 router.route("/addOrderHistory/:orderId").post(verifyRestaurantsJWT, addToOrderHistory)
 
 router.route("/removeOrderHistory/:orderId").post(verifyRestaurantsJWT, removeOrderHistory)
+
+router.route("/getOrderHistory").get(verifyRestaurantsJWT, getOrderHistory)
 
 router.route("/addVegFoods").post(upload.single("image"),verifyRestaurantsJWT, addVegFoods)
 

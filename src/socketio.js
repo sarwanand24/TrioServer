@@ -10,7 +10,7 @@ import { Restaurant } from "./models/Retaurant.model.js";
 import { User } from "./models/User.model.js";
 import { ApiError } from "./utils/ApiError.js";
 const require = createRequire(import.meta.url);
-const trioRestroServiceAccount = require('../TrioRestaurantServiceAccount.json');
+const tiofyRestroServiceAccount = require('../TiofyRestaurantServiceAccount.json');
 const trioServiceAccount = require('../TrioServiceAccount.json');
 const tiofyRiderServiceAccount = require('../TiofyRiderServiceAccount.json');
 
@@ -18,9 +18,9 @@ const trioApp = admin.initializeApp({
   credential: admin.credential.cert(trioServiceAccount),
 }, 'trioApp');
 
-const trioRestaurantApp = admin.initializeApp({
-  credential: admin.credential.cert(trioRestroServiceAccount),
-}, 'trioRestaurantApp');
+const tiofyRestaurantApp = admin.initializeApp({
+  credential: admin.credential.cert(tiofyRestroServiceAccount),
+}, 'tiofyRestaurantApp');
 
 const tiofyRiderApp = admin.initializeApp({
   credential: admin.credential.cert(tiofyRiderServiceAccount),
@@ -32,7 +32,7 @@ const handleConnection = async (socket) => {
   socket.on("FoodyOrderPlaced", async (data) => {
     console.log("Server data", data);
     //get the device token and send the notification
-    const msg = await trioRestaurantApp.messaging().sendEachForMulticast({
+    const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
       tokens: [data.deviceToken],
       notification: {
         title: 'You Received an Order',
@@ -52,6 +52,7 @@ const handleConnection = async (socket) => {
       foodItems: data.newSelectedFoods,
       totalItems: data.newTotalItem,
       bill: data.newTotalAmount,
+      restroBill: data.newTotalRestroAmount,
       userDeviceToken: data.userDeviceToken,
       userAddress: data.userAddress,
       userId: data.userId
@@ -139,7 +140,7 @@ const handleConnection = async (socket) => {
   
     riders.forEach(rider => {
       console.log('entry456');
-      console.log('Rider lat Long',  rider.latitude, rider.longitude);
+      console.log('Rider lat Long', rider, rider.latitude, rider.longitude);
       const distance = haversine(restaurantLat, restaurantLon, rider.latitude, rider.longitude);
       console.log('distance', distance);
       if (distance < minDistance) {
@@ -178,6 +179,7 @@ const handleConnection = async (socket) => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
+      restroEarning: data.newTotalRestroAmount,
       city: data.city,
       orderOf: 'Foody'
     });
@@ -186,7 +188,7 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in Creating of Accept/Reject");
     }
   
-    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: rider2.riderId });
+    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: rider2.riderId, restroEarning: data.newTotalRestroAmount });
   
     // Start timeout for rider response
 setTimeout(async () => {
@@ -247,6 +249,7 @@ setTimeout(async () => {
       totalItems: data.totalItems,
       bill: data.bill,
       city: data.city,
+      restroEarning: data.newTotalRestroAmount,
       orderOf: 'Foody'
     });
 
@@ -295,6 +298,7 @@ setTimeout(async () => {
       orderedFromLocation: rider.userAddress,
       bill: data.bill,
       items: data.foodItems,
+      restroEarning: data.restroEarning,
       orderStatus: "Making the order"
     })
 
@@ -427,6 +431,7 @@ setTimeout(async () => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
+      restroEarning: data.restroEarning,
       city: data.city,
       orderOf: 'Foody'
     });
@@ -505,6 +510,7 @@ setTimeout(async () => {
           foodItems: data.foodItems,
           totalItems: data.totalItems,
           bill: data.bill,
+          restroEarning: data.restroEarning,
           city: data.city,
           orderOf: 'Foody'
         });
@@ -514,7 +520,7 @@ setTimeout(async () => {
         }
   
         // Emit event to inform the client about the new rider selection
-        io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: anotherNewRiderOrder.riderId });
+        io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: anotherNewRiderOrder.riderId, restroEarning: data.restroEarning });
       }
     }, 30000);
   });

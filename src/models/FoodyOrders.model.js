@@ -35,6 +35,14 @@ const foodyOrdersSchema = new Schema(
         riderEarning: {
             type: Number,
             default: 0
+        },
+        restroEarning: {
+            type: Number,
+            default: 0
+        },
+        savings: {
+            type: Number,
+            default: 0
         }
     },
     { timestamps: true }
