@@ -38,7 +38,7 @@ const registerRestaurant = asyncHandler(async (req, res) => {
    //return res
 
    const { restaurantName, ownerName, email, password, address, mobileNo, alternateMobileNo,
-      restaurantPhotoImg, fssaiNo, fssaiExpiryDate, openingTime, closingTime, zone, city } = req.body;
+      restaurantPhotoImg, fssaiNo, fssaiExpiryDate, openingTime, closingTime, city } = req.body;
 
    let altMob;
    if (alternateMobileNo?.length) {
@@ -64,8 +64,8 @@ const registerRestaurant = asyncHandler(async (req, res) => {
       throw new ApiError(409, "Restaurant already exists, Please Login!")
    }
 
-   //const restaurantLocalPath = restaurantPhotoImg;
-   const restaurantLocalPath = req.file?.path;
+   const restaurantLocalPath = restaurantPhotoImg;
+   // const restaurantLocalPath = req.file?.path;
 
    const restaurantPhoto = await uploadOnCloudinary(restaurantLocalPath);
 
@@ -86,7 +86,8 @@ const registerRestaurant = asyncHandler(async (req, res) => {
       fssaiExpiryDate,
       alternateMobileNo: altMob?.alternateMobileNo || "",
       openingTime,
-      closingTime
+      closingTime,
+      city
    })
 
    if (!restaurant) {
@@ -538,11 +539,11 @@ const updateLatLong = asyncHandler(async (req, res) => {
 })
 
 const addVegFoods = asyncHandler(async (req, res) => {
-   const { name, image, price } = req.body;
-  console.log(name, price, image);
+   const { name, image, price, tiofyPrice } = req.body;
+  console.log(name, price, image, tiofyPrice);
   
   if (
-   [name, image, price].some((field) =>
+   [name, image, price, tiofyPrice].some((field) =>
       field?.trim === "")
 ) {
    res.status(400).json(new ApiResponse(400, "Didn't got the details"))
@@ -563,7 +564,8 @@ const addVegFoods = asyncHandler(async (req, res) => {
    const vegfood = await VegFoods.create({
       name,
       image: foodPhoto.url,
-      price
+      price,
+      tiofyPrice
    })
 
    if (!vegfood) {
@@ -591,10 +593,10 @@ const addVegFoods = asyncHandler(async (req, res) => {
 })
 
 const addNonVegFoods = asyncHandler(async (req, res) => {
-   const { name, image, price } = req.body;
+   const { name, image, price, tiofyPrice } = req.body;
 
    if (
-      [name, image, price].some((field) =>
+      [name, image, price, tiofyPrice].some((field) =>
          field?.trim === "")
    ) {
       res.status(400).json(new ApiResponse(400, "Didn't got the details"))
@@ -615,7 +617,8 @@ const addNonVegFoods = asyncHandler(async (req, res) => {
    const nonvegfood = await NonVegFoods.create({
       name,
       image: foodPhoto.url,
-      price
+      price,
+      tiofyPrice
    })
 
    if (!nonvegfood) {

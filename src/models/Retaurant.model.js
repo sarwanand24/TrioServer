@@ -100,9 +100,6 @@ const restaurantSchema = new Schema(
         deviceToken: {
           type: String
         },
-        zone: {
-            type: String
-        },
         city: {
             type: String,
             required: true

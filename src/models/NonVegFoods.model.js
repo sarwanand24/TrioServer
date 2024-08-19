@@ -13,6 +13,9 @@ const nonvegFoodsSchema = new Schema(
       price: {
         type: Number,
         required: true
+      },
+      tiofyPrice: {
+        type: Number
       }
    },{timestamps: true})
 
