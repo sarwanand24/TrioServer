@@ -40,6 +40,10 @@ const restaurantSchema = new Schema(
             type: String,
             required: true
         },
+        moneyEarned: {
+            type: Number,
+            default: 0
+        },
         vegFoods: [
             {
                 type: Schema.Types.ObjectId,
@@ -59,9 +63,6 @@ const restaurantSchema = new Schema(
             }
         ],
         bankAccountNo: {
-            type: Number
-        },
-        moneyEarned: {
             type: Number
         },
         ratings: {

@@ -46,8 +46,15 @@ const registerUser = asyncHandler(async (req, res) => {
       }
    }
 
+   let addressCheck;
+   if (address?.length) {
+      addressCheck = {
+         address
+      }
+   }
+
    if (
-      [fullName, username, email, password, address, mobileNo].some((field) =>
+      [fullName, username, email, password, mobileNo].some((field) =>
          field?.trim === "")
    ) {
       res.status(400).json(new ApiResponse(400, "All fields are required"))
@@ -84,7 +91,7 @@ const registerUser = asyncHandler(async (req, res) => {
       username: username.toLowerCase(),
       email,
       password,
-      address,
+      address: addressCheck?.address || '',
       profilePhoto: profilePhoto.url,
       mobileNo,
       alternateMobileNo: altMob?.alternateMobileNo || ""
