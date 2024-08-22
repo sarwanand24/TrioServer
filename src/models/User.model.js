@@ -184,3 +184,17 @@ userSchema.methods.generateRefreshToken = function () {
 }
 
 export const User = mongoose.model("User", userSchema);
+
+const carouselSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: String } // Optional, you can store colors too
+});
+
+export const CarouselImage = mongoose.model('CarouselImage', carouselSchema);
+
+const offerSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: String } // Optional, you can store colors too
+});
+
+export const OfferImage = mongoose.model('OfferImage', offerSchema);

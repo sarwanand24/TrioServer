@@ -16,7 +16,11 @@ import {
     getAllHotelsForFamilyStay,
     getAllFlats,
     getAllFlatsByCity,
-    updateUserLocation
+    updateUserLocation,
+    uploadOfferImage,
+    getOfferImages,
+    uploadCarouselImage,
+    getCarouselImages
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -89,5 +93,13 @@ router.route("/getAllFlats").get(getAllFlats)
 router.route("/get-all-flats-by-city").post(getAllFlatsByCity)
 
 router.route("/update-user-location").post(verifyUsersJWT, updateUserLocation)
+
+router.get('/carousel-images', getCarouselImages);
+
+router.post('/carousel-images', uploadCarouselImage);
+
+router.get('/offer-images', getOfferImages);
+
+router.post('/offer-images', uploadOfferImage);
 
 export default router

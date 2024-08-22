@@ -1,4 +1,4 @@
-import { User } from "../models/User.model.js";
+import { CarouselImage, OfferImage, User } from "../models/User.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -1551,6 +1551,49 @@ const updateUserLocation = asyncHandler( async(req, res) => {
     }
 })
 
+// Fetch all carousel images
+const getCarouselImages = async (req, res) => {
+   try {
+     const images = await CarouselImage.find({});
+     res.json(images);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching carousel images', error });
+   }
+ };
+ 
+ // Upload a new carousel image
+ const uploadCarouselImage = async (req, res) => {
+   const { imageUrl, title } = req.body;
+   try {
+     const newImage = new CarouselImage({ imageUrl, title });
+     await newImage.save();
+     res.status(201).json(newImage);
+   } catch (error) {
+     res.status(500).json({ message: 'Error uploading carousel image', error });
+   }
+ };
+
+ const getOfferImages = async (req, res) => {
+   try {
+     const images = await OfferImage.find({});
+     res.json(images);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching Offer images', error });
+   }
+ };
+ 
+ // Upload a new Offer image
+ const uploadOfferImage = async (req, res) => {
+   const { imageUrl, title } = req.body;
+   try {
+     const newImage = new OfferImage({ imageUrl, title });
+     await newImage.save();
+     res.status(201).json(newImage);
+   } catch (error) {
+     res.status(500).json({ message: 'Error uploading Offer image', error });
+   }
+ };
+
 export {
    registerUser,
    loginUser,
@@ -1595,5 +1638,9 @@ export {
    addToFlatOrderHistory,
    getAllFlats,
    getAllFlatsByCity,
-   updateUserLocation
+   updateUserLocation,
+   uploadCarouselImage,
+   getCarouselImages,
+   uploadOfferImage,
+   getOfferImages
 }
