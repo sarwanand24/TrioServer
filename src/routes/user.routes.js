@@ -96,10 +96,10 @@ router.route("/update-user-location").post(verifyUsersJWT, updateUserLocation)
 
 router.get('/carousel-images', getCarouselImages);
 
-router.post('/carousel-images', uploadCarouselImage);
+router.post('/carousel-images', upload.single("imageUrl"), uploadCarouselImage);
 
 router.get('/offer-images', getOfferImages);
 
-router.post('/offer-images', uploadOfferImage);
+router.post('/offer-images',upload.single("imageUrl"), uploadOfferImage);
 
 export default router

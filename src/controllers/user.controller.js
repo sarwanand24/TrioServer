@@ -1563,9 +1563,22 @@ const getCarouselImages = async (req, res) => {
  
  // Upload a new carousel image
  const uploadCarouselImage = async (req, res) => {
-   const { imageUrl, title } = req.body;
+   const { title } = req.body;
+   const carouselPhotoLocalPath = req.file?.path;
+
+      if (!carouselPhotoLocalPath) {
+         res.status(400).json(new ApiResponse(400, "carouselPhoto File is required"))
+         throw new ApiError(400, "carouselPhoto File is required")
+      }
+   
+      const carouselPhoto = await uploadOnCloudinary(carouselPhotoLocalPath);
+   
+      if (!carouselPhoto) {
+         res.status(400).json(new ApiResponse(400, "Error in uploading carouselPhoto file"))
+         throw new ApiError(400, "Error in uploading carouselPhoto file")
+      }
    try {
-     const newImage = new CarouselImage({ imageUrl, title });
+     const newImage = new CarouselImage({ imageUrl: carouselPhoto.url, title });
      await newImage.save();
      res.status(201).json(newImage);
    } catch (error) {
@@ -1584,13 +1597,26 @@ const getCarouselImages = async (req, res) => {
  
  // Upload a new Offer image
  const uploadOfferImage = async (req, res) => {
-   const { imageUrl, title } = req.body;
+   const { title } = req.body;
+   const offerPhotoLocalPath = req.file?.path;
+
+      if (!offerPhotoLocalPath) {
+         res.status(400).json(new ApiResponse(400, "offerPhoto File is required"))
+         throw new ApiError(400, "offerPhoto File is required")
+      }
+   
+      const offerPhoto = await uploadOnCloudinary(offerPhotoLocalPath);
+   
+      if (!offerPhoto) {
+         res.status(400).json(new ApiResponse(400, "Error in uploading offerPhoto file"))
+         throw new ApiError(400, "Error in uploading offerPhoto file")
+      }
    try {
-     const newImage = new OfferImage({ imageUrl, title });
+     const newImage = new OfferImage({ imageUrl: offerPhoto.url, title });
      await newImage.save();
      res.status(201).json(newImage);
    } catch (error) {
-     res.status(500).json({ message: 'Error uploading Offer image', error });
+     res.status(500).json({ message: 'Error uploading carousel image', error });
    }
  };
 
