@@ -78,7 +78,7 @@ router.route("/getAllVegFoods").post(getAllVegFoods)
 
 router.route("/getAllNonVegFoods").post(getAllNonVegFoods)
 
-router.route("/getAllRestaurants").get(getAllRestaurants)
+router.route("/getAllRestaurants/:city").get(getAllRestaurants)
 
 router.route("/set-device-token").post(verifyUsersJWT, setDeviceToken)
 

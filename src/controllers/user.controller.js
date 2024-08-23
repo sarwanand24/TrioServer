@@ -1175,28 +1175,51 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
    //check for all the restaurants open via mongoose aggregate
    //return res
 
-   const { city } = req.query;
-    
-   if (!city) {
-       return res.status(400).json({ error: "City query parameter is required." });
-   }
-
    try {
-       const restaurants = await Restaurant.find({ city: city })
-           .populate('vegFoods')
-           .populate('nonvegFoods');
-       
-       if (!restaurants || restaurants.length === 0) {
-           console.warn('No restaurants found for city:', city);
-           return res.status(404).json({ message: `No restaurants found in city: ${city}` });
-       }
+      const { city } = req.params;
+      const { vegMode } = req.query;
 
-       console.log('Restaurants found:', restaurants);
-       res.status(200).json(restaurants);
-   } catch (err) {
-       console.error('Error fetching restaurants:', err.message);
-       res.status(500).json({ error: "An internal server error occurred." });
-   }
+      if (!city) {
+          return res.status(400).json({ message: 'City parameter is required.' });
+      }
+
+      // Fetch restaurants based on the city
+      const restaurants = await Restaurant.find({ city })
+          .populate(vegMode === 'true' ? 'vegFoods' : ['vegFoods', 'nonvegFoods'])
+          .exec();
+
+      if (restaurants.length === 0) {
+          return res.status(404).json({ message: `No restaurants found in ${city}.` });
+      }
+
+      let foods = new Map();
+
+      restaurants.forEach(restaurant => {
+          const foodArray = vegMode === 'true' ? restaurant.vegFoods : [...restaurant.vegFoods, ...restaurant.nonvegFoods];
+          foodArray.forEach(food => {
+              if (!foods.has(food.name)) {
+                  foods.set(food.name, food.image); // Use image randomly from the foods that have the same name
+              }
+          });
+      });
+
+      // Convert Map to Array of objects for frontend
+      const uniqueFoods = Array.from(foods, ([name, image]) => ({ name, image }));
+
+      res.json({ restaurants, foods: uniqueFoods });
+  } catch (error) {
+      if (error.name === 'CastError' || error.name === 'ValidationError') {
+          // Handle mongoose validation errors
+          return res.status(400).json({ message: 'Invalid request parameters.', error: error.message });
+      } else if (error.name === 'MongoNetworkError') {
+          // Handle network-related errors (e.g., unable to connect to database)
+          return res.status(503).json({ message: 'Database connection error. Please try again later.', error: error.message });
+      } else {
+          // Handle any other unexpected errors
+          return res.status(500).json({ message: 'An unexpected error occurred.', error: error.message });
+      }
+  }
+  
 })
 
 
