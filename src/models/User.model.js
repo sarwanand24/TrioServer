@@ -198,3 +198,10 @@ const offerSchema = new mongoose.Schema({
 });
 
 export const OfferImage = mongoose.model('OfferImage', offerSchema);
+
+const foodCarouselSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: String } // Optional, you can store colors too
+});
+
+export const FoodCarouselImage = mongoose.model('FoodCarouselImage', foodCarouselSchema);

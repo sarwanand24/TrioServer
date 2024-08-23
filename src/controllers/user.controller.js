@@ -1,4 +1,4 @@
-import { CarouselImage, OfferImage, User } from "../models/User.model.js";
+import { CarouselImage, FoodCarouselImage, OfferImage, User } from "../models/User.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -1620,6 +1620,41 @@ const getCarouselImages = async (req, res) => {
    }
  };
 
+// Fetch all carousel images
+const getFoodCarouselImages = async (req, res) => {
+   try {
+     const images = await FoodCarouselImage.find({});
+     res.json(images);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching foodCarousel images', error });
+   }
+ };
+ 
+ // Upload a new foodCarousel image
+ const uploadFoodCarouselImage = async (req, res) => {
+   const { title } = req.body;
+   const foodCarouselPhotoLocalPath = req.file?.path;
+
+      if (!foodCarouselPhotoLocalPath) {
+         res.status(400).json(new ApiResponse(400, "foodCarouselPhoto File is required"))
+         throw new ApiError(400, "foodCarouselPhoto File is required")
+      }
+   
+      const foodCarouselPhoto = await uploadOnCloudinary(foodCarouselPhotoLocalPath);
+   
+      if (!foodCarouselPhoto) {
+         res.status(400).json(new ApiResponse(400, "Error in uploading foodCarouselPhoto file"))
+         throw new ApiError(400, "Error in uploading foodCarouselPhoto file")
+      }
+   try {
+     const newImage = new FoodCarouselImage({ imageUrl: foodCarouselPhoto.url, title });
+     await newImage.save();
+     res.status(201).json(newImage);
+   } catch (error) {
+     res.status(500).json({ message: 'Error uploading foodCarousel image', error });
+   }
+ };
+
 export {
    registerUser,
    loginUser,
@@ -1668,5 +1703,7 @@ export {
    uploadCarouselImage,
    getCarouselImages,
    uploadOfferImage,
-   getOfferImages
+   getOfferImages,
+   getFoodCarouselImages,
+   uploadFoodCarouselImage
 }

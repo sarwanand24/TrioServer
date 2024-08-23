@@ -20,7 +20,9 @@ import {
     uploadOfferImage,
     getOfferImages,
     uploadCarouselImage,
-    getCarouselImages
+    getCarouselImages,
+    getFoodCarouselImages,
+    uploadFoodCarouselImage
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -101,5 +103,9 @@ router.post('/carousel-images', upload.single("imageUrl"), uploadCarouselImage);
 router.get('/offer-images', getOfferImages);
 
 router.post('/offer-images',upload.single("imageUrl"), uploadOfferImage);
+
+router.get('/food-carousel-images', getFoodCarouselImages);
+
+router.post('/food-carousel-images', upload.single("imageUrl"), uploadFoodCarouselImage);
 
 export default router
