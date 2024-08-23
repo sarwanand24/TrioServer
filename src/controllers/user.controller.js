@@ -1175,18 +1175,28 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
    //check for all the restaurants open via mongoose aggregate
    //return res
 
-    const { city } = req.query;
+   const { city } = req.query;
     
-    try {
-        const restaurants = await Restaurant.find({ city: city })
-            .populate('vegFoods')
-            .populate('nonvegFoods');
-        
-        res.status(200).json(restaurants);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+   if (!city) {
+       return res.status(400).json({ error: "City query parameter is required." });
+   }
 
+   try {
+       const restaurants = await Restaurant.find({ city: city })
+           .populate('vegFoods')
+           .populate('nonvegFoods');
+       
+       if (!restaurants || restaurants.length === 0) {
+           console.warn('No restaurants found for city:', city);
+           return res.status(404).json({ message: `No restaurants found in city: ${city}` });
+       }
+
+       console.log('Restaurants found:', restaurants);
+       res.status(200).json(restaurants);
+   } catch (err) {
+       console.error('Error fetching restaurants:', err.message);
+       res.status(500).json({ error: "An internal server error occurred." });
+   }
 })
 
 
