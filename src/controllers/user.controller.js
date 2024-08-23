@@ -1175,16 +1175,17 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
    //check for all the restaurants open via mongoose aggregate
    //return res
 
-   const allrestro = await Restaurant.find({});
-   if (!allrestro) {
-      throw new ApiError(400, "Didn't got the details")
-   }
-
-   console.log(allrestro);
-
-   return res
-      .status(200)
-      .json(new ApiResponse(200, allrestro, "Successfully Fetched All Restaurants"))
+    const { city } = req.query;
+    
+    try {
+        const restaurants = await Restaurant.find({ city: city })
+            .populate('vegFoods')
+            .populate('nonvegFoods');
+        
+        res.status(200).json(restaurants);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 
 })
 
