@@ -1,4 +1,4 @@
-import { CarouselImage, FoodCarouselImage, OfferImage, User } from "../models/User.model.js";
+import { CarouselImage, FoodCarouselImage, FoodOfferImage, OfferImage, User } from "../models/User.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -1689,6 +1689,41 @@ const getFoodCarouselImages = async (req, res) => {
    }
  };
 
+ const getFoodOfferImages = async (req, res) => {
+   try {
+     const images = await FoodOfferImage.find({});
+     res.json(images);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching Offer images', error });
+   }
+ };
+ 
+ // Upload a new Offer image
+ const uploadFoodOfferImage = async (req, res) => {
+   const { title } = req.body;
+   const offerPhotoLocalPath = req.file?.path;
+
+      if (!offerPhotoLocalPath) {
+         res.status(400).json(new ApiResponse(400, "offerPhoto File is required"))
+         throw new ApiError(400, "offerPhoto File is required")
+      }
+   
+      const offerPhoto = await uploadOnCloudinary(offerPhotoLocalPath);
+   
+      if (!offerPhoto) {
+         res.status(400).json(new ApiResponse(400, "Error in uploading offerPhoto file"))
+         throw new ApiError(400, "Error in uploading offerPhoto file")
+      }
+   try {
+     const newImage = new FoodOfferImage({ imageUrl: offerPhoto.url, title });
+     await newImage.save();
+     res.status(201).json(newImage);
+   } catch (error) {
+     res.status(500).json({ message: 'Error uploading carousel image', error });
+   }
+ };
+
+
 export {
    registerUser,
    loginUser,
@@ -1739,5 +1774,7 @@ export {
    uploadOfferImage,
    getOfferImages,
    getFoodCarouselImages,
-   uploadFoodCarouselImage
+   uploadFoodCarouselImage,
+  getFoodOfferImages,
+  uploadFoodOfferImage
 }
