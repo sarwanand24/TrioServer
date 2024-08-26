@@ -129,7 +129,6 @@ const handleConnection = async (socket) => {
     const riders = await Rider.find({ city: data.city });
 
     console.log('restaurant lat Long',restaurant, restaurantLat, restaurantLon);
-    
   
     if (!riders || riders.length === 0) {
       throw new ApiError(400, "No Riders Found");

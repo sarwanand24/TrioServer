@@ -53,6 +53,6 @@ router.route("/set-device-token").post(verifyRestaurantsJWT, setDeviceToken);
 
 router.route("/fetchAccept-Reject").get(verifyRestaurantsJWT, fetchAcceptReject);
 
-router.route("/update-restro-location").get(verifyRestaurantsJWT, updateRestroLocation);
+router.route("/update-restro-location").post(verifyRestaurantsJWT, updateRestroLocation);
 
 export default router
