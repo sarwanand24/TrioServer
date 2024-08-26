@@ -11,12 +11,12 @@ import { User } from "./models/User.model.js";
 import { ApiError } from "./utils/ApiError.js";
 const require = createRequire(import.meta.url);
 const tiofyRestroServiceAccount = require('../TiofyRestaurantServiceAccount.json');
-const trioServiceAccount = require('../TrioServiceAccount.json');
+const tiofyServiceAccount = require('../TiofyServiceAccount.json');
 const tiofyRiderServiceAccount = require('../TiofyRiderServiceAccount.json');
 
-const trioApp = admin.initializeApp({
-  credential: admin.credential.cert(trioServiceAccount),
-}, 'trioApp');
+const tiofyApp = admin.initializeApp({
+  credential: admin.credential.cert(tiofyServiceAccount),
+}, 'tiofyApp');
 
 const tiofyRestaurantApp = admin.initializeApp({
   credential: admin.credential.cert(tiofyRestroServiceAccount),
@@ -78,7 +78,7 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")
     }
     console.log("UserDeviceToken", restro.userDeviceToken);
-    const msg = await trioApp.messaging().sendEachForMulticast({
+    const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [restro.userDeviceToken],
       notification: {
         title: 'OOps',
@@ -281,7 +281,7 @@ setTimeout(async () => {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")
     }
     console.log("UserDeviceToken", rider.userDeviceToken);
-    const msg = await trioApp.messaging().sendEachForMulticast({
+    const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [rider.userDeviceToken],
       notification: {
         title: 'Get Ready to Eat',
