@@ -1,5 +1,5 @@
 import {Router} from "express";
-import { getOrderById, getUndeliveredOrders, placeOrder, updateOrderStatus, updatePickupOrderStatus } from "../controllers/foodyOrders.controller.js";
+import { getOrderById, getRiderUndeliveredOrders, getUserUndeliveredOrders, placeOrder, updateOrderStatus, updatePickupOrderStatus } from "../controllers/foodyOrders.controller.js";
 import { verifyRidersJWT, verifyUsersJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router()
@@ -12,6 +12,8 @@ router.route("/order/:orderId")
 
     router.route("/order-update/:orderId").put(updatePickupOrderStatus)
 
-    router.route("/getUndeliveredOrders").get(verifyRidersJWT, getUndeliveredOrders)
+    router.route("/getRiderUndeliveredOrders").get(verifyRidersJWT, getRiderUndeliveredOrders)
+
+    router.route("/getUserUndeliveredOrders").get(verifyUsersJWT, getUserUndeliveredOrders)
 
 export default router

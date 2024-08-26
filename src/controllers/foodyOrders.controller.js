@@ -197,10 +197,22 @@ const getOrderById = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, order, "Order fetched Successfully"))
 })
 
-const getUndeliveredOrders = asyncHandler(async (req, res) => {
+const getRiderUndeliveredOrders = asyncHandler(async (req, res) => {
     try {
         const orders = await FoodyOrders.find({
             rider: req.rider._id,
+            orderStatus: { $ne: 'Delivered' }
+        });
+        res.status(200).json(orders);
+    } catch (error) {
+        res.status(500).json({ error: 'Server Error' });
+    }
+})
+
+const getUserUndeliveredOrders = asyncHandler(async (req, res) => {
+    try {
+        const orders = await FoodyOrders.find({
+            user: req.user._id,
             orderStatus: { $ne: 'Delivered' }
         });
         res.status(200).json(orders);
@@ -215,5 +227,6 @@ export {
     updateOrderStatus,
     updatePickupOrderStatus,
     getOrderById,
-    getUndeliveredOrders
+    getRiderUndeliveredOrders,
+    getUserUndeliveredOrders
 }

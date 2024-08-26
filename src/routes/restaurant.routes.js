@@ -5,7 +5,8 @@ import {
     addVegFoods,
     changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, getOrderHistory, loginRestaurant, logoutRestaurant,
     refreshAccessToken, registerRestaurant, removeNonVegFoods, removeOrderHistory, removeVegFoods, setDeviceToken, signoutRestaurant,
-    updateAccountDetails
+    updateAccountDetails,
+    updateRestroLocation
 } from "../controllers/restaurant.controller.js";
 import { upload } from "../middlewares/multer.js";
 import { verifyRestaurantsJWT } from "../middlewares/auth.middleware.js";
@@ -51,5 +52,7 @@ router.route("/getAllNonVegFoods").get(verifyRestaurantsJWT, getAllNonVegFoods)
 router.route("/set-device-token").post(verifyRestaurantsJWT, setDeviceToken);
 
 router.route("/fetchAccept-Reject").get(verifyRestaurantsJWT, fetchAcceptReject);
+
+router.route("/update-restro-location").get(verifyRestaurantsJWT, updateRestroLocation);
 
 export default router

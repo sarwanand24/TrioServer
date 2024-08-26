@@ -821,6 +821,39 @@ const fetchAcceptReject = asyncHandler( async(req, res) => {
     .json(new ApiResponse(200, restro, "Successfull in fetching Accept/Reject"))
 })
 
+const updateRestroLocation = asyncHandler( async(req, res) => {
+   try {
+      console.log('entryyyy in restroo')
+      const { latitude, longitude } = req.body;
+      if(!(latitude && longitude)){
+         return res.status(404).send('LatLong Required')
+      }
+      const restro = await Restaurant.findByIdAndUpdate(req.restro._id,
+         {
+            $set: {
+               latitude, longitude
+            }
+         },{new: true}
+      )
+
+      if (!restro) {
+         console.error('restro not found:', req.restro._id);
+         return res.status(404).send('restro not found');
+       }
+   
+       console.log('Location updated successfully:', {
+         restroId: req.restro._id,
+         latitude,
+         longitude,
+       });
+
+
+      res.status(200).send('Location updated');
+    } catch (error) {
+      res.status(500).send('Error updating location');
+    }
+})
+
 export {
    registerRestaurant,
    loginRestaurant,
@@ -846,5 +879,6 @@ export {
    getAllVegFoods,
    getAllNonVegFoods,
    setDeviceToken,
-   fetchAcceptReject
+   fetchAcceptReject,
+   updateRestroLocation
 }
