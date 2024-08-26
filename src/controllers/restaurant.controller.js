@@ -828,7 +828,7 @@ const updateRestroLocation = asyncHandler( async(req, res) => {
       if(!(latitude && longitude)){
          return res.status(404).send('LatLong Required')
       }
-      const restro = await Restaurant.findByIdAndUpdate(req.restro._id,
+      const restro = await Restaurant.findByIdAndUpdate(req.restaurant._id,
          {
             $set: {
                latitude, longitude
@@ -837,12 +837,12 @@ const updateRestroLocation = asyncHandler( async(req, res) => {
       )
 
       if (!restro) {
-         console.error('restro not found:', req.restro._id);
+         console.error('restro not found:', req.restaurant._id);
          return res.status(404).send('restro not found');
        }
    
        console.log('Location updated successfully:', {
-         restroId: req.restro._id,
+         restroId: req.restaurant._id,
          latitude,
          longitude,
        });
