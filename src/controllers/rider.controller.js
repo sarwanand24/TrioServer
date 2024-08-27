@@ -922,7 +922,7 @@ const earning = asyncHandler( async(req, res) => {
    const { distanceInKm } = req.body;
 
    // Calculate earning based on the current rate
-   const earning = distanceInKm * 10;
+   const earning = distanceInKm * 12.5;
  
    res.json({ earning });
 })

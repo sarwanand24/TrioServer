@@ -28,6 +28,9 @@ const restroAcceptRejectSchema = new Schema(
         restroBill: {
             type: "Number"
         },
+        riderEarning: {
+            type: "Number"
+        },
         status: {
             type: Boolean,
             default: false

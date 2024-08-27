@@ -55,7 +55,8 @@ const handleConnection = async (socket) => {
       restroBill: data.newTotalRestroAmount,
       userDeviceToken: data.userDeviceToken,
       userAddress: data.userAddress,
-      userId: data.userId
+      userId: data.userId,
+      riderEarning: data.riderEarning
     })
     console.log(restro);
 
@@ -131,7 +132,7 @@ const handleConnection = async (socket) => {
     console.log('restaurant lat Long',restaurant, restaurantLat, restaurantLon);
   
     if (!riders || riders.length === 0) {
-      throw new ApiError(400, "No Riders Found");
+      io.emit("NoRidersFound", data);
     }
   
     let nearestRider = null;
@@ -149,7 +150,7 @@ const handleConnection = async (socket) => {
     });
   
     if (!nearestRider) {
-      throw new ApiError(400, "Error in Finding Nearest Rider");
+      io.emit("NoRidersFound", data);
     }
   
     const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
@@ -178,7 +179,8 @@ const handleConnection = async (socket) => {
       foodItems: data.foodItems,
       totalItems: data.totalItems,
       bill: data.bill,
-      restroEarning: data.newTotalRestroAmount,
+      restroEarning: data.restroBill,
+      riderEarning: data.riderEarning,
       city: data.city,
       orderOf: 'Foody'
     });
@@ -187,7 +189,7 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in Creating of Accept/Reject");
     }
   
-    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: rider2.riderId, restroEarning: data.newTotalRestroAmount });
+    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: rider2.riderId, restroEarning: data.restroBill, riderEarning: data.riderEarning });
   
     // Start timeout for rider response
 setTimeout(async () => {
@@ -203,7 +205,7 @@ setTimeout(async () => {
     const remainingRiders = riders.filter(rider => rider._id.toString() !== rider2.riderId.toString());
 
     if (remainingRiders.length === 0) {
-      throw new ApiError(400, "No More Riders Available");
+      io.emit("NoRidersFound", data);
     }
 
     let nearestRider = null;
@@ -218,7 +220,7 @@ setTimeout(async () => {
     });
 
     if (!nearestRider) {
-      throw new ApiError(400, "Error in Finding Nearest Rider");
+      io.emit("NoRidersFound", data);
     }
 
     const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
@@ -248,7 +250,8 @@ setTimeout(async () => {
       totalItems: data.totalItems,
       bill: data.bill,
       city: data.city,
-      restroEarning: data.newTotalRestroAmount,
+      restroEarning: data.restroBill,
+      riderEarning: data.riderEarning,
       orderOf: 'Foody'
     });
 
@@ -256,7 +259,7 @@ setTimeout(async () => {
       throw new ApiError(400, "Error in Creating of Accept/Reject for New Rider");
     }
 
-    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: newRiderOrder.riderId });
+    io.emit("RiderOrderInform", { data, restaurantId: restro.restaurantId, riderId: newRiderOrder.riderId, restroEarning: data.restroBill, riderEarning: data.riderEarning });
 
     // You can also start a new timeout here if needed for the new rider
   }
@@ -298,6 +301,7 @@ setTimeout(async () => {
       bill: data.bill,
       items: data.foodItems,
       restroEarning: data.restroEarning,
+      riderEarning: data.riderEarning,
       orderStatus: "Making the order"
     })
 
@@ -377,7 +381,7 @@ setTimeout(async () => {
     });
   
     if (availableRiders.length === 0) {
-      throw new ApiError(400, "No Available Riders in the City");
+      io.emit("NoRidersFound", {userId: data.data.userId});
     }
   
     // Calculate distance for each rider and find the nearest one
@@ -395,7 +399,7 @@ setTimeout(async () => {
     }
   
     if (!nearestRider) {
-      throw new ApiError(400, "No suitable rider found");
+      io.emit("NoRidersFound", {userId: data.data.userId});
     }
   
     console.log("Nearest Rider Device Token:", nearestRider.deviceToken);
@@ -431,6 +435,7 @@ setTimeout(async () => {
       totalItems: data.totalItems,
       bill: data.bill,
       restroEarning: data.restroEarning,
+      riderEarning: data.riderEarning,
       city: data.city,
       orderOf: 'Foody'
     });
@@ -440,7 +445,7 @@ setTimeout(async () => {
     }
   
     // Emit event to inform the client about the new rider selection
-    io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: newRiderOrder.riderId });
+    io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: newRiderOrder.riderId, restroEarning: data.restroEarning, riderEarning: data.riderEarning });
   
     // Start timeout for the new rider's response
     setTimeout(async () => {
@@ -457,7 +462,7 @@ setTimeout(async () => {
         });
   
         if (anotherAvailableRiders.length === 0) {
-          throw new ApiError(400, "No Available Riders in the City");
+          io.emit("NoRidersFound", {userId: data.data.userId});
         }
   
         let anotherNearestRider = null;
@@ -474,7 +479,7 @@ setTimeout(async () => {
         }
   
         if (!anotherNearestRider) {
-          throw new ApiError(400, "No suitable rider found");
+          io.emit("NoRidersFound", data);
         }
   
         console.log("Another Nearest Rider Device Token:", anotherNearestRider.deviceToken);
@@ -510,6 +515,7 @@ setTimeout(async () => {
           totalItems: data.totalItems,
           bill: data.bill,
           restroEarning: data.restroEarning,
+          riderEarning: data.riderEarning,
           city: data.city,
           orderOf: 'Foody'
         });
@@ -519,7 +525,7 @@ setTimeout(async () => {
         }
   
         // Emit event to inform the client about the new rider selection
-        io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: anotherNewRiderOrder.riderId, restroEarning: data.restroEarning });
+        io.emit("RiderOrderInform", { data, restaurantId: data.restaurantId, riderId: anotherNewRiderOrder.riderId, restroEarning: data.restroEarning, riderEarning: data.riderEarning });
       }
     }, 30000);
   });

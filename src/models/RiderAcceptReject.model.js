@@ -55,6 +55,10 @@ const riderAcceptRejectSchema = new Schema(
             type: Number,
             default: 0
         },
+        riderEarning: {
+            type: Number,
+            default: 0
+        },
         orderOf: {
             type: String,
         }
