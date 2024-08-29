@@ -195,7 +195,7 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
    const createdUser = await User.findById(user._id).select("-password -refreshToken");
 
-   return res.status(200).json(new ApiResponse(200, { user: createdUser, accessToken }, "User Registered Successfully"));
+   return res.status(200).json(new ApiResponse(200, { user: createdUser, refreshToken }, "User Registered Successfully"));
 });
 
 
