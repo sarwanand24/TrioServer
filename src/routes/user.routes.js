@@ -117,6 +117,6 @@ router.get('/food-offer-images', getFoodOfferImages);
 
 router.post('/food-offer-images',upload.single("imageUrl"), uploadFoodOfferImage);
 
-router.route("get-food-orderHistory").get(verifyUsersJWT, getfoodyOrderHistory)
+router.route("/get-food-orderHistory").get(verifyUsersJWT, getfoodyOrderHistory)
 
 export default router
