@@ -206,14 +206,14 @@ const handleConnection = async (socket) => {
       setTimeout(async () => {
         const updatedRiderOrder = await RiderAcceptReject.findById(riderOrder._id);
         if (!updatedRiderOrder.status) {
-          console.log(`Rider ${riderOrder.riderId} did not respond to the order within 30 seconds.`);
+          console.log(`Rider ${riderOrder.riderId} did not respond to the order within 90 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(riderOrder._id);
 
           // Exclude the non-responsive rider and try again
           const remainingRiders = ridersList.filter(rider => rider._id.toString() !== riderOrder.riderId.toString());
           findAndNotifyRider(remainingRiders); // Recursive call to handle the next rider
         }
-      }, 30000);
+      }, 90000);
     };
 
     findAndNotifyRider(riders);
@@ -335,6 +335,7 @@ const handleConnection = async (socket) => {
       });
   
       if (availableRiders.length === 0) {
+      console.log('No riders available .........');
         io.emit("NoRidersFound", { userId: data.userId });
         return;
       }
@@ -409,13 +410,13 @@ const handleConnection = async (socket) => {
         // Check if the new rider has responded within the timeout
         const updatedRiderOrder = await RiderAcceptReject.findById(newRiderOrder._id);
         if (!updatedRiderOrder.status) {
-          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 30 seconds.`);
+          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 90 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
           
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
         }
-      }, 30000);
+      }, 90000);
     };
   
     // Start the process of finding and notifying a rider
