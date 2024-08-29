@@ -400,6 +400,8 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in updating order")
     }
 
+    io.emit('OrderAcceptedbyRider', {orderId: order._id})
+
     const restroOrder = await Restaurant.findByIdAndUpdate(
       rider.restaurantId,
       {
