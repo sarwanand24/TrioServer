@@ -188,12 +188,14 @@ const googleRegisterUser = asyncHandler(async (req, res) => {
       throw new ApiError(409, "User already exists, Please Login!")
    }
 
+   const updatedProfileImg = profileImg.replace(/^https:\/\//, 'http://');
+
    const user = await User.create({
       fullName,
       username: username.toLowerCase(),
       email,
       password,
-      profilePhoto: profileImg,
+      profilePhoto: updatedProfileImg,
       mobileNo,
    })
 
@@ -1240,7 +1242,7 @@ const getAllRestaurants = asyncHandler(async (req, res) => {
       }
 
       // Fetch restaurants based on the city
-      const restaurants = await Restaurant.find({ city })
+      const restaurants = await Restaurant.find({ city, availableStatus: true })
           .populate(vegMode === 'true' ? 'vegFoods' : ['vegFoods', 'nonvegFoods'])
           .exec();
 
