@@ -15,6 +15,9 @@ const riderAcceptRejectSchema = new Schema(
         userDeviceToken: {
             type: String
         },
+        restroDeviceToken: {
+            type: String
+        },
         userAddress: {
             type: String
         },
@@ -61,6 +64,10 @@ const riderAcceptRejectSchema = new Schema(
         },
         orderOf: {
             type: String,
+        },
+        orderId: {
+            type: Schema.Types.ObjectId,
+            ref: 'FoodyOrders'
         }
     },
     { timestamps: true })

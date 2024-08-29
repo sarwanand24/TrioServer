@@ -15,6 +15,9 @@ const restroAcceptRejectSchema = new Schema(
         userDeviceToken: {
             type: String
         },
+        restroDeviceToken: {
+            type: String
+        },
         userAddress: {
             type: String
         },

@@ -2,30 +2,30 @@ import mongoose, { Schema } from "mongoose";
 
 const foodyCancelledOrdersSchema = new Schema(
     {
-        cancelledBy: {
-            type: Schema.Types.ObjectId,
-            ref: "User"
-        },
         restaurant: {
             type: Schema.Types.ObjectId,
             ref: "Restaurant"
         },
-        rider: {
+        user: {
             type: Schema.Types.ObjectId,
-            ref: "Rider"
+            ref: "User"
         },
         orderedFromLocation: {
             type: String,
             required: true
         },
-        items: [{
-            type: String,
+        items: {
+            type: Array,
             required: true
-        }],
+    },
         orderStatus: {
             type: String
         },
         bill: {
+            type: Number,
+            required: true
+        },
+        restroEarning: {
             type: Number,
             required: true
         },

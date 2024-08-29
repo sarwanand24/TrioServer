@@ -70,8 +70,21 @@ const getCancelledOrderById = asyncHandler(async (req, res)=> {
 
 })
 
+const getAllCancelledOrdersForRestaurant = asyncHandler(async (req, res) => {
+    try {
+        const cancelledOrders = await FoodyCancelledOrders.find({ restaurant: req.restaurant._id })
+            .populate('restaurant')
+            .populate('user')
+            .sort({ createdAt: -1 }); // Sort by most recent dates
+        
+        res.status(200).json(cancelledOrders);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching cancelled orders', error });
+    }
+})
 
 export {
     cancelOrder,
-    getCancelledOrderById
+    getCancelledOrderById,
+    getAllCancelledOrdersForRestaurant
 }

@@ -24,7 +24,8 @@ import {
     getFoodCarouselImages,
     uploadFoodCarouselImage,
     getFoodOfferImages,
-    uploadFoodOfferImage
+    uploadFoodOfferImage,
+    googleRegisterUser
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -35,6 +36,8 @@ const router = Router()
 router.route("/register").post(upload.single("profilePhoto"), registerUser)
 
 router.route("/login").post(loginUser)
+
+router.route("/google-register").post(googleRegisterUser)
 
 //secured Routes
 

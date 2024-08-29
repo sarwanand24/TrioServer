@@ -147,11 +147,10 @@ const updatePickupOrderStatus = asyncHandler(async (req, res) => {
 })
 
 const getOrderById = asyncHandler(async (req, res) => {
-
-    const { orderId } = req.params
+    const { orderId } = req.params;
 
     if (!orderId) {
-        throw new ApiError(400, "orderId is required")
+        throw new ApiError(400, "orderId is required");
     }
 
     const order = await FoodyOrders.aggregate([
@@ -184,18 +183,18 @@ const getOrderById = asyncHandler(async (req, res) => {
                 as: "Rider",
             }
         }
-    ])
+    ]);
 
     if (!order?.length) {
-        throw new ApiError(400, "Error in fectching the order")
+        throw new ApiError(400, "Error in fetching the order");
     }
 
-    console.log(order);
+    const orderData = order[0];
+    const hasRider = orderData.Rider && orderData.Rider.length > 0;
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, order, "Order fetched Successfully"))
-})
+    return res.status(200).json(new ApiResponse(200, { ...orderData, hasRider }, "Order fetched Successfully"));
+});
+
 
 const getRiderUndeliveredOrders = asyncHandler(async (req, res) => {
     try {

@@ -157,6 +157,62 @@ const loginUser = asyncHandler(async (req, res) => {
       )
 })
 
+const googleRegisterUser = asyncHandler(async (req, res) => {
+   //Take all fields from req.body
+   //validate the fields
+   //check if user already exists - username, email
+   //check for avatar path
+   //upload to cloudinary
+   //check for upload
+   //create entry in db
+   //check for db
+   // remove password and refresh token field
+   //return res
+
+   const { fullName, username, email, password, mobileNo, profileImg } = req.body;
+
+   if (
+      [fullName, username, email, password, mobileNo].some((field) =>
+         field?.trim === "")
+   ) {
+      res.status(400).json(new ApiResponse(400, "All fields are required"))
+      throw new ApiError(400, "All fields are required")
+   }
+
+   const existedUser = await User.findOne({
+      $or: [{ username }, { email }]
+   })
+
+   if (existedUser) {
+      res.status(400).json(new ApiResponse(400, "User already exists, Please Login!"))
+      throw new ApiError(409, "User already exists, Please Login!")
+   }
+
+   const user = await User.create({
+      fullName,
+      username: username.toLowerCase(),
+      email,
+      password,
+      profilePhoto: profileImg,
+      mobileNo,
+   })
+
+   if (!user) {
+      res.status(400).json(new ApiResponse(400, "Something went wrong while registering user"))
+      throw new ApiError(400, "Something went wrong while registering user")
+   }
+   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
+
+   const createdUser = await User.findById(user._id).select("-password -refreshToken")
+
+   return res
+      .status(200)
+      .json(
+         new ApiResponse(200, { user: createdUser, accessToken }, "User Registered Successfully")
+      )
+
+})
+
 const googleAuthLogin = asyncHandler(async (req, res) => {
    console.log(req);
    const { userInfo } = req.body;
@@ -1727,6 +1783,7 @@ const getFoodCarouselImages = async (req, res) => {
 export {
    registerUser,
    loginUser,
+   googleRegisterUser,
    googleAuthLogin,
    facebookAuthLogin,
    logoutUser,
