@@ -455,7 +455,7 @@ const getfoodyOrderHistory = asyncHandler(async (req, res) => {
    //check for the above data
    //return res
 
-   const foodyHistory = await User.aggregate([
+   const foodyHistory = await User.aggregate(
       [
          {
             $match: {
@@ -489,7 +489,7 @@ const getfoodyOrderHistory = asyncHandler(async (req, res) => {
             }
          }
       ]
-   ])
+   )
    console.log(foodyHistory);
    return res
       .status(200)

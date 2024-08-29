@@ -101,7 +101,7 @@ router.route("/get-all-flats-by-city").post(getAllFlatsByCity)
 
 router.route("/update-user-location").post(verifyUsersJWT, updateUserLocation)
 
-router.get('/carousel-images', getCarouselImages);
+router.route('/carousel-images').get(getCarouselImages);
 
 router.post('/carousel-images', upload.single("imageUrl"), uploadCarouselImage);
 
@@ -116,5 +116,7 @@ router.post('/food-carousel-images', upload.single("imageUrl"), uploadFoodCarous
 router.get('/food-offer-images', getFoodOfferImages);
 
 router.post('/food-offer-images',upload.single("imageUrl"), uploadFoodOfferImage);
+
+router.route("get-food-orderHistory").get(verifyUsersJWT, getfoodyOrderHistory)
 
 export default router
