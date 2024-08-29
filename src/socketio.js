@@ -491,7 +491,7 @@ const handleConnection = async (socket) => {
         },
       });
       console.log("Message", msg.responses[0].error);
-      await FoodyOrders.findByIdAndDelete(order._id);
+      await FoodyOrders.findByIdAndDelete(riderRejected.orderId);
       const msg2 = await tiofyApp.messaging().sendEachForMulticast({
         tokens: [riderRejected.userDeviceToken],
         notification: {
