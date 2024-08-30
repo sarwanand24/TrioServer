@@ -1,4 +1,5 @@
 import { FoodyRating } from "../models/FoodyRating.model.js";
+import {Restaurant} from '../models/Restaurant.model.js';
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -33,6 +34,30 @@ const createRatings = asyncHandler(async (req, res) => {
     if (!ratings) {
         throw new ApiError(400, "Error in creating Ratings")
     }
+
+    const restroRating = await FoodyRating.aggregate([
+        {
+            $match: {
+                restaurant: new mongoose.Types.ObjectId(restaurantId)
+            }
+        },
+        {
+            $group: {
+                _id: null, // Group by null to calculate aggregate over all documents
+                averageRating: { $avg: "$rating" } // Calculate average of the 'rating' field
+            }
+        }
+    ])
+
+    console.log("restroRating", restroRating);
+    console.log("Average Rating", restroRating[0]);
+
+    const restaurant = await Restaurant.findByIdAndUpdate(new mongoose.Types.ObjectId(restaurantId),
+        {
+           $set: {
+            ratings: restroRating[0].averageRating
+           }
+        })
 
     return res
         .status(200)

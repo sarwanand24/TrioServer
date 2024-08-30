@@ -5,7 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
-import { Restaurant } from "../models/Retaurant.model.js";
+import { Restaurant } from "../models/Restaurant.model.js";
 import { Hotel } from "../models/Hotel.model.js";
 import { Flat } from "../models/Flat.model.js";
 

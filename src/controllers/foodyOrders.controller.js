@@ -5,7 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import { cancelOrder } from "./cyrCancelledRides.controller.js";
 import { Rider } from "../models/Rider.model.js";
-import { Restaurant } from "../models/Retaurant.model.js";
+import { Restaurant } from "../models/Restaurant.model.js";
 
 const placeOrder = asyncHandler(async (req, res) => {
 
