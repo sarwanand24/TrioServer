@@ -16,7 +16,6 @@ const foodyOrdersSchema = new Schema(
         },
         orderedFromLocation: {
             type: String,
-            required: true
         },
         items: {
             type: Array,
@@ -41,6 +40,9 @@ const foodyOrdersSchema = new Schema(
         savings: {
             type: Number,
             default: 0
+        },
+        otp: {
+            type: Number
         }
     },
     { timestamps: true }

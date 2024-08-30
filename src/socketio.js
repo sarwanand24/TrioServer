@@ -58,7 +58,8 @@ const handleConnection = async (socket) => {
       userAddress: data.userAddress,
       userId: data.userId,
       riderEarning: data.riderEarning,
-      restroDeviceToken: data.deviceToken
+      restroDeviceToken: data.deviceToken,
+      otp: data.otp
     })
     console.log(restro);
 
@@ -130,7 +131,8 @@ const handleConnection = async (socket) => {
       items: data.foodItems,
       restroEarning: data.restroBill,
       riderEarning: data.riderEarning,
-      orderStatus: "Your Order is getting Prepared"
+      orderStatus: "Your Order is getting Prepared",
+      otp: restro.otp
     })
 
     if (!order) {

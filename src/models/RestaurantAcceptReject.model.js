@@ -25,14 +25,17 @@ const restroAcceptRejectSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "User"
         },
+        otp: {
+            type: Number
+        },
         bill: {
-            type: "Number"
+            type: Number
         },
         restroBill: {
-            type: "Number"
+            type: Number
         },
         riderEarning: {
-            type: "Number"
+            type: Number
         },
         status: {
             type: Boolean,

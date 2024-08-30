@@ -12,7 +12,6 @@ const foodyCancelledOrdersSchema = new Schema(
         },
         orderedFromLocation: {
             type: String,
-            required: true
         },
         items: {
             type: Array,
