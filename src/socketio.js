@@ -6,7 +6,7 @@ import { RestroAcceptReject } from "./models/RestaurantAcceptReject.model.js";
 import { Rider } from "./models/Rider.model.js";
 import { RiderAcceptReject } from "./models/RiderAcceptReject.model.js";
 import { FoodyOrders } from "./models/FoodyOrders.model.js";
-import { Restaurant } from "./models/Retaurant.model.js";
+import { Restaurant } from "./models/Restaurant.model.js";
 import { User } from "./models/User.model.js";
 import { ApiError } from "./utils/ApiError.js";
 import { FoodyCancelledOrders } from "./models/FoodyCancelledOrders.model.js";
