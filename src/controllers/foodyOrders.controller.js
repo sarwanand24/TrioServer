@@ -210,12 +210,10 @@ const getRiderUndeliveredOrders = asyncHandler(async (req, res) => {
 
 const getUserUndeliveredOrders = asyncHandler(async (req, res) => {
     try {
-        console.log('entry in undelivered');
         const orders = await FoodyOrders.find({
-            user: req.user._id,
+            orderedBy: req.user._id,
             orderStatus: { $ne: 'Delivered' }
         });
-        console.log('ordersssss', orders);
         res.status(200).json(orders);
     } catch (error) {
         res.status(500).json({ error: 'Server Error' });
