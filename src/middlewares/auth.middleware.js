@@ -13,13 +13,13 @@ import { Laundry } from "../models/Laundry.model.js";
 //(req, _, next)
 export const verifyUsersJWT = asyncHandler(async (req, res, next)=>{
   try {
-      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+      const token = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ","")
   
       if(!token){
           throw new ApiError(401, "Unauthorized Request");
       }
      
-     const decodedToken = jwt.verify(token, process.env.AccessTokenSecret);
+     const decodedToken = jwt.verify(token, process.env.RefreshTokenSecret);
   
      const user = await User.findById(decodedToken?._id).select("-password -refreshToken");
   
