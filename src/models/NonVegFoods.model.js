@@ -14,8 +14,9 @@ const nonvegFoodsSchema = new Schema(
         type: Number,
         required: true
       },
-      tiofyPrice: {
-        type: Number
+      tiofyPriceFactor: {
+        type: Number,
+        default: 1.2
       }
    },{timestamps: true})
 
