@@ -18,7 +18,7 @@ const payments = asyncHandler( async(req, res) => {
   try {
    console.log('checking', amount*100, receipt);
     const order = await instance.orders.create({
-      "amount": 5000.5,
+      "amount": amount*100,
       "currency": "INR",
       "receipt": receipt,
       "partial_payment": false,
