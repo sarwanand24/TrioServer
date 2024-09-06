@@ -15,28 +15,13 @@ const payments = asyncHandler( async(req, res) => {
   // Generate a unique receipt ID
   const receipt = `receipt_${Math.floor(Math.random() * 1000000)}`;
 
-  // Razorpay order creation options
-  const options = {
-    amount: amount, // Amount in paise (multiply by 100 for INR)
-    currency: 'INR',
-    receipt: receipt,
-    partial_payment: false,
-    auto_capture: true
-  };
-
   try {
-    // Create Razorpay order
-    // const order = await instance.orders.create(options);
-
+   console.log('checking', amount, receipt);
     const order = await instance.orders.create({
-      "amount": 50000,
+      "amount": amount * 100,
       "currency": "INR",
-      "receipt": "receipt#1",
+      "receipt": receipt,
       "partial_payment": false,
-      "notes": {
-        "key1": "value3",
-        "key2": "value2"
-      }
      })
 
     // Check if the order was created successfully
