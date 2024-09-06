@@ -1,41 +1,47 @@
-// Set your secret key. Remember to switch to your live secret key in production.
-// See your keys here: https://dashboard.stripe.com/apikeys
-import Stripe from 'stripe';
+import Razorpay from 'razorpay';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import { ApiResponse } from '../utils/ApiResponse.js';
+import crypto from 'crypto';
 
-const stripe = new Stripe('sk_test_51P562USCfSZTgwMiVqPaGC2SuaqSmucgePKCWkNAaOAfSPL7d54Hsuxk4ZghXpePtOw5PIREkLsuYGfspaq55ZCj001xGPnU95', {
-    apiVersion: '2023-10-16', // Adjust the API version as needed
-  });
+var instance = new Razorpay({ key_id: 'rzp_test_TLbKsNVqgyyLdp', key_secret: 'FvLlb5ZvXmZAoESKXvGdKnaH' })
 
-const depositAmount = asyncHandler(async (req, res) => {
- // Use an existing Customer ID if this is a returning customer.
-   const {amount} = req.body;
- const customer = await stripe.customers.create();
+const payments = asyncHandler( async(req, res) => {
+  const { amount } = req.body; // Get amount from the frontend
+  const receipt = `receipt_${Math.floor(Math.random() * 1000000)}`; // Generate a unique receipt
 
-  const ephemeralKey = await stripe.ephemeralKeys.create(
-    {customer: customer.id},
-    {apiVersion: '2023-10-16'},
-  );
-  console.log("ephemeralKeyLog", ephemeralKey.secret);
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: 100*(amount),
-    currency: 'INR',
-    payment_method_types: ['card']
-  });
-  console.log("PaymentIntentLog", paymentIntent.client_secret);
+  const options = {
+    "amount": amount,
+    "currency": 'INR',
+    "receipt": receipt, // Dynamically generated receipt
+    "partial_payment": false
+  };
 
-return res
-.status(200)
-.json(new ApiResponse(200,{  
-    paymentIntent: paymentIntent.client_secret,
-    ephemeralKey: ephemeralKey.secret,
-    customer: customer.id},
-    "Success from Backend Res"
-))
+  try {
+    const order = await instance.orders.create(options); // Create the order
+    res.json(order); // Send the created order as a response
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 })
 
+const verification = asyncHandler( async(req, res) => {
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body; // Data received from the frontend after successful payment
+
+  const body = razorpay_order_id + '|' + razorpay_payment_id;
+
+  // Create the expected signature using the order ID and payment ID
+  const expectedSignature = crypto
+    .createHmac('sha256', 'FvLlb5ZvXmZAoESKXvGdKnaH') // Use your Razorpay Key Secret
+    .update(body.toString())
+    .digest('hex');
+  // Check if the generated signature matches the signature sent from Razorpay
+  if (expectedSignature === razorpay_signature) {
+    res.send({ success: true }); // Payment is verified successfully
+  } else {
+    res.status(400).send({ success: false }); // Payment verification failed
+  }
+})
 
 export {
-    depositAmount
+  payments,
+  verification
 }
