@@ -5,21 +5,41 @@ import crypto from 'crypto';
 var instance = new Razorpay({ key_id: 'rzp_test_TLbKsNVqgyyLdp', key_secret: 'FvLlb5ZvXmZAoESKXvGdKnaH' })
 
 const payments = asyncHandler( async(req, res) => {
-  const { amount } = req.body; // Get amount from the frontend
-  const receipt = `receipt_${Math.floor(Math.random() * 1000000)}`; // Generate a unique receipt
+  const { amount } = req.body;
 
+  // Validate amount (amount should be in paise for Razorpay)
+  if (!amount || isNaN(amount) || amount <= 0) {
+    return res.status(400).json({ error: 'Invalid amount provided' });
+  }
+
+  // Generate a unique receipt ID
+  const receipt = `receipt_${Math.floor(Math.random() * 1000000)}`;
+
+  // Razorpay order creation options
   const options = {
-    "amount": amount,
-    "currency": 'INR',
-    "receipt": receipt, // Dynamically generated receipt
-    "partial_payment": false
+    amount: amount, // Amount in paise (multiply by 100 for INR)
+    currency: 'INR',
+    receipt: receipt,
+    partial_payment: false
   };
 
   try {
-    const order = await instance.orders.create(options); // Create the order
-    res.json(order); // Send the created order as a response
+    // Create Razorpay order
+    const order = await instance.orders.create(options);
+
+    // Check if the order was created successfully
+    if (!order) {
+      return res.status(500).json({ error: 'Failed to create order' });
+    }
+
+    // Log the order for debugging
+    console.log('Order Created: ', order);
+
+    // Send the created order back to the frontend
+    res.status(200).json(order);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error creating Razorpay order: ', error.message);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 })
 
