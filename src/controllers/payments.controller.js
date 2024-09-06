@@ -26,7 +26,18 @@ const payments = asyncHandler( async(req, res) => {
 
   try {
     // Create Razorpay order
-    const order = await instance.orders.create(options);
+    // const order = await instance.orders.create(options);
+
+    const order = await instance.orders.create({
+      "amount": 50000,
+      "currency": "INR",
+      "receipt": "receipt#1",
+      "partial_payment": false,
+      "notes": {
+        "key1": "value3",
+        "key2": "value2"
+      }
+     })
 
     // Check if the order was created successfully
     if (!order) {
