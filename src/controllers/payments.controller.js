@@ -20,7 +20,8 @@ const payments = asyncHandler( async(req, res) => {
     amount: amount, // Amount in paise (multiply by 100 for INR)
     currency: 'INR',
     receipt: receipt,
-    partial_payment: false
+    partial_payment: false,
+    auto_capture: true
   };
 
   try {
