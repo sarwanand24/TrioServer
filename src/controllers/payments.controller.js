@@ -13,12 +13,12 @@ const payments = asyncHandler( async(req, res) => {
   }
 
   // Generate a unique receipt ID
-  const receipt = `receipt_${Math.floor(Math.random() * 1000000)}`;
+  const receipt = `receipt${Math.floor(Math.random() * 1000000)}`;
 
   try {
-   console.log('checking', amount, receipt);
+   console.log('checking', amount*100, receipt);
     const order = await instance.orders.create({
-      "amount": amount * 100,
+      "amount": 5000,
       "currency": "INR",
       "receipt": receipt,
       "partial_payment": false,
@@ -35,7 +35,7 @@ const payments = asyncHandler( async(req, res) => {
     // Send the created order back to the frontend
     res.status(200).json(order);
   } catch (error) {
-    console.error('Error creating Razorpay order: ', error.message);
+    console.error('Error creating Razorpay order: ', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 })
