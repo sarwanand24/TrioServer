@@ -36,9 +36,9 @@ const handleConnection = async (socket) => {
     const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
       tokens: [data.deviceToken],
       notification: {
-        title: 'You Received an Order',
-        body: 'A Customer Placed an order, please respond quickly.', 
-        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+        title: 'New Order Alert!',
+        body: 'A customer just placed an order. Please confirm and start preparing it now.',
+        imageUrl: 'https://png.pngtree.com/background/20230426/original/pngtree-chef-preparing-a-dish-in-a-restaurant-picture-image_2482776.jpg',
       },
       android: {
         notification: {
@@ -85,9 +85,9 @@ const handleConnection = async (socket) => {
     const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [restro.userDeviceToken],
       notification: {
-        title: 'OOps',
-        body: 'The Restaurant Rejected Order, May be they are more busy than you.',  // Add food items details also
-        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+        title: 'Order Rejected 😕',
+        body: 'Oops! The restaurant is swamped and had to reject your order. Don’t worry, your cravings will be satisfied soon!', // Add food items details also
+        imageUrl: 'https://img.freepik.com/premium-photo/3d-illustration-funny-chef-white-toque-apron-looking-shocked-overwhelmed-messy-kitchen_14117-494612.jpg',
       }
     });
     console.log("Message", msg);
@@ -106,9 +106,9 @@ const handleConnection = async (socket) => {
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
     return R * c; // Distance in km
   };
-  
+
   socket.on("RestaurantAcceptedOrder", async (data) => {
-  
+
     const restro = await RestroAcceptReject.findByIdAndUpdate(
       data.restroId,
       {
@@ -118,7 +118,7 @@ const handleConnection = async (socket) => {
       },
       { new: true }
     );
-  
+
     if (!restro) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject");
     }
@@ -139,35 +139,35 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in creating order")
     }
 
-     io.emit("OrderAcceptedbyRestaurant", {data, orderId: order._id});
+    io.emit("OrderAcceptedbyRestaurant", { data, orderId: order._id });
 
-     console.log("UserDeviceToken", restro.userDeviceToken);
-     const msg = await tiofyApp.messaging().sendEachForMulticast({
-       tokens: [restro.userDeviceToken],
-       notification: {
-         title: 'Hurray! The Restaurant Accepted Your Order',
-         body: 'Your Order is Placed, we are finding a suitable rider for you and will inform you asap.',  // Add food items details also
-         imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
-       }
-     });
-     console.log("Message", msg);
+    console.log("UserDeviceToken", restro.userDeviceToken);
+    const msg = await tiofyApp.messaging().sendEachForMulticast({
+      tokens: [restro.userDeviceToken],
+      notification: {
+        title: 'Hurray! The Restaurant Accepted Your Order',
+        body: 'Your Order is Placed, we are finding a suitable rider for you and will inform you asap.',  // Add food items details also
+        imageUrl: 'https://thumbs.dreamstime.com/b/ai-generated-mouth-watering-image-home-cooked-meal-captured-high-definition-warm-golden-lighting-hyperdetailed-270551119.jpg',
+      }
+    });
+    console.log("Message", msg);
 
     const restaurant = await Restaurant.findById(restro.restaurantId);
-  
+
     const restaurantLat = restaurant.latitude; // Assuming latitude field
     const restaurantLon = restaurant.longitude; // Assuming longitude field
-  
+
     const riders = await Rider.find({ city: data.city, availableStatus: true });
 
-    console.log('restaurant lat Long',restaurant, restaurantLat, restaurantLon);
-  
+    console.log('restaurant lat Long', restaurant, restaurantLat, restaurantLon);
+
     if (!riders || riders.length === 0) {
       const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
         tokens: [restro.restroDeviceToken],
         notification: {
           title: 'Cancelled Order',
-          body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.', 
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+          body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.',
+          imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
         },
         android: {
           notification: {
@@ -182,23 +182,23 @@ const handleConnection = async (socket) => {
         tokens: [restro.userDeviceToken],
         notification: {
           title: 'Cancelled Order',
-          body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.', 
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+          body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.',
+          imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
         }
       });
       console.log("Message", msg2.responses[0].error);
       const cancelledOrder = await FoodyCancelledOrders.create({
-      user: new mongoose.Types.ObjectId(data.userId),
-      restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
-      orderedFromLocation: restro.userAddress,
-      bill: data.bill,
-      items: data.foodItems,
-      restroEarning: data.restroBill,
-      orderStatus: "Cancelled",
-      reason: 'No riders available for delivery'
+        user: new mongoose.Types.ObjectId(data.userId),
+        restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
+        orderedFromLocation: restro.userAddress,
+        bill: data.bill,
+        items: data.foodItems,
+        restroEarning: data.restroBill,
+        orderStatus: "Cancelled",
+        reason: 'No riders available for delivery'
       })
 
-      if(!cancelledOrder){
+      if (!cancelledOrder) {
         throw new ApiError(400, 'Error in creating cancelled Order')
       }
 
@@ -207,45 +207,45 @@ const handleConnection = async (socket) => {
 
     const findAndNotifyRider = async (ridersList) => {
       if (ridersList.length === 0) {
-           const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
-        tokens: [restro.restroDeviceToken],
-        notification: {
-          title: 'Cancelled Order',
-          body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.', 
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
-        },
-        android: {
+        const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
+          tokens: [restro.restroDeviceToken],
           notification: {
-            channelId: "order_channel", // Specify your Android notification channel ID
-            sound: "order_tone.mp3", // Specify your custom sound file
+            title: 'Cancelled Order',
+            body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.',
+            imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
           },
-        },
-      });
-      console.log("Message", msg.responses[0].error);
-      await FoodyOrders.findByIdAndDelete(order._id);
-      const msg2 = await tiofyApp.messaging().sendEachForMulticast({
-        tokens: [restro.userDeviceToken],
-        notification: {
-          title: 'Cancelled Order',
-          body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.', 
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
-        }
-      });
-      console.log("Message", msg2.responses[0].error);
-      const cancelledOrder = await FoodyCancelledOrders.create({
-      user: new mongoose.Types.ObjectId(data.userId),
-      restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
-      orderedFromLocation: restro.userAddress,
-      bill: data.bill,
-      items: data.foodItems,
-      restroEarning: data.restroBill,
-      orderStatus: "Cancelled",
-      reason: 'No riders available for delivery'
-      })
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
+        });
+        console.log("Message", msg.responses[0].error);
+        await FoodyOrders.findByIdAndDelete(order._id);
+        const msg2 = await tiofyApp.messaging().sendEachForMulticast({
+          tokens: [restro.userDeviceToken],
+          notification: {
+            title: 'Order Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
+          }
+        });
+        console.log("Message", msg2.responses[0].error);
+        const cancelledOrder = await FoodyCancelledOrders.create({
+          user: new mongoose.Types.ObjectId(data.userId),
+          restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
+          orderedFromLocation: restro.userAddress,
+          bill: data.bill,
+          items: data.foodItems,
+          restroEarning: data.restroBill,
+          orderStatus: "Cancelled",
+          reason: 'No riders available for delivery'
+        })
 
-      if(!cancelledOrder){
-        throw new ApiError(400, 'Error in creating cancelled Order')
-      }
+        if (!cancelledOrder) {
+          throw new ApiError(400, 'Error in creating cancelled Order')
+        }
         return;
       }
 
@@ -265,8 +265,8 @@ const handleConnection = async (socket) => {
           tokens: [restro.restroDeviceToken],
           notification: {
             title: 'Cancelled Order',
-            body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.', 
-            imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+            body: 'Sorry! We are unable to find any rider for delivery so please consider this order as cancelled.',
+            imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
           },
           android: {
             notification: {
@@ -280,24 +280,24 @@ const handleConnection = async (socket) => {
         const msg2 = await tiofyApp.messaging().sendEachForMulticast({
           tokens: [restro.userDeviceToken],
           notification: {
-            title: 'Cancelled Order',
-            body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.', 
-            imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+            title: 'Order Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
           }
         });
         console.log("Message", msg2.responses[0].error);
         const cancelledOrder = await FoodyCancelledOrders.create({
-        user: new mongoose.Types.ObjectId(data.userId),
-        restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
-        orderedFromLocation: restro.userAddress,
-        bill: data.bill,
-        items: data.foodItems,
-        restroEarning: data.restroBill,
-        orderStatus: "Cancelled",
-        reason: 'No riders available for delivery'
+          user: new mongoose.Types.ObjectId(data.userId),
+          restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
+          orderedFromLocation: restro.userAddress,
+          bill: data.bill,
+          items: data.foodItems,
+          restroEarning: data.restroBill,
+          orderStatus: "Cancelled",
+          reason: 'No riders available for delivery'
         })
-  
-        if(!cancelledOrder){
+
+        if (!cancelledOrder) {
           throw new ApiError(400, 'Error in creating cancelled Order')
         }
         return;
@@ -306,9 +306,9 @@ const handleConnection = async (socket) => {
       const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
         tokens: [nearestRider.deviceToken],
         notification: {
-          title: 'You Received an Order From Foody',
-          body: 'A user Placed an order', // Add food items details also
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+          title: 'New Order from Foody! 🍔',
+          body: 'A user just placed an order. Get ready to deliver some deliciousness!',
+          imageUrl: 'https://img.freepik.com/premium-photo/middleaged-food-delivery-rider-action_895561-5174.jpg',
         },
         android: {
           notification: {
@@ -385,24 +385,24 @@ const handleConnection = async (socket) => {
     const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [rider.userDeviceToken],
       notification: {
-        title: 'Get Ready to Eat',
-        body: 'The Rider Accepted Order and will pickup your order from the restaurant very soon.',  // Add food items details also
-        imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+        title: 'Get Ready to Eat! 🍽️',
+        body: 'Your rider just accepted the order and will pick up your food items from the restaurant soon. Stay hungry!',  // Add food items details also
+        imageUrl: 'https://img.freepik.com/premium-photo/middleaged-food-delivery-rider-action_895561-5174.jpg',
       }
     });
     console.log("Message", msg);
 
     const order = await FoodyOrders.findByIdAndUpdate(rider.orderId, {
-        $set: {
-          rider: new mongoose.Types.ObjectId(rider.riderId),
-        }
-    }, {new: true})
+      $set: {
+        rider: new mongoose.Types.ObjectId(rider.riderId),
+      }
+    }, { new: true })
 
     if (!order) {
       throw new ApiError(400, "Error in updating order")
     }
 
-    io.emit('OrderAcceptedbyRider', {orderId: order._id})
+    io.emit('OrderAcceptedbyRider', { orderId: order._id })
 
     const restroOrder = await Restaurant.findByIdAndUpdate(
       rider.restaurantId,
@@ -454,19 +454,19 @@ const handleConnection = async (socket) => {
   socket.on("RiderRejectedOrder", async (data) => {
     // Delete the rejected rider's data from RiderAcceptReject
     const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.riderId);
-  
+
     if (!riderRejected) {
       throw new ApiError(400, "Error in Deleting Accept/Reject");
     }
-  
+
     // Retrieve the restaurant's coordinates
     const restaurant = await Restaurant.findById(data.restaurantId);
     if (!restaurant) {
       throw new ApiError(400, "Restaurant not found");
     }
-  
+
     const { latitude: restaurantLat, longitude: restaurantLon } = restaurant;
-  
+
     // Function to handle finding a new rider
     const findAndNotifyRider = async (excludedRiderIds = []) => {
       // Find available riders in the city excluding the rejected ones
@@ -475,56 +475,56 @@ const handleConnection = async (socket) => {
         availableStatus: true,
         _id: { $nin: excludedRiderIds } // Exclude previously rejected riders
       });
-  
-      if (availableRiders.length === 0) {
-      console.log('No riders available .........', data.userId, riderRejected);
-      const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
-        tokens: [riderRejected.restroDeviceToken],
-        notification: {
-          title: 'Cancelled Order',
-          body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.', 
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
-        },
-        android: {
-          notification: {
-            channelId: "order_channel", // Specify your Android notification channel ID
-            sound: "order_tone.mp3", // Specify your custom sound file
-          },
-        },
-      });
-      console.log("Message", msg.responses[0].error);
-      await FoodyOrders.findByIdAndDelete(riderRejected.orderId);
-      const msg2 = await tiofyApp.messaging().sendEachForMulticast({
-        tokens: [riderRejected.userDeviceToken],
-        notification: {
-          title: 'Cancelled Order',
-          body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.', 
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
-        }
-      });
-      console.log("Message", msg2.responses[0].error);
-      const cancelledOrder = await FoodyCancelledOrders.create({
-      user: new mongoose.Types.ObjectId(riderRejected.userId),
-      restaurant: new mongoose.Types.ObjectId(riderRejected.restaurantId),
-      orderedFromLocation: riderRejected.userAddress,
-      bill: riderRejected.bill,
-      items: riderRejected.foodItems,
-      restroEarning: riderRejected.restroEarning,
-      orderStatus: "Cancelled",
-      reason: 'No riders available for delivery'
-      })
 
-      if(!cancelledOrder){
-        throw new ApiError(400, 'Error in creating cancelled Order')
-      }
+      if (availableRiders.length === 0) {
+        console.log('No riders available .........', data.userId, riderRejected);
+        const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
+          tokens: [riderRejected.restroDeviceToken],
+          notification: {
+            title: 'Order Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
+        });
+        console.log("Message", msg.responses[0].error);
+        await FoodyOrders.findByIdAndDelete(riderRejected.orderId);
+        const msg2 = await tiofyApp.messaging().sendEachForMulticast({
+          tokens: [riderRejected.userDeviceToken],
+          notification: {
+            title: 'Order Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
+          }
+        });
+        console.log("Message", msg2.responses[0].error);
+        const cancelledOrder = await FoodyCancelledOrders.create({
+          user: new mongoose.Types.ObjectId(riderRejected.userId),
+          restaurant: new mongoose.Types.ObjectId(riderRejected.restaurantId),
+          orderedFromLocation: riderRejected.userAddress,
+          bill: riderRejected.bill,
+          items: riderRejected.foodItems,
+          restroEarning: riderRejected.restroEarning,
+          orderStatus: "Cancelled",
+          reason: 'No riders available for delivery'
+        })
+
+        if (!cancelledOrder) {
+          throw new ApiError(400, 'Error in creating cancelled Order')
+        }
 
         return;
       }
-  
+
       // Calculate distance for each rider and find the nearest one
       let nearestRider = null;
       let minDistance = Infinity;
-  
+
       for (const rider of availableRiders) {
         const { latitude: riderLat, longitude: riderLon } = rider;
         const distance = haversine(restaurantLat, restaurantLon, riderLat, riderLon);
@@ -533,14 +533,14 @@ const handleConnection = async (socket) => {
           nearestRider = rider;
         }
       }
-  
+
       if (!nearestRider) {
         const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
           tokens: [riderRejected.restroDeviceToken],
           notification: {
             title: 'Cancelled Order',
-            body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.', 
-            imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+            body: 'Sorry! We are unable to find any rider for delivery so please cancel this order.',
+            imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
           },
           android: {
             notification: {
@@ -554,37 +554,37 @@ const handleConnection = async (socket) => {
         const msg2 = await tiofyApp.messaging().sendEachForMulticast({
           tokens: [riderRejected.userDeviceToken],
           notification: {
-            title: 'Cancelled Order',
-            body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.', 
-            imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+            title: 'Order Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
           }
         });
         console.log("Message", msg2.responses[0].error);
         const cancelledOrder = await FoodyCancelledOrders.create({
-        user: new mongoose.Types.ObjectId(riderRejected.userId),
-        restaurant: new mongoose.Types.ObjectId(riderRejected.restaurantId),
-        orderedFromLocation: riderRejected.userAddress,
-        bill: riderRejected.bill,
-        items: riderRejected.foodItems,
-        restroEarning: riderRejected.restroEarning,
-        orderStatus: "Cancelled",
-        reason: 'No riders available for delivery'
+          user: new mongoose.Types.ObjectId(riderRejected.userId),
+          restaurant: new mongoose.Types.ObjectId(riderRejected.restaurantId),
+          orderedFromLocation: riderRejected.userAddress,
+          bill: riderRejected.bill,
+          items: riderRejected.foodItems,
+          restroEarning: riderRejected.restroEarning,
+          orderStatus: "Cancelled",
+          reason: 'No riders available for delivery'
         })
-  
-        if(!cancelledOrder){
+
+        if (!cancelledOrder) {
           throw new ApiError(400, 'Error in creating cancelled Order')
         }
-  
+
         return;
       }
-  
+
       // Send a notification to the nearest rider
       const msg = await tiofyRiderApp.messaging().sendEachForMulticast({
         tokens: [nearestRider.deviceToken],
         notification: {
           title: 'You Received an Order From Foody',
           body: 'A user placed an order, please respond quickly',  // Add food items details also
-          imageUrl: 'https://wallpaperaccess.com/full/1280818.jpg',
+          imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
         },
         android: {
           notification: {
@@ -593,7 +593,7 @@ const handleConnection = async (socket) => {
           },
         },
       });
-  
+
       // Create a new entry in RiderAcceptReject for the selected rider
       const newRiderOrder = await RiderAcceptReject.create({
         riderId: nearestRider._id,
@@ -612,11 +612,11 @@ const handleConnection = async (socket) => {
         city: data.city,
         orderOf: 'Foody'
       });
-  
+
       if (!newRiderOrder) {
         throw new ApiError(400, "Error in Creating Accept/Reject Entry");
       }
-  
+
       // Emit event to inform the client about the new rider selection
       io.emit("RiderOrderInform", {
         data,
@@ -625,7 +625,7 @@ const handleConnection = async (socket) => {
         restroEarning: data.restroEarning,
         riderEarning: data.riderEarning
       });
-  
+
       // Start timeout for the new rider's response
       setTimeout(async () => {
         // Check if the new rider has responded within the timeout
@@ -633,17 +633,17 @@ const handleConnection = async (socket) => {
         if (!updatedRiderOrder?.status) {
           console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 90 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
-          
+
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
         }
       }, 90000);
     };
-  
+
     // Start the process of finding and notifying a rider
     await findAndNotifyRider([riderRejected.riderId]);
-  });  
-  
+  });
+
   socket.on("RiderCurrentLocation", async (data) => {
     io.emit("CurrentLocationofRiderToUser", data)
   })

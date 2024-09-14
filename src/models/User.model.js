@@ -212,3 +212,10 @@ const foodOfferSchema = new mongoose.Schema({
 });
 
 export const FoodOfferImage = mongoose.model('FoodOfferImage', foodOfferSchema);
+
+const festiveOfferSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: String } // Optional, you can store colors too
+});
+
+export const FestiveOfferImage = mongoose.model('FestiveOfferImage', festiveOfferSchema);

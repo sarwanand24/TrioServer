@@ -104,6 +104,10 @@ const restaurantSchema = new Schema(
         city: {
             type: String,
             required: true
+        },
+        cuisineType: {
+            type: String,
+            default: 'NorthIndian'
         }
     }, {
     timestamps: true

@@ -854,6 +854,28 @@ const updateRestroLocation = asyncHandler( async(req, res) => {
     }
 })
 
+const toggleAvailableStatus = asyncHandler( async(req, res) => {
+   try { // Assuming the user's restaurant ID is available in req.user.id
+      const { availableStatus } = req.body;
+  
+      // Find the restaurant by ID
+      const restaurant = await Restaurant.findById(req.restaurant._id);
+  
+      if (!restaurant) {
+        return res.status(404).json({ message: 'Restaurant not found' });
+      }
+  
+      // Update the availableStatus
+      restaurant.availableStatus = availableStatus;
+      await restaurant.save();
+  
+      res.status(200).json({ message: 'Availability status updated successfully', availableStatus });
+    } catch (error) {
+      console.error('Error toggling availability:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+})
+
 export {
    registerRestaurant,
    loginRestaurant,
@@ -880,5 +902,6 @@ export {
    getAllNonVegFoods,
    setDeviceToken,
    fetchAcceptReject,
-   updateRestroLocation
+   updateRestroLocation,
+   toggleAvailableStatus
 }

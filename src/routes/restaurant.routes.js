@@ -5,6 +5,7 @@ import {
     addVegFoods,
     changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, getOrderHistory, loginRestaurant, logoutRestaurant,
     refreshAccessToken, registerRestaurant, removeNonVegFoods, removeOrderHistory, removeVegFoods, setDeviceToken, signoutRestaurant,
+    toggleAvailableStatus,
     updateAccountDetails,
     updateRestroLocation
 } from "../controllers/restaurant.controller.js";
@@ -54,5 +55,7 @@ router.route("/set-device-token").post(verifyRestaurantsJWT, setDeviceToken);
 router.route("/fetchAccept-Reject").get(verifyRestaurantsJWT, fetchAcceptReject);
 
 router.route("/update-restro-location").post(verifyRestaurantsJWT, updateRestroLocation);
+
+router.route("/toggle-availability").post(verifyRestaurantsJWT, toggleAvailableStatus);
 
 export default router
