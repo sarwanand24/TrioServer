@@ -13,7 +13,7 @@ import { Laundry } from "../models/Laundry.model.js";
 //(req, _, next)
 export const verifyUsersJWT = asyncHandler(async (req, res, next)=>{
   try {
-      const token = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ","")
+      const token = req.cookies?.refreshToken || req.headers("Authorization")?.replace("Bearer ","")
       console.log('token in server:', token);
     
       if(!token){
