@@ -13,8 +13,8 @@ import { Laundry } from "../models/Laundry.model.js";
 //(req, _, next)
 export const verifyUsersJWT = asyncHandler(async (req, res, next)=>{
   try {
-      const token = req.cookies?.refreshToken || req.header("Authorization")?.replace("Bearer ","")
-      console.log('token in server:', token, req.header("Authorization"));
+      const token = req.header("Authorization")?.replace("Bearer ","") || req.cookies?.refreshToken ;
+      console.log('token in server:', token, req.header("Authorization")?.replace("Bearer ",""));
     
       if(!token){
           throw new ApiError(401, "Unauthorized Request");
