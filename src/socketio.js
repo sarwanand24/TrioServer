@@ -88,7 +88,13 @@ const handleConnection = async (socket) => {
         title: 'Order Rejected 😕',
         body: 'Oops! The restaurant is swamped and had to reject your order. Don’t worry, your cravings will be satisfied soon!', // Add food items details also
         imageUrl: 'https://img.freepik.com/premium-photo/3d-illustration-funny-chef-white-toque-apron-looking-shocked-overwhelmed-messy-kitchen_14117-494612.jpg',
-      }
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
     });
     console.log("Message", msg);
 
@@ -148,7 +154,13 @@ const handleConnection = async (socket) => {
         title: 'Hurray! The Restaurant Accepted Your Order',
         body: 'Your Order is Placed, we are finding a suitable rider for you and will inform you asap.',  // Add food items details also
         imageUrl: 'https://thumbs.dreamstime.com/b/ai-generated-mouth-watering-image-home-cooked-meal-captured-high-definition-warm-golden-lighting-hyperdetailed-270551119.jpg',
-      }
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
     });
     console.log("Message", msg);
 
@@ -184,7 +196,13 @@ const handleConnection = async (socket) => {
           title: 'Cancelled Order',
           body: 'Sorry! We are unable to find any rider for delivery so we are cancelling this order.',
           imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
-        }
+        },
+        android: {
+          notification: {
+            channelId: "order_channel", // Specify your Android notification channel ID
+            sound: "order_tone.mp3", // Specify your custom sound file
+          },
+        },
       });
       console.log("Message", msg2.responses[0].error);
       const cancelledOrder = await FoodyCancelledOrders.create({
@@ -229,7 +247,13 @@ const handleConnection = async (socket) => {
             title: 'Order Cancelled 😔',
             body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
             imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
-          }
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
         });
         console.log("Message", msg2.responses[0].error);
         const cancelledOrder = await FoodyCancelledOrders.create({
@@ -283,7 +307,13 @@ const handleConnection = async (socket) => {
             title: 'Order Cancelled 😔',
             body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
             imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
-          }
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
         });
         console.log("Message", msg2.responses[0].error);
         const cancelledOrder = await FoodyCancelledOrders.create({
@@ -388,7 +418,13 @@ const handleConnection = async (socket) => {
         title: 'Get Ready to Eat! 🍽️',
         body: 'Your rider just accepted the order and will pick up your food items from the restaurant soon. Stay hungry!',  // Add food items details also
         imageUrl: 'https://img.freepik.com/premium-photo/middleaged-food-delivery-rider-action_895561-5174.jpg',
-      }
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
     });
     console.log("Message", msg);
 
@@ -500,7 +536,13 @@ const handleConnection = async (socket) => {
             title: 'Order Cancelled 😔',
             body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
             imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
-          }
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
         });
         console.log("Message", msg2.responses[0].error);
         const cancelledOrder = await FoodyCancelledOrders.create({
@@ -557,7 +599,13 @@ const handleConnection = async (socket) => {
             title: 'Order Cancelled 😔',
             body: 'We’re really sorry! We couldn’t find a rider for your Food Items. Please consider this order as cancelled and try again soon.',
             imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
-          }
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
         });
         console.log("Message", msg2.responses[0].error);
         const cancelledOrder = await FoodyCancelledOrders.create({
