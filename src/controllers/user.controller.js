@@ -8,6 +8,7 @@ import jwt from "jsonwebtoken";
 import { Restaurant } from "../models/Restaurant.model.js";
 import { Hotel } from "../models/Hotel.model.js";
 import { Flat } from "../models/Flat.model.js";
+import { Rider } from "../models/Rider.model.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
    try {
@@ -1790,6 +1791,39 @@ const getFoodCarouselImages = async (req, res) => {
    }
  };
 
+ const ridesAvailable = async (req, res) => {
+   const { pickupLocation } = req.body;
+
+   // Find riders with a matching city name
+   const riders = await Rider.find({
+       city: pickupLocation.city,
+       availableStatus: true
+   });
+
+   // Categorize riders by vehicle type
+   const categorizedRiders = riders.reduce((acc, rider) => {
+       const { vehicleType } = rider;
+
+       if (!acc[vehicleType]) {
+           acc[vehicleType] = [];
+       }
+
+       acc[vehicleType].push(rider);
+       return acc;
+   }, {});
+
+   // Format the response to include category names
+   const response = Object.entries(categorizedRiders).map(([vehicleType, riders]) => ({
+       vehicleType,
+       riders
+   }));
+
+   console.log("Response", response)
+   console.log("Response2", response[0], response[1])
+
+   res.json(response);
+ }
+
 
 export {
    registerUser,
@@ -1846,5 +1880,6 @@ export {
   getFoodOfferImages,
   uploadFoodOfferImage,
   getFestiveOfferImages,
-  uploadFestiveOfferImage
+  uploadFestiveOfferImage,
+  ridesAvailable
 }

@@ -27,7 +27,8 @@ import {
     uploadFoodOfferImage,
     googleRegisterUser,
     getFestiveOfferImages,
-    uploadFestiveOfferImage
+    uploadFestiveOfferImage,
+    ridesAvailable
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -124,5 +125,7 @@ router.route("/get-food-orderHistory").get(verifyUsersJWT, getfoodyOrderHistory)
 router.get('/festive-offer-images', getFestiveOfferImages);
 
 router.post('/festive-offer-images',upload.single("imageUrl"), uploadFestiveOfferImage);
+
+router.route("/rides-available").post(ridesAvailable);
 
 export default router
