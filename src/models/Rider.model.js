@@ -105,6 +105,11 @@ const riderSchema = new Schema(
         city: {
             type: String,
             required: true
+        },
+        vehicleType: {
+            type: String,
+            required: true,
+            default: 'Bike'
         }
     }, {
     timestamps: true

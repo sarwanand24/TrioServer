@@ -13,7 +13,7 @@ import { Laundry } from "../models/Laundry.model.js";
 //(req, _, next)
 export const verifyUsersJWT = asyncHandler(async (req, res, next)=>{
   try {
-      const token = req.header("Authorization")?.replace("Bearer ","") || req.cookies?.refreshToken ;
+      const token = req.header("Authorization")?.replace("Bearer ","") || req.cookies?.refreshToken;
       console.log('token in server:', token, req.header("Authorization")?.replace("Bearer ",""));
     
       if(!token){
@@ -40,48 +40,48 @@ export const verifyUsersJWT = asyncHandler(async (req, res, next)=>{
 
 export const verifyRidersJWT = asyncHandler(async (req, res, next)=>{
   try {
-      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+    const token = req.header("Authorization")?.replace("Bearer ","") || req.cookies?.refreshToken;
   
       if(!token){
           throw new ApiError(401, "Unauthorized Request");
       }
      
-     const decodedToken = jwt.verify(token, process.env.AccessTokenSecret);
+     const decodedToken = jwt.verify(token, process.env.RefreshTokenSecret);
   
      const rider = await Rider.findById(decodedToken?._id).select("-password -refreshToken");
   
      if(!rider){
-      throw new ApiError(401, "Invalid Access Token");
+      throw new ApiError(401, "Invalid Refresh Token");
      }
   
      req.rider = rider;
      next()
   } catch (error) {
-     throw new ApiError(401, error?.message || "Invalid Access Token")
+     throw new ApiError(401, error?.message || "Invalid Refresh Token")
   }
 
 })
 
 export const verifyRestaurantsJWT = asyncHandler(async (req, res, next)=>{
   try {
-      const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ","")
+    const token = req.header("Authorization")?.replace("Bearer ","") || req.cookies?.refreshToken;
   
       if(!token){
           throw new ApiError(401, "Unauthorized Request");
       }
      
-     const decodedToken = jwt.verify(token, process.env.AccessTokenSecret);
+     const decodedToken = jwt.verify(token, process.env.RefreshTokenSecret);
   
      const restaurant = await Restaurant.findById(decodedToken?._id).select("-password -refreshToken");
   
      if(!restaurant){
-      throw new ApiError(401, "Invalid Access Token");
+      throw new ApiError(401, "Invalid Refresh Token");
      }
   
      req.restaurant = restaurant;
      next()
   } catch (error) {
-     throw new ApiError(401, error?.message || "Invalid Access Token")
+     throw new ApiError(401, error?.message || "Invalid Refresh Token")
   }
 
 })
