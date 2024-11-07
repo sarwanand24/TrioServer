@@ -11,15 +11,16 @@ const cyrOrdersSchema = new Schema(
             ref: "Rider"
         },
         fromLocation: {
-            type: String,
+            type: Object,
             required: true
         },
         toLocation: {
-            type: String,
+            type: Object,
             required: true
         },
         rideStatus: {
-            type: String
+            type: String,
+            default: 'Rider is on the way'
         },
         bill: {
             type: Number,
@@ -28,6 +29,9 @@ const cyrOrdersSchema = new Schema(
         distance: {
             type: String,
             required: true
+        },
+        otp: {
+            type: Number
         }
     },
     { timestamps: true }

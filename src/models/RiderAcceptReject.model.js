@@ -39,10 +39,10 @@ const riderAcceptRejectSchema = new Schema(
             type: Number
         },
         fromLocation: {
-            type: String,
+            type: Object,
         },
         toLocation: {
-            type: String,
+            type: Object,
         },
         distance: {
             type: String,
@@ -68,6 +68,12 @@ const riderAcceptRejectSchema = new Schema(
         orderId: {
             type: Schema.Types.ObjectId,
             ref: 'FoodyOrders'
+        },
+        otp: {
+            type: Number
+        },
+        vehicleType: {
+            type: "String"
         }
     },
     { timestamps: true })

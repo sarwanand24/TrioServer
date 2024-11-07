@@ -207,40 +207,31 @@ const logoutRider = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
 
-   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-
-   if (!incomingRefreshToken) {
+   const incomingRiderId = req.body.rider;
+   console.log('riderId', incomingRiderId)
+  
+   if (!incomingRiderId) {
       throw new ApiError(401, "Unauthorized Request")
    }
 
    try {
-      const decodedToken = jwt.verify(incomingRefreshToken, process.env.RefreshTokenSecret);
-
-      const rider = await Rider.findById(decodedToken?._id)
-
-      if (!rider) {
-         throw new ApiError(401, "Invalid Refresh Token")
-      }
-
-      if (incomingRefreshToken !== rider?.refreshToken) {
-         throw new ApiError(401, "Refresh Token is Used")
-      }
-
       const options = {
          httpOnly: true,
          secure: true
       }
 
-      const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(rider._id)
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(incomingRiderId)
+
+      console.log('tokens:', refreshToken, accessToken)
 
       return res
          .status(200)
          .cookie("accessToken", accessToken, options)
-         .cookie("refreshToken", newRefreshToken, options)
+         .cookie("refreshToken", refreshToken, options)
          .json(
             new ApiResponse(
                200,
-               { accessToken, refreshToken: newRefreshToken },
+               { accessToken, refreshToken },
                "AccessToken Refreshed"
             )
          )

@@ -1,5 +1,6 @@
 import {Router} from "express";
-import { getOrderById, getRiderUndeliveredOrders, getUserUndeliveredOrders, placeOrder, updateOrderStatus, updatePickupOrderStatus } from "../controllers/foodyOrders.controller.js";
+import { getOrderById, getRiderUndeliveredOrders, getUserUndeliveredOrders, placeOrder, 
+    updateOrderStatus, updatePickupOrderStatus } from "../controllers/foodyOrders.controller.js";
 import { verifyRidersJWT, verifyUsersJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router()

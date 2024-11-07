@@ -196,40 +196,31 @@ const logoutRestaurant = asyncHandler(async (req, res) => {
 
 const refreshAccessToken = asyncHandler(async (req, res) => {
 
-   const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-
-   if (!incomingRefreshToken) {
+   const incomingRestroId = req.body.restro;
+   console.log('RestroId', incomingRestroId)
+  
+   if (!incomingRestroId) {
       throw new ApiError(401, "Unauthorized Request")
    }
 
    try {
-      const decodedToken = jwt.verify(incomingRefreshToken, process.env.RefreshTokenSecret);
-
-      const restaurant = await Restaurant.findById(decodedToken?._id)
-
-      if (!restaurant) {
-         throw new ApiError(401, "Invalid Refresh Token")
-      }
-
-      if (incomingRefreshToken !== restaurant?.refreshToken) {
-         throw new ApiError(401, "Refresh Token is Used")
-      }
-
       const options = {
          httpOnly: true,
          secure: true
       }
 
-      const { accessToken, newRefreshToken } = await generateAccessAndRefreshTokens(restaurant._id)
+      const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(incomingRestroId)
+
+      console.log('tokens:', refreshToken, accessToken)
 
       return res
          .status(200)
          .cookie("accessToken", accessToken, options)
-         .cookie("refreshToken", newRefreshToken, options)
+         .cookie("refreshToken", refreshToken, options)
          .json(
             new ApiResponse(
                200,
-               { accessToken, refreshToken: newRefreshToken },
+               { accessToken, refreshToken },
                "AccessToken Refreshed"
             )
          )

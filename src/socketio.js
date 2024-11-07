@@ -10,6 +10,7 @@ import { Restaurant } from "./models/Restaurant.model.js";
 import { User } from "./models/User.model.js";
 import { ApiError } from "./utils/ApiError.js";
 import { FoodyCancelledOrders } from "./models/FoodyCancelledOrders.model.js";
+import { CYROrders } from "./models/CYROrders.model.js";
 const require = createRequire(import.meta.url);
 const tiofyRestroServiceAccount = require('../TiofyRestaurantServiceAccount.json');
 const tiofyServiceAccount = require('../TiofyServiceAccount.json');
@@ -29,6 +30,8 @@ const tiofyRiderApp = admin.initializeApp({
 
 const handleConnection = async (socket) => {
   console.log('A user/restaurant/rider connected', socket.id);
+
+  /**************************** FOOD ORDERS SOCKETS ********************************/
 
   socket.on("FoodyOrderPlaced", async (data) => {
     console.log("Server data", data);
@@ -695,6 +698,310 @@ const handleConnection = async (socket) => {
   socket.on("RiderCurrentLocation", async (data) => {
     io.emit("CurrentLocationofRiderToUser", data)
   })
+
+  /************************************ CYR RIDES SOCKETS ***********************************/
+
+  socket.on("CyrRidePlaced", async (data) => {
+    console.log("Server data", data);
+
+    const findAndNotifyRider = async (ridersList) => {
+      let nearestRider = null;
+      let minDistance = Infinity;
+
+      ridersList.forEach(rider => {
+        const distance = haversine(data.pickupLocation.lat, data.pickupLocation.long, rider.latitude, rider.longitude);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestRider = rider;
+        }
+      });
+
+      if (!nearestRider) {
+        const msg = await tiofyApp.messaging().sendEachForMulticast({
+          tokens: [data.Userdata.deviceToken],
+          notification: {
+            title: 'Cancelled Ride',
+            body: 'Sorry! We are unable to find any rider at the moment so please consider this ride as cancelled.',
+            imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
+        });
+        console.log("Message", msg.responses[0].error);
+      // return a socket also to user for this
+      io.emit("NoRiderFoundForCYR", {userId: data.Userdata._id})
+        return;
+      }
+
+      const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
+        tokens: [nearestRider.deviceToken],
+        notification: {
+          title: 'New Ride from CYR!',
+          body: 'A user just placed an order. Get ready to give them a hillarious and safe ride!',
+          imageUrl: 'https://img.freepik.com/premium-photo/middleaged-food-delivery-rider-action_895561-5174.jpg',
+        },
+        android: {
+          notification: {
+            channelId: "order_channel",
+            sound: "order_tone.mp3",
+          },
+        },
+      });
+
+      const riderOrder = await RiderAcceptReject.create({
+        riderId: nearestRider._id,
+        userDeviceToken: data.Userdata.deviceToken,
+        userId: data.Userdata._id,
+        bill: data.bill,
+        riderEarning: data.bill,
+        distance: data.bill/10,
+        city: data.pickupLocation.city,
+        fromLocation: data.pickupLocation,
+        toLocation: data.dropLocation,
+        orderOf: 'Cyr',
+        otp: data.otp,
+        vehicleType: data.selectedVehicleType
+      });
+
+      if (!riderOrder) {
+        throw new ApiError(400, "Error in Creating of Accept/Reject");
+      }
+
+      // io.emit("RiderOrderInform", {
+      //   data,
+      //   restaurantId: restro.restaurantId,
+      //   riderId: riderOrder.riderId,
+      //   restroEarning: data.restroBill,
+      //   riderEarning: data.riderEarning
+      // }); // this was just for fast, as data is also stored in accept/reject so dont need this
+
+      // Start timeout for rider response
+      setTimeout(async () => {
+        const updatedRiderOrder = await RiderAcceptReject.findById(riderOrder._id);
+        if (!updatedRiderOrder?.status) {
+          console.log(`Rider ${riderOrder.riderId} did not respond to the order within 90 seconds.`);
+          await RiderAcceptReject.findByIdAndDelete(riderOrder._id);
+
+          // Exclude the non-responsive rider and try again
+          const remainingRiders = ridersList.filter(rider => rider._id.toString() !== riderOrder.riderId.toString());
+          findAndNotifyRider(remainingRiders); // Recursive call to handle the next rider
+        }
+      }, 90000);
+    };
+
+    findAndNotifyRider(data.riders);
+  })
+
+  socket.on("RiderAcceptedCyrOrder", async (data) => {
+
+    const rider = await RiderAcceptReject.findByIdAndUpdate(
+      data.orderId,
+      {
+        $set: {
+          status: true
+        }
+      },
+      { new: true })
+
+    if (!rider) {
+      throw new ApiError(400, "Error in Changing Status of Accept/Reject")
+    }
+    console.log("UserDeviceToken", rider.userDeviceToken);
+    const msg = await tiofyApp.messaging().sendEachForMulticast({
+      tokens: [rider.userDeviceToken],
+      notification: {
+        title: 'Get Ready for a ride!',
+        body: 'Your rider just accepted the ride!',  
+        imageUrl: 'https://img.freepik.com/premium-photo/middleaged-food-delivery-rider-action_895561-5174.jpg',
+      },
+      android: {
+        notification: {
+          channelId: "order_channel", // Specify your Android notification channel ID
+          sound: "order_tone.mp3", // Specify your custom sound file
+        },
+      },
+    });
+    console.log("Message", msg);
+
+    const order = await CYROrders.create({
+         bookedBy: data.userId,
+         rider: rider.riderId,
+         fromLocation: rider.fromLocation,
+         toLocation: rider.toLocation,
+         bill: rider.bill,
+         distance: rider.distance,
+         otp: data.otp
+    })
+
+    if (!order) {
+      throw new ApiError(400, "Error in creating order")
+    }
+
+    io.emit('CyrRideAcceptedbyRider', { orderId: order._id, userId: data.userId })
+
+    const riderOrder = await Rider.findByIdAndUpdate(
+      rider.riderId,
+      {
+        $push: {
+          cyrRideHistory: new mongoose.Types.ObjectId(order._id)
+        }
+      },
+      {
+        new: true
+      })
+
+    if (!riderOrder) {
+      throw new ApiError(400, "Error in adding order history")
+    }
+
+    const userOrder = await User.findByIdAndUpdate(
+      rider.userId,
+      {
+        $push: {
+          cyrOrderHistory: new mongoose.Types.ObjectId(order._id)
+        }
+      },
+      {
+        new: true
+      })
+
+    if (!userOrder) {
+      throw new ApiError(400, "Error in adding Users order history")
+    }
+
+  })
+
+  socket.on("RiderRejectedCyrOrder", async (data) => {
+    // Delete the rejected rider's data from RiderAcceptReject
+    const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.orderId);
+
+    if (!riderRejected) {
+      throw new ApiError(400, "Error in Deleting Accept/Reject");
+    }
+
+    // Function to handle finding a new rider
+    const findAndNotifyRider = async (excludedRiderIds = []) => {
+      // Find available riders in the city excluding the rejected ones
+      const availableRiders = await Rider.find({
+        city: data.city,
+        availableStatus: true,
+        vehicleType: data.vehicleType,
+        _id: { $nin: excludedRiderIds } // Exclude previously rejected riders
+      });
+
+      if (availableRiders.length === 0) {
+        console.log('No riders available .........', data.userId, riderRejected);
+    
+        const msg2 = await tiofyApp.messaging().sendEachForMulticast({
+          tokens: [riderRejected.userDeviceToken],
+          notification: {
+            title: 'Ride Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Destination.',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
+        });
+        console.log("Message", msg2.responses[0].error);
+
+        return;
+      }
+
+      // Calculate distance for each rider and find the nearest one
+      let nearestRider = null;
+      let minDistance = Infinity;
+
+      for (const rider of availableRiders) {
+        const { latitude: riderLat, longitude: riderLon } = rider;
+        const distance = haversine(riderRejected.fromLocation.lat, riderRejected.long, riderLat, riderLon);
+        if (distance < minDistance) {
+          minDistance = distance;
+          nearestRider = rider;
+        }
+      }
+
+      if (!nearestRider) {
+    
+        const msg2 = await tiofyApp.messaging().sendEachForMulticast({
+          tokens: [riderRejected.userDeviceToken],
+          notification: {
+            title: 'Order Cancelled 😔',
+            body: 'We’re really sorry! We couldn’t find a rider for your Destination',
+            imageUrl: 'https://res.cloudinary.com/teepublic/image/private/s--iHow91xW--/t_Resized%20Artwork/c_fit,g_north_west,h_954,w_954/co_000000,e_outline:48/co_000000,e_outline:inner_fill:48/co_ffffff,e_outline:48/co_ffffff,e_outline:inner_fill:48/co_bbbbbb,e_outline:3:1000/c_mpad,g_center,h_1260,w_1260/b_rgb:eeeeee/c_limit,f_auto,h_630,q_90,w_630/v1564514493/production/designs/5462333_0.jpg',
+          },
+          android: {
+            notification: {
+              channelId: "order_channel", // Specify your Android notification channel ID
+              sound: "order_tone.mp3", // Specify your custom sound file
+            },
+          },
+        });
+        console.log("Message", msg2.responses[0].error);
+        io.emit("NoRiderFoundForCYR", {userId: data.userId})
+        return;
+      }
+
+      // Send a notification to the nearest rider
+      const msg = await tiofyRiderApp.messaging().sendEachForMulticast({
+        tokens: [nearestRider.deviceToken],
+        notification: {
+          title: 'You Received an Order From CYR',
+          body: 'A user placed an order, please respond quickly',  // Add food items details also
+          imageUrl: 'https://th.bing.com/th/id/OIP.I4OyONg5cqmX2UCXn27H2QHaHa?rs=1&pid=ImgDetMain',
+        },
+        android: {
+          notification: {
+            channelId: "order_channel", // Specify your Android notification channel ID
+            sound: "order_tone.mp3", // Specify your custom sound file
+          },
+        },
+      });
+
+      // Create a new entry in RiderAcceptReject for the selected rider
+      const newRiderOrder = await RiderAcceptReject.create({
+        riderId: nearestRider._id,
+        userDeviceToken: riderRejected.userDeviceToken,
+        userId: riderRejected.userId,
+        bill: riderRejected.bill,
+        riderEarning: riderRejected.riderEarning,
+        distance: riderRejected.distance,
+        city: riderRejected.fcity,
+        fromLocation: riderRejected.fromLocation,
+        toLocation: riderRejected.toLocation,
+        orderOf: 'Cyr',
+        otp: riderRejected.otp,
+        vehicleType: riderRejected.vehicleType
+      });
+
+      if (!newRiderOrder) {
+        throw new ApiError(400, "Error in Creating Accept/Reject Entry");
+      }
+
+      // Start timeout for the new rider's response
+      setTimeout(async () => {
+        // Check if the new rider has responded within the timeout
+        const updatedRiderOrder = await RiderAcceptReject.findById(newRiderOrder._id);
+        if (!updatedRiderOrder?.status) {
+          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 90 seconds.`);
+          await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
+
+          // Recursively find another nearest rider if the current rider didn't respond
+          await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
+        }
+      }, 90000);
+    };
+
+    // Start the process of finding and notifying a rider
+    await findAndNotifyRider([riderRejected.riderId]);
+  });
 
   // Disconnect event
   socket.on('disconnect', async () => {
