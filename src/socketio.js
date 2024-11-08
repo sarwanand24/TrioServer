@@ -50,7 +50,7 @@ const handleConnection = async (socket) => {
         },
       },
     });
-    console.log("Message", msg.responses[0].error);
+    console.log("Message Food Rani",msg, msg.responses[0].error);
     const restro = await RestroAcceptReject.create({
       restaurantId: data.restroId,
       foodItems: data.newSelectedFoods,
@@ -752,7 +752,7 @@ const handleConnection = async (socket) => {
         },
       });
 
-      console.log("Message2", msg2.responses[0].error);
+      console.log("Message2 CYR Rani", msg2, msg2.responses[0].error);
 
       const riderOrder = await RiderAcceptReject.create({
         riderId: nearestRider._id,
