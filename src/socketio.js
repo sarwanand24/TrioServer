@@ -731,7 +731,7 @@ const handleConnection = async (socket) => {
             },
           },
         });
-        console.log("Message", msg.responses[0].error);
+        console.log("Message", msg);
       // return a socket also to user for this
       io.emit("NoRiderFoundForCYR", {userId: data.Userdata._id})
         return;
@@ -751,6 +751,8 @@ const handleConnection = async (socket) => {
           },
         },
       });
+
+      console.log("Message2", msg2.responses[0].error);
 
       const riderOrder = await RiderAcceptReject.create({
         riderId: nearestRider._id,
