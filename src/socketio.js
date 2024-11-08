@@ -753,7 +753,7 @@ const handleConnection = async (socket) => {
       });
 
       console.log("Message2 CYR Rani", msg2, msg2.responses[0].error);
-
+      console.log("deviceToken user:", data.Userdata.deviceToken)
       const riderOrder = await RiderAcceptReject.create({
         riderId: nearestRider._id,
         userDeviceToken: data.Userdata.deviceToken,
