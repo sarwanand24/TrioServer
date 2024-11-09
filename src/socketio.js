@@ -836,7 +836,8 @@ const handleConnection = async (socket) => {
          toLocation: rider.toLocation,
          bill: rider.bill,
          distance: rider.distance,
-         otp: data.otp
+         otp: data.otp,
+         riderEarning: data.riderEarning
     })
 
     if (!order) {

@@ -32,6 +32,9 @@ const cyrOrdersSchema = new Schema(
         },
         otp: {
             type: Number
+        },
+        riderEarning: {
+            type: Number
         }
     },
     { timestamps: true }
