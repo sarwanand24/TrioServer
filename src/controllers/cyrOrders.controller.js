@@ -62,7 +62,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
             new mongoose.Types.ObjectId(orderId),
             {
                 $set: {
-                    orderStatus: rideStatus,
+                    rideStatus: rideStatus,
                     riderEarning: riderEarning,
                     savings: savings
                 }

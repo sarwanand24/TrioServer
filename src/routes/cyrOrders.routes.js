@@ -9,7 +9,7 @@ const router = Router()
 router.route("/placeOrder/:riderId/:userId").post(placeOrder)
 
 router.route("/order/:orderId")
-    .post(updateOrderStatus)
+    .put(updateOrderStatus)
     .get(getOrderById)
 
 router.route("/order-update/:orderId").put(updatePickupOrderStatus)
