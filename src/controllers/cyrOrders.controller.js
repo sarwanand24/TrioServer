@@ -120,7 +120,7 @@ const updatePickupOrderStatus = asyncHandler(async (req, res)=> {
         }
     },{new: true})
 
-    if(!order?.length){
+    if(!order){
         throw new ApiError(400, "Error in updating the order Status")
     }
 
@@ -163,7 +163,7 @@ const getOrderById = asyncHandler(async (req, res)=> {
         }
     ]);
 
-    if(!order?.length){
+    if(!order){
         throw new ApiError(400, "Error in fectching the order")
     }
 
