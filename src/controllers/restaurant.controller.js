@@ -8,6 +8,8 @@ import jwt from "jsonwebtoken";
 import { VegFoods } from "../models/VegFoods.model.js";
 import { NonVegFoods } from "../models/NonVegFoods.model.js";
 import { RestroAcceptReject } from "../models/RestaurantAcceptReject.model.js";
+import axios from 'axios';
+
 
 const generateAccessAndRefreshTokens = async (restaurantId) => {
    try {
@@ -115,17 +117,40 @@ const loginRestaurant = asyncHandler(async (req, res) => {
    //Access and refresh token when password is correct
    //send cookie
 
-   const { mobileNo } = req.body
+   const { email, otp } = req.body
 
-   if (!mobileNo) {
-      throw new ApiError(400, "MobileNO is required")
+   if (!(email && otp)) {
+      throw new ApiError(400, "email or otp is required")
    }
 
-   const restaurant = await Restaurant.findOne({ mobileNo })
+   const restaurant = await Restaurant.findOne({ email })
 
    if (!restaurant) {
       res.status(400).json(new ApiResponse(400, "restaurant doesn't exists"))
       throw new ApiError(400, "restaurant doesn't exists")
+   }
+
+   const BREVO_API_KEY = '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';
+
+   try {
+      const response = await axios.post(
+         'https://api.brevo.com/v3/smtp/email',
+         {
+           sender: { name: "Nikhil Dhamgay", email: "nikhildhamgay200424@gmail.com" },
+           to: [{ email: email }],
+           subject: "Welcome to Tiofy",
+           textContent: `Your OTP code is: ${otp}`,
+         },
+         {
+           headers: {
+             'api-key': BREVO_API_KEY,
+             'Content-Type': 'application/json',
+           },
+         }
+       );
+       res.status(200).send('OTP email sent successfully!');
+   } catch (error) {
+      res.status(500).send('Error sending OTP email: ' + error);
    }
 
    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(restaurant._id);

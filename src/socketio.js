@@ -31,26 +31,6 @@ const tiofyRiderApp = admin.initializeApp({
 const handleConnection = async (socket) => {
   console.log('A user/restaurant/rider connected', socket.id);
 
-  /***************************** Application Logins **************************/
-
-  socket.on("RestaurantLogin", async (data) => {
-    const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
-      tokens: [data.deviceToken],
-      notification: {
-        title: 'Welcome to Tiofy',
-        body: `${data.otp}, is your one time password for logging to your account.`,
-        imageUrl: 'https://png.pngtree.com/background/20230426/original/pngtree-chef-preparing-a-dish-in-a-restaurant-picture-image_2482776.jpg',
-      },
-      android: {
-        notification: {
-          channelId: "order_channel", // Specify your Android notification channel ID
-          sound: "order_tone.mp3", // Specify your custom sound file
-        },
-      },
-    });
-    console.log("Message Login Rani",msg, msg.responses[0].error);
-  })
-
   /**************************** FOOD ORDERS SOCKETS ********************************/
 
   socket.on("FoodyOrderPlaced", async (data) => {

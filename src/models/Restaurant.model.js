@@ -20,7 +20,8 @@ const restaurantSchema = new Schema(
             required: true,
             trim: true,
             lowercase: true,
-            index: true
+            index: true,
+            unique: true
         },
         address: {
             type: String
