@@ -148,9 +148,9 @@ const loginRestaurant = asyncHandler(async (req, res) => {
            },
          }
        );
-       res.status(200).send('OTP email sent successfully!');
+       console.log('OTP SENT TO EMAIL SUCCESSFULLY')
    } catch (error) {
-      res.status(500).send('Error sending OTP email: ' + error);
+      console.log('OTP SENDING ERROR')
    }
 
    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(restaurant._id);
