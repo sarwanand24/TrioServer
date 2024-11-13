@@ -116,7 +116,7 @@ const loginRestaurant = asyncHandler(async (req, res) => {
    //Match the password
    //Access and refresh token when password is correct
    //send cookie
-
+   
    const { email, otp } = req.body
 
    if (!(email && otp)) {

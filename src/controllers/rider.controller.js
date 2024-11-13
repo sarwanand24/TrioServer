@@ -6,6 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { RiderAcceptReject } from "../models/RiderAcceptReject.model.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import axios from 'axios';
 
 const generateAccessAndRefreshTokens = async (riderId) => {
    try {
@@ -127,17 +128,40 @@ const loginRider = asyncHandler(async (req, res) => {
    //Access and refresh token when user is present
    //send cookie
 
-   const { mobileNo } = req.body
+   const { email, otp } = req.body
 
-   if (!mobileNo) {
-      throw new ApiError(400, "MobileNo is required")
+   if (!(email && otp)) {
+      throw new ApiError(400, "email or otp is required")
    }
 
-   const rider = await Rider.findOne({mobileNo})
+   const rider = await Rider.findOne({email})
 
    if (!rider) {
       res.status(400).json(new ApiResponse(400, "rider doesn't exists"))
       throw new ApiError(400, "rider doesn't exists")
+   }
+
+   const BREVO_API_KEY = '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';
+
+   try {
+      const response = await axios.post(
+         'https://api.brevo.com/v3/smtp/email',
+         {
+           sender: { name: "Nikhil Dhamgay", email: "nikhildhamgay200424@gmail.com" },
+           to: [{ email: email }],
+           subject: "Welcome to Tiofy",
+           textContent: `Your OTP code is: ${otp}`,
+         },
+         {
+           headers: {
+             'api-key': BREVO_API_KEY,
+             'Content-Type': 'application/json',
+           },
+         }
+       );
+       console.log('OTP SENT TO EMAIL SUCCESSFULLY')
+   } catch (error) {
+      console.log('OTP SENDING ERROR')
    }
 
    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(rider._id);
