@@ -9,6 +9,7 @@ import { Restaurant } from "../models/Restaurant.model.js";
 import { Hotel } from "../models/Hotel.model.js";
 import { Flat } from "../models/Flat.model.js";
 import { Rider } from "../models/Rider.model.js";
+import {HotelOrders} from '../models/HotelOrders.model.js';
 import axios from 'axios';
 
 const generateAccessAndRefreshTokens = async (userId) => {

@@ -129,6 +129,6 @@ router.post('/festive-offer-images',upload.single("imageUrl"), uploadFestiveOffe
 
 router.route("/rides-available").post(ridesAvailable);
 
-router.route('./get-room-booking-history').get(getRoomBookingHistory);
+router.route('/get-room-booking-history').get(verifyUsersJWT, getRoomBookingHistory);
 
 export default router
