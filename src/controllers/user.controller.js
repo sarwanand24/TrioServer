@@ -1848,6 +1848,28 @@ const getFoodCarouselImages = async (req, res) => {
    res.json(response);
  }
 
+ const getRoomBookingHistory = async (req, res) => {
+   try {
+      const userId = req.user._id; // Assuming user is authenticated and userId is available from token payload
+      
+      // Fetch all orders for the logged-in user
+      const roomBookings = await HotelOrders.find({ bookedBy: userId })
+        .populate('hotel', 'name') // Populate hotel data (only name)
+        .sort({ createdAt: -1 }); // Sort by created date (latest first)
+      
+      if (!roomBookings || roomBookings.length === 0) {
+        return res.status(404).json(new ApiResponse(404, 'No room bookings found.'));
+      }
+  
+      // Return the bookings as response
+      return res.status(200).json(new ApiResponse(200, roomBookings, 'Room booking history fetched successfully.'));
+      
+    } catch (error) {
+      console.error(error);
+      throw new ApiError(500, 'Internal Server Error');
+    }
+ }
+
 
 export {
    registerUser,
@@ -1905,5 +1927,6 @@ export {
   uploadFoodOfferImage,
   getFestiveOfferImages,
   uploadFestiveOfferImage,
-  ridesAvailable
+  ridesAvailable,
+  getRoomBookingHistory
 }

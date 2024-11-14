@@ -22,6 +22,12 @@ const hotelOrdersSchema = new Schema(
         },
         dates: {
             type: Object
+        },
+        orderType: {
+            type: "String"
+        },
+        slotTiming: {
+            type: "String"
         }
     },
     { timestamps: true }

@@ -9,7 +9,7 @@ import { User } from "../models/User.model.js";
 const placeOrder = asyncHandler(async (req, res)=> {
 console.log('Entered');
     const {userId, hotelId} = req.params
-    const {bill, totalPerson, rooms, dates} = req.body
+    const {bill, totalPerson, rooms, dates, orderType, slotTiming} = req.body
 
     if(!(userId || hotelId)){
         throw new ApiError(400, "RiderId is required")
@@ -29,7 +29,9 @@ console.log('Entered');
         bill,
         totalPerson,
         rooms,
-        dates
+        dates,
+        orderType,
+        slotTiming: slotTiming || null,
      })
 
      if(!order){

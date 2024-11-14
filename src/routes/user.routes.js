@@ -28,7 +28,8 @@ import {
     googleRegisterUser,
     getFestiveOfferImages,
     uploadFestiveOfferImage,
-    ridesAvailable
+    ridesAvailable,
+    getRoomBookingHistory
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -127,5 +128,7 @@ router.get('/festive-offer-images', getFestiveOfferImages);
 router.post('/festive-offer-images',upload.single("imageUrl"), uploadFestiveOfferImage);
 
 router.route("/rides-available").post(ridesAvailable);
+
+router.route('./get-room-booking-history').get(getRoomBookingHistory);
 
 export default router

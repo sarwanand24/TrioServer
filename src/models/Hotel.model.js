@@ -84,7 +84,28 @@ const hotelSchema = new Schema(
         },
         price: {
             type: Number
-        }
+        },
+        roomsAvailable: {
+            type: Number,
+            default: 10
+        },
+        price3hr: {
+           type: Number,
+           default: 600
+        },
+        price6hr: {
+            type: Number,
+            default: 1100
+         },
+         price12hr: {
+            type: Number,
+            default: 1500
+         },
+         facilities: {
+            type: Array,
+            default: ['A.C', 'Wi-fi', 'T.V'],
+            required: true
+         }
     }, {
     timestamps: true
 })

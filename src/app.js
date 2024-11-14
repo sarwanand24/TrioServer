@@ -49,6 +49,7 @@ import cyrOrderRouter from "./routes/cyrOrders.routes.js";
 import cyrCancelledRide from "./routes/cyrCancelledRides.routes.js";
 import paymentRouter from "./routes/payments.routes.js";
 import hotelOrderRouter from "./routes/hotelOrders.routes.js";
+import hotelRatingRouter from "./routes/hotelRatings.routes.js";
 
 //routes declaration
 app.use("/api/v1/users", userRouter);
@@ -68,6 +69,7 @@ app.use("/api/v1/cyrOrder", cyrOrderRouter);
 app.use("/api/v1/cyrCancelledRide", cyrCancelledRide);
 app.use("/api/v1/payments", paymentRouter);
 app.use("/api/v1/hotelOrder", hotelOrderRouter);
+app.use("/api/v1/hotelRating", hotelRatingRouter);
 
 export {
     app,
