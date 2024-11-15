@@ -75,7 +75,7 @@ const ratingSummary = asyncHandler(async (req, res) => {
   try {
     const groupedRatings = await HotelRating.aggregate([
       {
-        $match: { hotel: mongoose.Types.ObjectId(hotelId) } // Match the hotelId
+        $match: { hotel: new mongoose.Types.ObjectId(hotelId) } // Match the hotelId
       },
       {
         $group: {

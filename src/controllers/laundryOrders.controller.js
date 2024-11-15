@@ -44,7 +44,7 @@ const placeOrder = asyncHandler(async (req, res) => {
      }
 
        // Find the laundry shop and update OrderHistory
-       await Laundry.findByIdAndUpdate(shopName, {
+       await Laundry.findByIdAndUpdate(new mongoose.Types.ObjectId(shopId), {
         $push: { OrderHistory: order._id }
     });
 
