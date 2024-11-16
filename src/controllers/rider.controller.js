@@ -7,6 +7,9 @@ import { RiderAcceptReject } from "../models/RiderAcceptReject.model.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import axios from 'axios';
+import { CYROrders } from "../models/CYROrders.model.js";
+import { FoodyOrders } from "../models/FoodyOrders.model.js";
+import moment from 'moment';
 
 const generateAccessAndRefreshTokens = async (riderId) => {
    try {
@@ -831,28 +834,6 @@ const getAllRatings = asyncHandler(async (req, res) => {
 
 })
 
-const toggleAvailableStatus = asyncHandler(async (req, res) => {
-    //whenever called update
-    //with the help of req.ride_id update the availableStatus
-
-    const rider = await Rider.findByIdAndUpdate(
-      req.rider._id,
-      {
-         $set: {
-            availableStatus: !req.rider?.availableStatus
-         }
-      },
-      { new: true })
-
-      if(!rider){
-         throw new ApiError(400, "Error in toggling Available Status of Rider")
-      }
-
-      return res
-      .status(200)
-      .json(new ApiResponse(200, rider, "Successfully toggled Available Status of Rider"))
- })
-
 const updateLatLong = asyncHandler(async (req, res) => {
   //thinking to do it in sockets
 })
@@ -942,6 +923,198 @@ const earning = asyncHandler( async(req, res) => {
    res.json({ earning });
 })
 
+const toggleAvailableStatus = asyncHandler( async(req, res) => {
+   try { // Assuming the user's restaurant ID is available in req.user.id
+      const { availableStatus } = req.body;
+  
+      // Find the restaurant by ID
+      const rider = await Rider.findById(req.rider._id);
+  
+      if (!rider) {
+        return res.status(404).json({ message: 'Rider not found' });
+      }
+  
+      // Update the availableStatus
+      rider.availableStatus = availableStatus;
+      await rider.save();
+  
+      res.status(200).json({ message: 'Availability status updated successfully', availableStatus });
+    } catch (error) {
+      console.error('Error toggling availability:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+})
+
+const getEarnings = asyncHandler( async(req, res)=> {
+   try {
+      const riderId = req.query.riderId;
+      const today = moment().startOf("day");
+      const weekStart = moment().startOf("week");
+  
+      // Fetch Food Orders
+      const foodOrders = await FoodyOrders.aggregate([
+        {
+          $match: {
+            rider: riderId,
+            orderStatus: "Delivered",
+            createdAt: { $gte: weekStart.toDate() },
+          },
+        },
+        {
+          $addFields: {
+            isToday: { $gte: ["$createdAt", today.toDate()] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalEarnings: { $sum: "$riderEarning" },
+            totalOrders: { $sum: 1 },
+            todayEarnings: {
+              $sum: {
+                $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$riderEarning", 0],
+              },
+            },
+            todayOrders: {
+              $sum: {
+                $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
+              },
+            },
+          },
+        },
+      ]);
+  
+      // Fetch Cyr Rides
+      const cyrRides = await CYROrders.aggregate([
+        {
+          $match: {
+            rider: riderId,
+            rideStatus: "Delivered",
+            createdAt: { $gte: weekStart.toDate() },
+          },
+        },
+        {
+          $addFields: {
+            isToday: { $gte: ["$createdAt", today.toDate()] },
+          },
+        },
+        {
+          $group: {
+            _id: null,
+            totalEarnings: { $sum: "$riderEarning" },
+            totalOrders: { $sum: 1 },
+            todayEarnings: {
+              $sum: {
+                $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$riderEarning", 0],
+              },
+            },
+            todayOrders: {
+              $sum: {
+                $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
+              },
+            },
+          },
+        },
+      ]);
+  
+      // Combine Results
+      const totalEarnings =
+        (foodOrders[0]?.totalEarnings || 0) + (cyrRides[0]?.totalEarnings || 0);
+      const totalOrders =
+        (foodOrders[0]?.totalOrders || 0) + (cyrRides[0]?.totalOrders || 0);
+      const todayEarnings =
+        (foodOrders[0]?.todayEarnings || 0) + (cyrRides[0]?.todayEarnings || 0);
+      const todayOrders =
+        (foodOrders[0]?.todayOrders || 0) + (cyrRides[0]?.todayOrders || 0);
+  
+      res.status(200).json({
+        totalEarnings,
+        totalOrders,
+        todayEarnings,
+        todayOrders,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+})
+
+const getEarningsHistory = asyncHandler( async(req, res)=> {
+   try {
+      const { riderId } = req.query;
+      const rider = await Rider.findById(riderId);
+      if (!rider) {
+        return res.status(404).json({ message: "Rider not found" });
+      }
+  
+      const today = moment().startOf("day");
+      const lastWeek = moment().subtract(7, "days").startOf("day");
+  
+      // Aggregate daily earnings
+      const foodOrders = await FoodyOrders.aggregate([
+        {
+          $match: {
+            rider: riderId,
+            orderStatus: "Delivered",
+            createdAt: { $gte: lastWeek.toDate() },
+          },
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            totalEarnings: { $sum: "$riderEarning" },
+            orders: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+  
+      const cyrRides = await CYROrders.aggregate([
+        {
+          $match: {
+            rider: riderId,
+            rideStatus: "Delivered",
+            createdAt: { $gte: lastWeek.toDate() },
+          },
+        },
+        {
+          $group: {
+            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            totalEarnings: { $sum: "$riderEarning" },
+            orders: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]);
+  
+      // Merge earnings
+      const mergedEarnings = [...foodOrders, ...cyrRides].reduce((acc, item) => {
+        const date = item._id;
+        if (!acc[date]) {
+          acc[date] = { totalEarnings: 0, orders: 0 };
+        }
+        acc[date].totalEarnings += item.totalEarnings;
+        acc[date].orders += item.orders;
+        return acc;
+      }, {});
+  
+      const earningsByDate = Object.entries(mergedEarnings).map(([date, data]) => ({
+        date,
+        totalEarnings: data.totalEarnings,
+        orders: data.orders,
+      }));
+  
+      res.status(200).json({
+        riderName: rider.riderName,
+        totalEarnings: rider.moneyEarned,
+        earningsByDate,
+      });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Internal Server Error" });
+    }
+})
+
 export {
    registerRider,
    loginRider,
@@ -970,5 +1143,8 @@ export {
    setDeviceToken,
    fetchAcceptReject,
    updateRiderLocation,
-   earning
+   earning,
+   toggleAvailableStatus,
+   getEarnings,
+   getEarningsHistory
 }
