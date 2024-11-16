@@ -1139,7 +1139,6 @@ export {
    addToCyrMedicoRideHistory,
    removeFromCyrMedicoRideHistory,
    getCyrMedicoRideHistory,
-   toggleAvailableStatus,
    setDeviceToken,
    fetchAcceptReject,
    updateRiderLocation,
