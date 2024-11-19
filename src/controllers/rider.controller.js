@@ -30,7 +30,7 @@ const generateAccessAndRefreshTokens = async (riderId) => {
 const registerRider = asyncHandler(async (req, res) => {
 
    const { riderName, email, password, address, mobileNo, alternateMobileNo, profileImg, drivingLiscenceImg,
-       vehicleName, vehicleNo, aadharImg, city } = req.body;
+       vehicleName, vehicleNo, aadharImg, city, vehicleType } = req.body;
 
    let altMob;
    if(alternateMobileNo?.length) {
@@ -96,6 +96,7 @@ const registerRider = asyncHandler(async (req, res) => {
       mobileNo,
       vehicleName,
       vehicleNo,
+      vehicleType,
       city
    })
 
@@ -945,175 +946,234 @@ const toggleAvailableStatus = asyncHandler( async(req, res) => {
     }
 })
 
-const getEarnings = asyncHandler( async(req, res)=> {
+const getEarnings = asyncHandler(async (req, res) => {
    try {
-      const riderId = req.query.riderId;
-      const today = moment().startOf("day");
-      const weekStart = moment().startOf("week");
-  
-      // Fetch Food Orders
-      const foodOrders = await FoodyOrders.aggregate([
-        {
-          $match: {
-            rider: riderId,
-            orderStatus: "Delivered",
-            createdAt: { $gte: weekStart.toDate() },
-          },
-        },
-        {
-          $addFields: {
-            isToday: { $gte: ["$createdAt", today.toDate()] },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalEarnings: { $sum: "$riderEarning" },
-            totalOrders: { $sum: 1 },
-            todayEarnings: {
-              $sum: {
-                $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$riderEarning", 0],
-              },
-            },
-            todayOrders: {
-              $sum: {
-                $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
-              },
-            },
-          },
-        },
-      ]);
-  
-      // Fetch Cyr Rides
-      const cyrRides = await CYROrders.aggregate([
-        {
-          $match: {
-            rider: riderId,
-            rideStatus: "Delivered",
-            createdAt: { $gte: weekStart.toDate() },
-          },
-        },
-        {
-          $addFields: {
-            isToday: { $gte: ["$createdAt", today.toDate()] },
-          },
-        },
-        {
-          $group: {
-            _id: null,
-            totalEarnings: { $sum: "$riderEarning" },
-            totalOrders: { $sum: 1 },
-            todayEarnings: {
-              $sum: {
-                $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$riderEarning", 0],
-              },
-            },
-            todayOrders: {
-              $sum: {
-                $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
-              },
-            },
-          },
-        },
-      ]);
-  
-      // Combine Results
-      const totalEarnings =
-        (foodOrders[0]?.totalEarnings || 0) + (cyrRides[0]?.totalEarnings || 0);
-      const totalOrders =
-        (foodOrders[0]?.totalOrders || 0) + (cyrRides[0]?.totalOrders || 0);
-      const todayEarnings =
-        (foodOrders[0]?.todayEarnings || 0) + (cyrRides[0]?.todayEarnings || 0);
-      const todayOrders =
-        (foodOrders[0]?.todayOrders || 0) + (cyrRides[0]?.todayOrders || 0);
-  
-      res.status(200).json({
-        totalEarnings,
-        totalOrders,
-        todayEarnings,
-        todayOrders,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-})
+     const riderId = req.query.riderId;
+ 
+     // Validate riderId
+     if (!riderId) {
+       return res.status(400).json({ message: "Rider ID is required" });
+     }
+     console.log('riderId:', riderId)
+ 
+     const today = moment().startOf("day");
+     const weekStart = moment().startOf("week");
+ 
+     console.log("Executing earnings calculation...", today);
+     console.log('week', weekStart)
+ 
+     // Fetch Food Orders
+     let foodOrders = [];
+     try {
+       foodOrders = await FoodyOrders.aggregate([
+         {
+           $match: {
+             rider: new mongoose.Types.ObjectId(riderId),
+             orderStatus: "Delivered",
+             createdAt: { $gte: weekStart.toDate() },
+           },
+         },
+         {
+           $group: {
+             _id: null,
+             totalEarnings: { $sum: "$riderEarning" },
+             totalOrders: { $sum: 1 },
+             todayEarnings: {
+               $sum: {
+                 $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$riderEarning", 0],
+               },
+             },
+             todayOrders: {
+               $sum: {
+                 $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
+               },
+             },
+           },
+         },
+       ]);
+       console.log("Food orders fetched:", foodOrders);
+     } catch (err) {
+       console.error("Error fetching food orders:", err);
+       return res.status(500).json({ message: "Error fetching food orders" });
+     }
+ 
+     // Fetch Cyr Rides
+     let cyrRides = [];
+     try {
+       cyrRides = await CYROrders.aggregate([
+         {
+           $match: {
+             rider: new mongoose.Types.ObjectId(riderId),
+             rideStatus: "Delivered",
+             createdAt: { $gte: weekStart.toDate() },
+           },
+         },
+         {
+           $group: {
+             _id: null,
+             totalEarnings: { $sum: "$riderEarning" },
+             totalOrders: { $sum: 1 },
+             todayEarnings: {
+               $sum: {
+                 $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$riderEarning", 0],
+               },
+             },
+             todayOrders: {
+               $sum: {
+                 $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
+               },
+             },
+           },
+         },
+       ]);
+       console.log("Cyr rides fetched:", cyrRides);
+     } catch (err) {
+       console.error("Error fetching Cyr rides:", err);
+       return res.status(500).json({ message: "Error fetching Cyr rides" });
+     }
+ 
+     // Combine Results
+     const totalEarnings =
+       (foodOrders[0]?.totalEarnings || 0) + (cyrRides[0]?.totalEarnings || 0);
+     const totalOrders =
+       (foodOrders[0]?.totalOrders || 0) + (cyrRides[0]?.totalOrders || 0);
+     const todayEarnings =
+       (foodOrders[0]?.todayEarnings || 0) + (cyrRides[0]?.todayEarnings || 0);
+     const todayOrders =
+       (foodOrders[0]?.todayOrders || 0) + (cyrRides[0]?.todayOrders || 0);
+ 
+     console.log("Calculations completed:", {
+       totalEarnings,
+       totalOrders,
+       todayEarnings,
+       todayOrders,
+     });
+ 
+     res.status(200).json({
+       totalEarnings,
+       totalOrders,
+       todayEarnings,
+       todayOrders,
+     });
+   } catch (error) {
+     console.error("Unexpected error:", error);
+     res.status(500).json({ message: "Internal Server Error" });
+   }
+ });
+ 
 
-const getEarningsHistory = asyncHandler( async(req, res)=> {
+ const getEarningsHistory = asyncHandler(async (req, res) => {
    try {
-      const { riderId } = req.query;
-      const rider = await Rider.findById(riderId);
-      if (!rider) {
-        return res.status(404).json({ message: "Rider not found" });
-      }
-  
-      const today = moment().startOf("day");
-      const lastWeek = moment().subtract(7, "days").startOf("day");
-  
-      // Aggregate daily earnings
-      const foodOrders = await FoodyOrders.aggregate([
-        {
-          $match: {
-            rider: riderId,
-            orderStatus: "Delivered",
-            createdAt: { $gte: lastWeek.toDate() },
-          },
-        },
-        {
-          $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            totalEarnings: { $sum: "$riderEarning" },
-            orders: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]);
-  
-      const cyrRides = await CYROrders.aggregate([
-        {
-          $match: {
-            rider: riderId,
-            rideStatus: "Delivered",
-            createdAt: { $gte: lastWeek.toDate() },
-          },
-        },
-        {
-          $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
-            totalEarnings: { $sum: "$riderEarning" },
-            orders: { $sum: 1 },
-          },
-        },
-        { $sort: { _id: 1 } },
-      ]);
-  
-      // Merge earnings
-      const mergedEarnings = [...foodOrders, ...cyrRides].reduce((acc, item) => {
-        const date = item._id;
-        if (!acc[date]) {
-          acc[date] = { totalEarnings: 0, orders: 0 };
-        }
-        acc[date].totalEarnings += item.totalEarnings;
-        acc[date].orders += item.orders;
-        return acc;
-      }, {});
-  
-      const earningsByDate = Object.entries(mergedEarnings).map(([date, data]) => ({
-        date,
-        totalEarnings: data.totalEarnings,
-        orders: data.orders,
-      }));
-  
-      res.status(200).json({
-        riderName: rider.riderName,
-        totalEarnings: rider.moneyEarned,
-        earningsByDate,
-      });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Internal Server Error" });
-    }
-})
+     const { riderId } = req.query;
+ 
+     // Validate input
+     if (!riderId) {
+       return res.status(400).json({ message: "Rider ID is required" });
+     }
+ 
+     // Find the rider
+     const rider = await Rider.findById(new mongoose.Types.ObjectId(riderId));
+     if (!rider) {
+       return res.status(404).json({ message: "Rider not found" });
+     }
+ 
+     console.log(`Fetching all-time earnings for Rider ID: ${riderId}`);
+ 
+     // Helper function to aggregate earnings
+     const aggregateEarnings = async (collection, riderField, statusField, statusValue) => {
+       return await collection.aggregate([
+         {
+           $match: {
+             [riderField]: new mongoose.Types.ObjectId(riderId),
+             [statusField]: statusValue, // Adjust based on the collection
+           },
+         },
+         {
+           $facet: {
+             byDate: [
+               {
+                 $group: {
+                   _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                   totalEarnings: { $sum: "$riderEarning" },
+                   orders: { $sum: 1 },
+                 },
+               },
+               { $sort: { _id: 1 } },
+             ],
+             byWeek: [
+               {
+                 $group: {
+                   _id: {
+                     week: { $isoWeek: "$createdAt" },
+                     year: { $isoWeekYear: "$createdAt" },
+                   },
+                   totalEarnings: { $sum: "$riderEarning" },
+                   orders: { $sum: 1 },
+                 },
+               },
+               { $sort: { "_id.year": 1, "_id.week": 1 } },
+             ],
+           },
+         },
+       ]);
+     };
+ 
+     // Fetch earnings for food orders
+     const [foodEarnings] = await aggregateEarnings(FoodyOrders, "rider", "orderStatus", "Delivered");
+ 
+     // Fetch earnings for Cyr rides
+     const [cyrEarnings] = await aggregateEarnings(CYROrders, "rider", "rideStatus", "Delivered");
+ 
+     // Combine results
+     const combinedByDate = [...foodEarnings.byDate, ...cyrEarnings.byDate].reduce((acc, item) => {
+       const date = item._id;
+       if (!acc[date]) {
+         acc[date] = { totalEarnings: 0, orders: 0 };
+       }
+       acc[date].totalEarnings += item.totalEarnings;
+       acc[date].orders += item.orders;
+       return acc;
+     }, {});
+ 
+     const combinedByWeek = [...foodEarnings.byWeek, ...cyrEarnings.byWeek].reduce((acc, item) => {
+       const week = `${item._id.year}-W${item._id.week}`;
+       if (!acc[week]) {
+         acc[week] = { totalEarnings: 0, orders: 0 };
+       }
+       acc[week].totalEarnings += item.totalEarnings;
+       acc[week].orders += item.orders;
+       return acc;
+     }, {});
+ 
+     // Convert combined results to arrays
+     const earningsByDate = Object.entries(combinedByDate).map(([date, data]) => ({
+       date,
+       totalEarnings: data.totalEarnings,
+       orders: data.orders,
+     }));
+ 
+     const earningsByWeek = Object.entries(combinedByWeek).map(([week, data]) => ({
+       week,
+       startDate: moment(week, "YYYY-WW").startOf("isoWeek").format("MMM DD"),
+       endDate: moment(week, "YYYY-WW").endOf("isoWeek").format("MMM DD"),
+       totalEarnings: data.totalEarnings,
+       orders: data.orders,
+     }));
+ 
+     // Response
+     res.status(200).json({
+       riderName: rider.riderName,
+       totalEarnings: rider.moneyEarned,
+       earningsByDate,
+       earningsByWeek,
+     });
+   } catch (error) {
+     console.error("Unexpected error:", error);
+     res.status(500).json({ message: "Internal Server Error" });
+   }
+ });
+ 
+ 
 
 export {
    registerRider,

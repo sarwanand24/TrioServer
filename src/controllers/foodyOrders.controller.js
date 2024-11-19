@@ -84,6 +84,7 @@ const updateOrderStatus = asyncHandler(async (req, res) => {
     
             if (rider) {
                 rider.moneyEarned += riderEarning;
+                rider.availableStatus = true;
                 await rider.save();
             } else {
                 throw new ApiError(404, "Rider not found");

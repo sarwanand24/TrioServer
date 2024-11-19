@@ -411,6 +411,18 @@ const handleConnection = async (socket) => {
       },
       { new: true })
 
+    const toggleAvailableStatus = await Rider.findByIdAndUpdate(
+      new mongoose.Types.ObjectId(rider.riderId),
+      {
+        $set: {
+          availableStatus: false
+        }
+      }, {new: true})
+
+      if (!toggleAvailableStatus) {
+        throw new ApiError(400, "Error in Changing Status of Availability of Rider")
+      }
+
     if (!rider) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")
     }
@@ -808,6 +820,18 @@ const handleConnection = async (socket) => {
         }
       },
       { new: true })
+
+      const toggleAvailableStatus = await Rider.findByIdAndUpdate(
+        new mongoose.Types.ObjectId(rider.riderId),
+        {
+          $set: {
+            availableStatus: false
+          }
+        }, {new: true})
+  
+        if (!toggleAvailableStatus) {
+          throw new ApiError(400, "Error in Changing Status of Availability of Rider")
+        }
 
     if (!rider) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")

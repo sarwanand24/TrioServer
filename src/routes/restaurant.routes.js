@@ -3,7 +3,7 @@ import {
     addNonVegFoods,
     addToOrderHistory,
     addVegFoods,
-    changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, getOrderHistory, loginRestaurant, logoutRestaurant,
+    changeCurrentPassword, fetchAcceptReject, getAllNonVegFoods, getAllVegFoods, getCurrentRestaurant, getEarnings, getEarningsHistory, getOrderHistory, loginRestaurant, logoutRestaurant,
     refreshAccessToken, registerRestaurant, removeNonVegFoods, removeOrderHistory, removeVegFoods, setDeviceToken, signoutRestaurant,
     toggleAvailableStatus,
     updateAccountDetails,
@@ -57,5 +57,9 @@ router.route("/fetchAccept-Reject").get(verifyRestaurantsJWT, fetchAcceptReject)
 router.route("/update-restro-location").post(verifyRestaurantsJWT, updateRestroLocation);
 
 router.route("/toggle-availability").post(verifyRestaurantsJWT, toggleAvailableStatus);
+
+router.route("/get-earnings").get(getEarnings);
+
+router.route("/earning-history").get(getEarningsHistory);
 
 export default router

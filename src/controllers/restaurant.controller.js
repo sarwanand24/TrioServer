@@ -9,6 +9,8 @@ import { VegFoods } from "../models/VegFoods.model.js";
 import { NonVegFoods } from "../models/NonVegFoods.model.js";
 import { RestroAcceptReject } from "../models/RestaurantAcceptReject.model.js";
 import axios from 'axios';
+import { FoodyOrders } from "../models/FoodyOrders.model.js";
+import moment from 'moment';
 
 
 const generateAccessAndRefreshTokens = async (restaurantId) => {
@@ -30,7 +32,7 @@ const generateAccessAndRefreshTokens = async (restaurantId) => {
 const registerRestaurant = asyncHandler(async (req, res) => {
    //Take all fields from req.body
    //validate the fields
-   //check if Rider already exists - Ridername, email
+   //check if Restaurant already exists - Restaurantname, email
    //check for avatar path
    //upload to cloudinary
    //check for upload
@@ -892,6 +894,190 @@ const toggleAvailableStatus = asyncHandler( async(req, res) => {
     }
 })
 
+const getEarnings = asyncHandler(async (req, res) => {
+   try {
+     const restaurantId = req.query.restroId;
+ 
+     // Validate restaurantId
+     if (!restaurantId) {
+       return res.status(400).json({ message: "Restaurant ID is required" });
+     }
+     console.log('restaurantId:', restaurantId)
+ 
+     const today = moment().startOf("day");
+     const weekStart = moment().startOf("week");
+ 
+     console.log("Executing earnings calculation...", today);
+     console.log('week', weekStart)
+ 
+     // Fetch Food Orders
+     let foodOrders = [];
+     try {
+       foodOrders = await FoodyOrders.aggregate([
+         {
+           $match: {
+             restaurant: new mongoose.Types.ObjectId(restaurantId),
+             orderStatus: "Delivered",
+             createdAt: { $gte: weekStart.toDate() },
+           },
+         },
+         {
+           $group: {
+             _id: null,
+             totalEarnings: { $sum: "$restroEarning" },
+             totalOrders: { $sum: 1 },
+             todayEarnings: {
+               $sum: {
+                 $cond: [{ $gte: ["$createdAt", today.toDate()] }, "$restroEarning", 0],
+               },
+             },
+             todayOrders: {
+               $sum: {
+                 $cond: [{ $gte: ["$createdAt", today.toDate()] }, 1, 0],
+               },
+             },
+           },
+         },
+       ]);
+       console.log("Food orders fetched:", foodOrders);
+     } catch (err) {
+       console.error("Error fetching food orders:", err);
+       return res.status(500).json({ message: "Error fetching food orders" });
+     }
+ 
+     // Combine Results
+     const totalEarnings = (foodOrders[0]?.totalEarnings || 0);
+     const totalOrders = (foodOrders[0]?.totalOrders || 0);
+     const todayEarnings = (foodOrders[0]?.todayEarnings || 0);
+     const todayOrders = (foodOrders[0]?.todayOrders || 0);
+ 
+     console.log("Calculations completed:", {
+       totalEarnings,
+       totalOrders,
+       todayEarnings,
+       todayOrders,
+     });
+ 
+     res.status(200).json({
+       totalEarnings,
+       totalOrders,
+       todayEarnings,
+       todayOrders,
+     });
+   } catch (error) {
+     console.error("Unexpected error:", error);
+     res.status(500).json({ message: "Internal Server Error" });
+   }
+ });
+
+ const getEarningsHistory = asyncHandler(async (req, res) => {
+   try {
+     const { restroId } = req.query;
+ 
+     // Validate input
+     if (!restroId) {
+       return res.status(400).json({ message: "Restro ID is required" });
+     }
+ 
+     // Find the restro
+     const restro = await Restaurant.findById(new mongoose.Types.ObjectId(restroId));
+     if (!restro) {
+       return res.status(404).json({ message: "Restro not found" });
+     }
+ 
+     console.log(`Fetching all-time earnings for Restro ID: ${restroId}`);
+ 
+     // Helper function to aggregate earnings
+     const aggregateEarnings = async (collection, restroField, statusField, statusValue) => {
+       return await collection.aggregate([
+         {
+           $match: {
+             [restroField]: new mongoose.Types.ObjectId(restroId),
+             [statusField]: statusValue, // Adjust based on the collection
+           },
+         },
+         {
+           $facet: {
+             byDate: [
+               {
+                 $group: {
+                   _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+                   totalEarnings: { $sum: "$restroEarning" },
+                   orders: { $sum: 1 },
+                 },
+               },
+               { $sort: { _id: 1 } },
+             ],
+             byWeek: [
+               {
+                 $group: {
+                   _id: {
+                     week: { $isoWeek: "$createdAt" },
+                     year: { $isoWeekYear: "$createdAt" },
+                   },
+                   totalEarnings: { $sum: "$restroEarning" },
+                   orders: { $sum: 1 },
+                 },
+               },
+               { $sort: { "_id.year": 1, "_id.week": 1 } },
+             ],
+           },
+         },
+       ]);
+     };
+ 
+     // Fetch earnings for food orders
+     const [foodEarnings] = await aggregateEarnings(FoodyOrders, "restaurant", "orderStatus", "Delivered");
+ 
+     // Combine results
+     const combinedByDate = [...foodEarnings.byDate].reduce((acc, item) => {
+       const date = item._id;
+       if (!acc[date]) {
+         acc[date] = { totalEarnings: 0, orders: 0 };
+       }
+       acc[date].totalEarnings += item.totalEarnings;
+       acc[date].orders += item.orders;
+       return acc;
+     }, {});
+ 
+     const combinedByWeek = [...foodEarnings.byWeek].reduce((acc, item) => {
+       const week = `${item._id.year}-W${item._id.week}`;
+       if (!acc[week]) {
+         acc[week] = { totalEarnings: 0, orders: 0 };
+       }
+       acc[week].totalEarnings += item.totalEarnings;
+       acc[week].orders += item.orders;
+       return acc;
+     }, {});
+ 
+     // Convert combined results to arrays
+     const earningsByDate = Object.entries(combinedByDate).map(([date, data]) => ({
+       date,
+       totalEarnings: data.totalEarnings,
+       orders: data.orders,
+     }));
+ 
+     const earningsByWeek = Object.entries(combinedByWeek).map(([week, data]) => ({
+       week,
+       startDate: moment(week, "YYYY-WW").startOf("isoWeek").format("MMM DD"),
+       endDate: moment(week, "YYYY-WW").endOf("isoWeek").format("MMM DD"),
+       totalEarnings: data.totalEarnings,
+       orders: data.orders,
+     }));
+ 
+     // Response
+     res.status(200).json({
+       restroName: restro.restroName,
+       totalEarnings: restro.moneyEarned,
+       earningsByDate,
+       earningsByWeek,
+     });
+   } catch (error) {
+     console.error("Unexpected error:", error);
+     res.status(500).json({ message: "Internal Server Error" });
+   }
+ });
+
 export {
    registerRestaurant,
    loginRestaurant,
@@ -919,5 +1105,7 @@ export {
    setDeviceToken,
    fetchAcceptReject,
    updateRestroLocation,
-   toggleAvailableStatus
+   toggleAvailableStatus,
+   getEarnings,
+   getEarningsHistory
 }
