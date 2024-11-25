@@ -3,7 +3,7 @@ import {
     addToCyrMedicoRideHistory,
     addToCyrRideHistory,
     addToFoodyRideHistory,
-    changeCurrentPassword, earning, fetchAcceptReject, getCurrentRider, getEarnings, getEarningsHistory, getFoodyRideHistory, loginRider, logoutRider, refreshAccessToken, registerRider,
+    changeCurrentPassword, earning, fetchAcceptReject, getCurrentRider, getEarnings, getEarningsHistory, getFoodyRideHistory, loginRider, logoutRider, peakOrderRestaurants, refreshAccessToken, registerRider,
     removeFromCyrMedicoRideHistory,
     removeFromCyrRideHistory,
     removeFromFoodyRideHistory,
@@ -84,5 +84,7 @@ router.route("/toggle-availability").post(verifyRidersJWT, toggleAvailableStatus
 router.route("/get-earnings").get(getEarnings);
 
 router.route("/earning-history").get(getEarningsHistory);
+
+router.route('/getPeakOrderRestaurants/:city').get(peakOrderRestaurants);
 
 export default router
