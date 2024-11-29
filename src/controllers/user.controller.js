@@ -11,6 +11,7 @@ import { Flat } from "../models/Flat.model.js";
 import { Rider } from "../models/Rider.model.js";
 import {HotelOrders} from '../models/HotelOrders.model.js';
 import axios from 'axios';
+import { Fees } from "../models/Fees.model.js";
 
 const generateAccessAndRefreshTokens = async (userId) => {
    try {
@@ -1370,7 +1371,7 @@ const addTohotelOrderHistory = asyncHandler(async (req, res) => {
 })
 
 
-const getAllHotels = asyncHandler(async (req, res) => {
+const getAllHotelsCity = asyncHandler(async (req, res) => {
    //check for all the Hotels open via mongoose aggregate
    //return res
 
@@ -1904,6 +1905,26 @@ const getFoodCarouselImages = async (req, res) => {
    }
  };
 
+ const getAllHotels = asyncHandler(async (req, res) => {
+   try {
+      const hotels = await Hotel.find();
+      res.status(200).json({ success: true, hotels });
+    } catch (error) {
+      console.error('Error fetching hotels:', error);
+      res.status(500).json({ success: false, message: 'Server Error' });
+    }
+ })
+
+ const getAllFees = asyncHandler(async (req, res) => {
+   try {
+      const fees = await Fees.find();
+      res.status(200).json({success: true, fees})
+   } catch (error) {
+      console.error('Error fetching hotels:', error);
+      res.status(500).json({ success: false, message: 'Server Error' });
+   }
+ })
+
 
 export {
    registerUser,
@@ -1942,7 +1963,7 @@ export {
    setDeviceToken,
    addTohotelRatings,
    addTohotelOrderHistory,
-   getAllHotels,
+   getAllHotelsCity,
    getAllHotelsForCoupleStay,
    getAllHotelsForFamilyStay,
    getAllHotelsByCity,
@@ -1964,5 +1985,7 @@ export {
   ridesAvailable,
   getRoomBookingHistory,
   gethotelDashboardImages,
-  uploadhotelDashboardImage
+  uploadhotelDashboardImage,
+  getAllHotels,
+  getAllFees
 }

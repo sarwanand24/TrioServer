@@ -10,7 +10,6 @@ import {
     getAllNonVegFoods,
     getAllRestaurants,
     setDeviceToken,
-    getAllHotels,
     getAllHotelsByCity,
     getAllHotelsForCoupleStay,
     getAllHotelsForFamilyStay,
@@ -31,7 +30,10 @@ import {
     ridesAvailable,
     getRoomBookingHistory,
     gethotelDashboardImages,
-    uploadhotelDashboardImage
+    uploadhotelDashboardImage,
+    getAllHotelsCity,
+    getAllHotels,
+    getAllFees
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -93,6 +95,8 @@ router.route("/getAllRestaurants/:city").get(getAllRestaurants)
 
 router.route("/set-device-token").post(verifyUsersJWT, setDeviceToken)
 
+router.route("/getAllHotelsCity").get(getAllHotelsCity)
+
 router.route("/getAllHotels").get(getAllHotels)
 
 router.route("/get-all-hotels-by-city").post(getAllHotelsByCity)
@@ -136,5 +140,7 @@ router.route('/get-room-booking-history').get(verifyUsersJWT, getRoomBookingHist
 router.get('/hotel-dashboard-images', gethotelDashboardImages);
 
 router.post('/hotel-dashboard-images',upload.single("imageUrl"), uploadhotelDashboardImage);
+
+router.route("/get-all-fees").get(getAllFees);
 
 export default router

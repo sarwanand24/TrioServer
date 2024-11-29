@@ -172,7 +172,7 @@ const handleConnection = async (socket) => {
     const restaurantLat = restaurant.latitude; // Assuming latitude field
     const restaurantLon = restaurant.longitude; // Assuming longitude field
 
-    const riders = await Rider.find({ city: data.city, availableStatus: true });
+    const riders = await Rider.find({ city: data.city, availableStatus: true, vehicleType: 'Bike' });
 
     console.log('restaurant lat Long', restaurant, restaurantLat, restaurantLon);
 
@@ -524,6 +524,7 @@ const handleConnection = async (socket) => {
       const availableRiders = await Rider.find({
         city: data.city,
         availableStatus: true,
+        vehicleType: 'Bike',
         _id: { $nin: excludedRiderIds } // Exclude previously rejected riders
       });
 
