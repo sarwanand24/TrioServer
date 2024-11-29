@@ -70,34 +70,47 @@ const createRatings = asyncHandler(async (req, res) => {
 
 
 const ratingSummary = asyncHandler(async (req, res) => {
-    const { hotelId } = req.params; // Extract the hotelId from the URL parameter
+  const { hotelId } = req.params;
 
   try {
+    if (!hotelId || !mongoose.Types.ObjectId.isValid(hotelId)) {
+      return res.status(400).json({ error: "Invalid or missing hotelId." });
+    }
+
+    console.log("Processing hotelId:", hotelId);
+
     const groupedRatings = await HotelRating.aggregate([
       {
-        $match: { hotel: new mongoose.Types.ObjectId(hotelId) } // Match the hotelId
+        $match: { hotel: new mongoose.Types.ObjectId(hotelId) }, // Match the hotelId
       },
       {
         $group: {
-          _id: "$rating",       // Group by the rating value
-          count: { $sum: 1 }    // Count the number of ratings for each group
-        }
+          _id: "$rating", // Group by rating value
+          count: { $sum: 1 }, // Count each rating group
+        },
       },
       {
-        $sort: { _id: 1 }       // Sort by rating value (1, 2, 3, 4, 5)
-      }
+        $sort: { _id: 1 }, // Sort by rating value (1, 2, 3, 4, 5)
+      },
     ]);
 
     if (!groupedRatings.length) {
-      return res.status(404).json({ error: 'No ratings found for this hotel.' });
+      return res.status(404).json({ error: "No ratings found for this hotel." });
     }
 
+    console.log("Grouped Ratings:", groupedRatings);
     return res.status(200).json({ data: groupedRatings });
   } catch (error) {
-    console.error('Error fetching grouped ratings:', error);
-    return res.status(500).json({ error: "Error fetching ratings" });
+    console.error("Error fetching grouped ratings:", error.message);
+
+    if (error.name === "CastError" || error instanceof mongoose.Error) {
+      return res.status(400).json({ error: "Invalid hotelId format." });
+    }
+
+    return res.status(500).json({ error: "An unexpected error occurred." });
   }
-})
+});
+
 
 export {
     createRatings,

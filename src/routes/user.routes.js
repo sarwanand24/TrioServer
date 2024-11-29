@@ -29,7 +29,9 @@ import {
     getFestiveOfferImages,
     uploadFestiveOfferImage,
     ridesAvailable,
-    getRoomBookingHistory
+    getRoomBookingHistory,
+    gethotelDashboardImages,
+    uploadhotelDashboardImage
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -130,5 +132,9 @@ router.post('/festive-offer-images',upload.single("imageUrl"), uploadFestiveOffe
 router.route("/rides-available").post(ridesAvailable);
 
 router.route('/get-room-booking-history').get(verifyUsersJWT, getRoomBookingHistory);
+
+router.get('/hotel-dashboard-images', gethotelDashboardImages);
+
+router.post('/hotel-dashboard-images',upload.single("imageUrl"), uploadhotelDashboardImage);
 
 export default router

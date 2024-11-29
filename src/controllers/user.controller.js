@@ -1,4 +1,4 @@
-import { CarouselImage, FestiveOfferImage, FoodCarouselImage, FoodOfferImage, OfferImage, User } from "../models/User.model.js";
+import { CarouselImage, FestiveOfferImage, FoodCarouselImage, FoodOfferImage, hotelDashboardImage, OfferImage, User } from "../models/User.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
@@ -631,7 +631,6 @@ const getcyrOrderHistory = asyncHandler(async (req, res) => {
    //return res
 
    const cyrHistory = await User.aggregate([
-      [
          {
             $match: {
                _id: new mongoose.Types.ObjectId(req.user._id),
@@ -656,7 +655,7 @@ const getcyrOrderHistory = asyncHandler(async (req, res) => {
             }
          }
       ]
-   ])
+   )
    console.log(cyrHistory);
    return res
       .status(200)
@@ -1855,7 +1854,7 @@ const getFoodCarouselImages = async (req, res) => {
       
       // Fetch all orders for the logged-in user
       const roomBookings = await HotelOrders.find({ bookedBy: userId })
-        .populate('hotel', 'name') // Populate hotel data (only name)
+        .populate('hotel', 'hotelName') // Populate hotel data (only name)
         .sort({ createdAt: -1 }); // Sort by created date (latest first)
       
       if (!roomBookings || roomBookings.length === 0) {
@@ -1870,6 +1869,40 @@ const getFoodCarouselImages = async (req, res) => {
       throw new ApiError(500, 'Internal Server Error');
     }
  }
+
+ const gethotelDashboardImages = async (req, res) => {
+   try {
+     const images = await hotelDashboardImage.find({});
+     res.json(images);
+   } catch (error) {
+     res.status(500).json({ message: 'Error fetching Offer images', error });
+   }
+ };
+ 
+ // Upload a new Offer image
+ const uploadhotelDashboardImage = async (req, res) => {
+   const { title } = req.body;
+   const offerPhotoLocalPath = req.file?.path;
+
+      if (!offerPhotoLocalPath) {
+         res.status(400).json(new ApiResponse(400, "offerPhoto File is required"))
+         throw new ApiError(400, "offerPhoto File is required")
+      }
+   
+      const offerPhoto = await uploadOnCloudinary(offerPhotoLocalPath);
+   
+      if (!offerPhoto) {
+         res.status(400).json(new ApiResponse(400, "Error in uploading offerPhoto file"))
+         throw new ApiError(400, "Error in uploading offerPhoto file")
+      }
+   try {
+     const newImage = new hotelDashboardImage({ imageUrl: offerPhoto.url, title });
+     await newImage.save();
+     res.status(201).json(newImage);
+   } catch (error) {
+     res.status(500).json({ message: 'Error uploading carousel image', error });
+   }
+ };
 
 
 export {
@@ -1929,5 +1962,7 @@ export {
   getFestiveOfferImages,
   uploadFestiveOfferImage,
   ridesAvailable,
-  getRoomBookingHistory
+  getRoomBookingHistory,
+  gethotelDashboardImages,
+  uploadhotelDashboardImage
 }

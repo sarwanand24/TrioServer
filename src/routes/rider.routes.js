@@ -3,7 +3,8 @@ import {
     addToCyrMedicoRideHistory,
     addToCyrRideHistory,
     addToFoodyRideHistory,
-    changeCurrentPassword, earning, fetchAcceptReject, getCurrentRider, getEarnings, getEarningsHistory, getFoodyRideHistory, loginRider, logoutRider, peakOrderRestaurants, refreshAccessToken, registerRider,
+    changeCurrentPassword, earning, fetchAcceptReject, getCurrentRider, getEarnings, getEarningsHistory, getFoodyRideHistory, loginRider, 
+    logoutRider, peakOrderZones, refreshAccessToken, registerRider,
     removeFromCyrMedicoRideHistory,
     removeFromCyrRideHistory,
     removeFromFoodyRideHistory,
@@ -85,6 +86,6 @@ router.route("/get-earnings").get(getEarnings);
 
 router.route("/earning-history").get(getEarningsHistory);
 
-router.route('/getPeakOrderRestaurants/:city').get(peakOrderRestaurants);
+router.route('/getPeakOrderZones/:city').get(peakOrderZones);
 
 export default router

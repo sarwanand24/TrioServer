@@ -219,3 +219,10 @@ const festiveOfferSchema = new mongoose.Schema({
 });
 
 export const FestiveOfferImage = mongoose.model('FestiveOfferImage', festiveOfferSchema);
+
+const hotelDashboardSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: String } // Optional, you can store colors too
+});
+
+export const hotelDashboardImage = mongoose.model('hotelDashboardImage', hotelDashboardSchema);

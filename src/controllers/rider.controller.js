@@ -1175,50 +1175,90 @@ const getEarnings = asyncHandler(async (req, res) => {
  });
  
 
- const peakOrderRestaurants = asyncHandler(async (req, res) => {
-   try {
-      const city = req.params.city; // Get the rider's city from URL params
-  
-      // Fetch restaurants matching the city and count orders in OrderHistory
-      const restaurants = await Restaurant.aggregate([
-        {
-          $match: {
-            city: city, // Match the rider's city with restaurant's city
-          }
-        },
-        {
-          $lookup: {
-            from: 'foodyorders', // Assuming "foodyorders" is the collection for orders
-            localField: 'OrderHistory', // Array field containing the order IDs
-            foreignField: '_id', // Field in the orders collection
-            as: 'orders' // Alias for the joined orders
-          }
-        },
-        {
-          $project: {
-            restaurantName: 1,
-            address: 1,
-            city: 1,
-            orderCount: { $size: '$orders' }, // Count the number of orders in the OrderHistory
-            ratings: 1,
-            latitude: 1,
-            longitude: 1
-          }
-        },
-        {
-          $sort: { orderCount: -1 } // Sort by the number of orders in descending order
-        }
-      ]);
-  
-      // Return the result
-      res.json(restaurants);
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Server error');
-    }
- })
- 
+ const peakOrderZones = asyncHandler(async (req, res) => {
+  try {
+    const city = req.params.city; // Get the city from the URL params
 
+    // Validate that the city parameter is provided
+    if (!city) {
+      return res.status(400).json({ error: 'City parameter is required' });
+    }
+
+    // Fetch peak order restaurants
+    const restaurants = await Restaurant.aggregate([
+      {
+        $match: {
+          city: city, // Match the rider's city with the restaurant's city
+        }
+      },
+      {
+        $lookup: {
+          from: 'foodyorders', // Assuming "foodyorders" is the collection for orders
+          localField: 'OrderHistory', // Array field containing the order IDs
+          foreignField: '_id', // Field in the orders collection
+          as: 'orders' // Alias for the joined orders
+        }
+      },
+      {
+        $project: {
+          restaurantName: 1,
+          address: 1,
+          city: 1,
+          orderCount: { $size: '$orders' }, // Count the number of orders in the OrderHistory
+          ratings: 1,
+          latitude: 1,
+          longitude: 1
+        }
+      },
+      {
+        $sort: { orderCount: -1 } // Sort by the number of orders in descending order
+      }
+    ]);
+
+    // Fetch peak zones for Cyr orders
+    const peakZones = await CYROrders.aggregate([
+      {
+        $match: {
+          'fromLocation.city': city // Match the city with Cyr orders
+        }
+      },
+      {
+        $group: {
+          _id: '$fromLocation.placeName', // Group by the placeName in fromLocation
+          orderCount: { $sum: 1 }, // Count the number of orders for each placeName
+        }
+      },
+      {
+        $sort: { orderCount: -1 } // Sort by the number of orders in descending order
+      }
+    ]);
+
+    // If no restaurants or peak zones are found, handle it gracefully
+    if (restaurants.length === 0 && peakZones.length === 0) {
+      return res.status(404).json({ message: 'No data found for the specified city' });
+    }
+
+    // Return both the peak restaurants and peak zones
+    res.json({ restaurants, peakZones });
+
+  } catch (err) {
+    console.error('Error occurred in peakOrderRestaurants:', err);
+
+    // Handle different types of errors
+    if (err.name === 'MongoError') {
+      return res.status(500).json({ error: 'Database error occurred' });
+    }
+
+    if (err.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid data format' });
+    }
+
+    // Catch-all for unexpected errors
+    return res.status(500).json({ error: 'An unexpected error occurred' });
+  }
+});
+
+ 
 export {
    registerRider,
    loginRider,
@@ -1250,5 +1290,5 @@ export {
    toggleAvailableStatus,
    getEarnings,
    getEarningsHistory,
-   peakOrderRestaurants
+   peakOrderZones
 }
