@@ -1918,7 +1918,7 @@ const getFoodCarouselImages = async (req, res) => {
  const getAllFees = asyncHandler(async (req, res) => {
    try {
       const fees = await Fees.find();
-      res.status(200).json({success: true, fees})
+      res.status(200).json(fees[0])
    } catch (error) {
       console.error('Error fetching hotels:', error);
       res.status(500).json({ success: false, message: 'Server Error' });
