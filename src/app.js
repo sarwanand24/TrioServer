@@ -28,7 +28,7 @@ const allowedOrigins = [
     'https://trioserver.onrender.com',  // Add the correct URLs
     'http://localhost:3000',
     'http://localhost:2024',
-    'https://trio-hotel-owner-dashboard.vercel.app/login'
+    'https://trio-hotel-owner-dashboard.vercel.app'
 ];
 
 const corsOptions = {
