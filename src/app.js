@@ -8,7 +8,8 @@ const app = express();
 
 const allowedOrigins = [
     'https://trioserver.onrender.com',
-    'http://localhost:3000'
+    'http://localhost:3000',
+    'http://localhost:2024'
 ];
 
 app.use(cors({

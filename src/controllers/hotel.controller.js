@@ -6,7 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { HotelOrders } from "../models/HotelOrders.model.js";
-
+import axios from 'axios';
 
 const generateAccessAndRefreshTokens = async (hotelId) => {
     try {
@@ -114,15 +114,14 @@ const loginHotel = asyncHandler(async (req, res) => {
     //Match the password
     //Access and refresh token when password is correct
     //send cookie
-
     const { email, otp } = req.body
-
+    console.log('entryyyy', email, otp)
     if (!(email && otp)) {
        throw new ApiError(400, "email or otp is required")
     }
  
     const hotel = await Hotel.find({ email })
- 
+   console.log('hotel', hotel)
     if (!hotel) {
        res.status(400).json(new ApiResponse(400, "hotel doesn't exists"))
        throw new ApiError(400, "hotel doesn't exists")
@@ -148,12 +147,22 @@ const loginHotel = asyncHandler(async (req, res) => {
         );
         console.log('OTP SENT TO EMAIL SUCCESSFULLY')
     } catch (error) {
-       console.log('OTP SENDING ERROR')
+        if (error.response) {
+            // Server responded with a status code outside the 2xx range
+            console.error('Error Response:', error.response.data);
+        } else if (error.request) {
+            // No response received from the server
+            console.error('No Response:', error.request);
+        } else {
+            // Something else went wrong in making the request
+            console.error('Error Message:', error.message);
+        }
     }
+    
  
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(hotel[0]._id);
  
-    const loggedInhotel = await hotel.findById(hotel[0]._id).select("-password -refreshToken");
+    const loggedInhotel = await Hotel.findById(hotel[0]._id).select("-password -refreshToken");
  
     const options = {
        httpOnly: true,
