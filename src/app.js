@@ -7,7 +7,7 @@ import { Server } from "socket.io";
 const app = express();
 
 app.use(cors({
-    origin: "https://trioserver.onrender.com",
+    origin: "*",
     credentials: true
 }))
 app.use(express.json({limit: "16kb"}))

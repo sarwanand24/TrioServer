@@ -9,7 +9,7 @@ import { User } from "../models/User.model.js";
 const placeOrder = asyncHandler(async (req, res)=> {
 console.log('Entered');
     const {userId, hotelId} = req.params
-    const {bill, totalPerson, rooms, dates, orderType, slotTiming} = req.body
+    const {bill, totalPerson, rooms, dates, orderType, slotTiming, savings} = req.body
 
     if(!(userId || hotelId)){
         throw new ApiError(400, "RiderId is required")
@@ -27,6 +27,7 @@ console.log('Entered');
         bookedBy: new mongoose.Types.ObjectId(userId),
         hotel: new mongoose.Types.ObjectId(hotelId),
         bill,
+        savings,
         totalPerson,
         rooms,
         dates,

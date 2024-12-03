@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.js";
 import { verifyHotelsJWT } from "../middlewares/auth.middleware.js";
-import { addToOrderHistory, getCurrentHotel, getOrderHistory, loginHotel, registerHotel, toggleRoomStatus } from "../controllers/hotel.controller.js";
+import { addToOrderHistory, getCurrentHotel, getOrderHistory, loginHotel, registerHotel, toggleRoomStatus, updateHotelData } from "../controllers/hotel.controller.js";
 
 const router = Router()
 
@@ -13,7 +13,9 @@ router.route("/login").post(loginHotel)
 
 router.route("/addOrderHistory/:orderId").post(verifyHotelsJWT, addToOrderHistory)
 
-router.route("/getOrderHistory").get(verifyHotelsJWT, getOrderHistory)
+router.route("/getOrderHistory/:hotelId").get(getOrderHistory)
+
+router.route("/updateHotel/:hotelId").put(updateHotelData)
 
 router.route("/toggleRoomStatus").patch(verifyHotelsJWT, toggleRoomStatus)
 

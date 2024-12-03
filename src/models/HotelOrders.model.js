@@ -14,6 +14,9 @@ const hotelOrdersSchema = new Schema(
             type: Number,
             required: true
         },
+        savings: {
+            type: Number
+        },
         totalPerson: {
             type: Number
         },

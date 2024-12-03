@@ -5,6 +5,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
+import { HotelOrders } from "../models/HotelOrders.model.js";
 
 
 const generateAccessAndRefreshTokens = async (hotelId) => {
@@ -114,41 +115,63 @@ const loginHotel = asyncHandler(async (req, res) => {
     //Access and refresh token when password is correct
     //send cookie
 
-    const { mobileNo } = req.body
-console.log("Welcome");
-    if (!mobileNo) {
-        throw new ApiError(400, "MobileNO is required")
+    const { email, otp } = req.body
+
+    if (!(email && otp)) {
+       throw new ApiError(400, "email or otp is required")
     }
-
-    const hotel = await Hotel.findOne({ mobileNo })
-
+ 
+    const hotel = await Hotel.find({ email })
+ 
     if (!hotel) {
-        res.status(400).json(new ApiResponse(400, "Hotel doesn't exists"))
-        throw new ApiError(400, "Hotel doesn't exists")
+       res.status(400).json(new ApiResponse(400, "hotel doesn't exists"))
+       throw new ApiError(400, "hotel doesn't exists")
     }
-
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(hotel._id);
-
-    const loggedInHotel = await Hotel.findById(hotel._id).select("-password -refreshToken");
-
+ 
+    const BREVO_API_KEY = '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';
+ 
+    try {
+       const response = await axios.post(
+          'https://api.brevo.com/v3/smtp/email',
+          {
+            sender: { name: "Nikhil Dhamgay", email: "nikhildhamgay200424@gmail.com" },
+            to: [{ email: email }],
+            subject: "Welcome to Tiofy",
+            textContent: `Your OTP code is: ${otp}`,
+          },
+          {
+            headers: {
+              'api-key': BREVO_API_KEY,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        console.log('OTP SENT TO EMAIL SUCCESSFULLY')
+    } catch (error) {
+       console.log('OTP SENDING ERROR')
+    }
+ 
+    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(hotel[0]._id);
+ 
+    const loggedInhotel = await hotel.findById(hotel[0]._id).select("-password -refreshToken");
+ 
     const options = {
-        httpOnly: true,
-        secure: true
+       httpOnly: true,
+       secure: true
     }
-
+ 
     return res.status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
-        .json(
-            new ApiResponse(
-                200,
-                {
-                    Hotel: loggedInHotel, accessToken, refreshToken
-                },
-                "Hotel Logged In Successfully"
-            )
-        )
-
+       .cookie("accessToken", accessToken, options)
+       .cookie("refreshToken", refreshToken, options)
+       .json(
+          new ApiResponse(
+             200,
+             {
+                Hotel: loggedInhotel, accessToken, refreshToken
+             },
+             "hotel Logged In Successfully"
+          )
+       )
 })
 
 const addToOrderHistory = asyncHandler(async (req, res) => {
@@ -189,45 +212,28 @@ const getOrderHistory = asyncHandler(async (req, res) => {
     //using mongoose aggregate filter the id from foodyOrderHistory and foodyOrders
     //check for the above data
     //return res
- 
- 
-    const orderHistory = await Hotel.aggregate([
-       [
-          {
-             $match: {
-                _id: new mongoose.Types.ObjectId(req.hotel._id),
-             },
-          },
-          {
-             $lookup: {
-                from: "hotelorders",
-                localField: "OrderHistory",
-                foreignField: "_id",
-                as: "OrderHistory",
-                pipeline: [
-                   {
-                      $lookup: {
-                         from: "users",
-                         localField: "bookedBy",
-                         foreignField: "_id",
-                         as: "guest"
-                      }
-                   }
-                ]
-             }
-          }
-       ]
-    ])
-    console.log(orderHistory);
-    return res
-       .status(200)
-       .json(
-          new ApiResponse(
-             200,
-             orderHistory[0].OrderHistory,
-             "Order History fetched Succesfully"
-          )
-       )
+    try {
+        console.log('entryyyy in orders')
+        const { hotelId } = req.params; // Assuming hotelId is passed as a route param
+        const bookings = await HotelOrders.find({ hotel: new mongoose.Types.ObjectId(hotelId)})
+          .populate('bookedBy', 'fullName email mobileNo address') // Populate user details
+          .populate('hotel', 'hotelName') // Optional: Populate hotel details
+          .exec();
+
+          const totalEarnings = bookings.reduce((sum, booking) => sum + booking.bill, 0);
+             
+          console.log(bookings, totalEarnings)
+          res.status(200).json({
+            success: true,
+            data: bookings,
+            totalEarnings,
+            message: 'Booking history fetched successfully',
+          });
+      
+      } catch (error) {
+        console.error('Error fetching booking history:', error);
+        res.status(500).json({ success: false, message: 'Server error' });
+      }
  
  })
 
@@ -267,6 +273,26 @@ const getOrderHistory = asyncHandler(async (req, res) => {
        .json(new ApiResponse(200, req.hotel, "User Details fetched Successfully"))
  })
 
+ const updateHotelData = asyncHandler(async (req, res) => {
+    try {
+        const { hotelId } = req.params;
+        const updatedData = req.body;
+    
+        const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, updatedData, {
+          new: true,
+        });
+    
+        if (!updatedHotel) {
+          return res.status(404).json({ success: false, message: "Hotel not found" });
+        }
+    
+        res.status(200).json({ success: true, hotel: updatedHotel });
+      } catch (error) {
+        console.error("Error updating hotel:", error);
+        res.status(500).json({ success: false, message: "Server error" });
+      }
+ })
+
 
 export {
     registerHotel,
@@ -274,5 +300,6 @@ export {
     addToOrderHistory,
     getOrderHistory,
     toggleRoomStatus,
-    getCurrentHotel
+    getCurrentHotel,
+    updateHotelData
 }
