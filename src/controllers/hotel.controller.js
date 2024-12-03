@@ -163,6 +163,8 @@ const loginHotel = asyncHandler(async (req, res) => {
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(hotel[0]._id);
  
     const loggedInhotel = await Hotel.findById(hotel[0]._id).select("-password -refreshToken");
+
+    console.log('res details:', loggedInhotel, accessToken, refreshToken)
  
     const options = {
        httpOnly: true,

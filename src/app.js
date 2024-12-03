@@ -6,22 +6,48 @@ import { Server } from "socket.io";
 
 const app = express();
 
+// const allowedOrigins = [
+//     'https://trioserver.onrender.com',
+//     'http://localhost:3000',
+//     'http://localhost:2024',
+//     'https://7651-2409-4061-208a-95b0-5c9a-c178-a896-8e2f.ngrok-free.app'
+// ];
+
+// app.use(cors({
+//     origin: (origin, callback) => {
+//         if (!origin || allowedOrigins.includes(origin)) {
+//             callback(null, true);
+//         } else {
+//             callback(new Error('Not allowed by CORS'));
+//         }
+//     },
+//     credentials: true
+// }));
+
 const allowedOrigins = [
-    'https://trioserver.onrender.com',
+    'https://trioserver.onrender.com',  // Add the correct URLs
     'http://localhost:3000',
-    'http://localhost:2024'
+    'http://localhost:2024',
 ];
 
-app.use(cors({
-    origin: (origin, callback) => {
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Check if the origin is in the allowedOrigins list
         if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true); // Allow the request
+            callback(null, true);  // Allow the request
         } else {
-            callback(new Error('Not allowed by CORS')); // Block the request
+            callback(new Error('Not allowed by CORS'), false);  // Block the request
         }
     },
-    credentials: true
-}));
+    methods: ['GET', 'POST', 'OPTIONS', 'PUT', 'PATCH', 'DELETE'],  // Allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'],  // Allowed headers
+    credentials: true,  // Allow cookies if needed
+    preflightContinue: true,  // Allow preflight request to continue
+    optionsSuccessStatus: 200  // Some browsers (like old versions of IE) require this status code for successful OPTIONS requests
+};
+
+// Enable CORS with the specified options
+app.use(cors(corsOptions));
 
 app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
