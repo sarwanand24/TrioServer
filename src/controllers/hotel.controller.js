@@ -136,7 +136,7 @@ const loginHotel = asyncHandler(async (req, res) => {
           {
             sender: { name: "Nikhil Dhamgay", email: "nikhildhamgay200424@gmail.com" },
             to: [{ email: email }],
-            subject: "Welcome to Tiofy",
+            subject: "Welcome to Tiofy Hotel",
             textContent: `Your OTP code is: ${otp}`,
           },
           {
