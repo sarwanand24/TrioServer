@@ -6,10 +6,22 @@ import { Server } from "socket.io";
 
 const app = express();
 
+const allowedOrigins = [
+    'https://trioserver.onrender.com',
+    'http://localhost:3000'
+];
+
 app.use(cors({
-    origin: "*",
+    origin: (origin, callback) => {
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true); // Allow the request
+        } else {
+            callback(new Error('Not allowed by CORS')); // Block the request
+        }
+    },
     credentials: true
-}))
+}));
+
 app.use(express.json({limit: "16kb"}))
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static("public"))
