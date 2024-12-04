@@ -731,7 +731,7 @@ const handleConnection = async (socket) => {
 
       if (!nearestRider) {
         const msg = await tiofyApp.messaging().sendEachForMulticast({
-          tokens: [data.Userdata.deviceToken],
+          tokens: [data.userDeviceToken],
           notification: {
             title: 'Cancelled Ride',
             body: 'Sorry! We are unable to find any rider at the moment so please consider this ride as cancelled.',
@@ -766,10 +766,10 @@ const handleConnection = async (socket) => {
       });
 
       console.log("Message2 CYR Rani", msg2, msg2.responses[0].error);
-      console.log("deviceToken user:", data.Userdata.deviceToken)
+      console.log("deviceToken user:", data.userDeviceToken)
       const riderOrder = await RiderAcceptReject.create({
         riderId: nearestRider._id,
-        userDeviceToken: data.Userdata.deviceToken,
+        userDeviceToken: data.userDeviceToken,
         userId: data.Userdata._id,
         bill: data.bill,
         riderEarning: data.bill,
