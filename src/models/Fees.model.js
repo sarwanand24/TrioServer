@@ -10,6 +10,10 @@ const feesSchema = new Schema(
         type: Number,
         default: 20.5
        },
+       deliveryFeeAuto: {
+        type: Number,
+        default: 15.5
+       },
        convinientFee: {
         type: Number,
         default: 15
