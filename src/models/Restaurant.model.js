@@ -71,10 +71,12 @@ const restaurantSchema = new Schema(
             default: 0
         },
         latitude: {
-            type: Number
+            type: Number,
+            default: 22.23487
         },
         longitude: {
-            type: Number
+            type: Number,
+            default: 87.36489
         },
         fssaiNo: {
             type: Number,

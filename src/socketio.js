@@ -32,7 +32,7 @@ const handleConnection = async (socket) => {
   console.log('A user/restaurant/rider connected', socket.id);
 
   /**************************** FOOD ORDERS SOCKETS ********************************/
-
+  
   socket.on("FoodyOrderPlaced", async (data) => {
     console.log("Server data", data);
     //get the device token and send the notification
