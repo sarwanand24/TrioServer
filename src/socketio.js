@@ -730,6 +730,7 @@ const handleConnection = async (socket) => {
       });
 
       if (!nearestRider) {
+        console.log('nearest rider not found', data.userDeviceToken)
         const msg = await tiofyApp.messaging().sendEachForMulticast({
           tokens: [data.userDeviceToken],
           notification: {
@@ -744,12 +745,12 @@ const handleConnection = async (socket) => {
             },
           },
         });
-        console.log("Message", msg);
+        console.log("Message", msg, msg.responses[0].error);
       // return a socket also to user for this
       io.emit("NoRiderFoundForCYR", {userId: data.Userdata._id})
         return;
       }
-
+      console.log('riderDeviceToken:', nearestRider.deviceToken)
       const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
         tokens: [nearestRider.deviceToken],
         notification: {
@@ -837,7 +838,7 @@ const handleConnection = async (socket) => {
     if (!rider) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")
     }
-    console.log("UserDeviceToken", rider.userDeviceToken);
+    console.log("UserDeviceToken when rider accepted order", rider.userDeviceToken);
     const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [rider.userDeviceToken],
       notification: {
