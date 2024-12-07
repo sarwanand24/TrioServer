@@ -74,6 +74,9 @@ const riderAcceptRejectSchema = new Schema(
         },
         vehicleType: {
             type: "String"
+        },
+        prevRejectedRiders: {
+            type: 'Array'
         }
     },
     { timestamps: true })

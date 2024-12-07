@@ -186,7 +186,7 @@ const getOrderById = asyncHandler(async (req, res) => {
         }
     ]);
 
-    if (!order?.length) {
+    if (!order) {
         throw new ApiError(400, "Error in fetching the order");
     }
 

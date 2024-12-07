@@ -507,6 +507,9 @@ const handleConnection = async (socket) => {
     // Delete the rejected rider's data from RiderAcceptReject
     const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.riderId);
 
+    const prevRejectedRiderIds = riderRejected?.prevRejectedRiders || [];
+    prevRejectedRiderIds.push(riderRejected.riderId)   
+
     if (!riderRejected) {
       throw new ApiError(400, "Error in Deleting Accept/Reject");
     }
@@ -529,6 +532,8 @@ const handleConnection = async (socket) => {
         vehicleType: 'Bike',
         _id: { $nin: excludedRiderIds } // Exclude previously rejected riders
       });
+
+      console.log('available riders in riderrejected->', availableRiders)
 
       if (availableRiders.length === 0) {
         console.log('No riders available .........', data.userId, riderRejected);
@@ -676,7 +681,8 @@ const handleConnection = async (socket) => {
         restroEarning: data.restroEarning,
         riderEarning: data.riderEarning,
         city: data.city,
-        orderOf: 'Foody'
+        orderOf: 'Foody',
+        prevRejectedRiders: [...excludedRiderIds],
       });
 
       if (!newRiderOrder) {
@@ -699,7 +705,6 @@ const handleConnection = async (socket) => {
         if (!updatedRiderOrder?.status) {
           console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 50 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
-
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
         }
@@ -707,7 +712,7 @@ const handleConnection = async (socket) => {
     };
 
     // Start the process of finding and notifying a rider
-    await findAndNotifyRider([riderRejected.riderId]);
+    await findAndNotifyRider(prevRejectedRiderIds);
   });
 
   socket.on("RiderCurrentLocation", async (data) => {
@@ -912,6 +917,9 @@ const handleConnection = async (socket) => {
     // Delete the rejected rider's data from RiderAcceptReject
     const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.orderId);
 
+    const prevRejectedRiderIds = riderRejected?.prevRejectedRiders || [];
+    prevRejectedRiderIds.push(riderRejected.riderId)  
+
     if (!riderRejected) {
       throw new ApiError(400, "Error in Deleting Accept/Reject");
     }
@@ -1034,7 +1042,7 @@ const handleConnection = async (socket) => {
     };
 
     // Start the process of finding and notifying a rider
-    await findAndNotifyRider([riderRejected.riderId]);
+    await findAndNotifyRider(prevRejectedRiderIds);
   });
 
   // Disconnect event
