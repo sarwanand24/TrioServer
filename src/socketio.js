@@ -227,6 +227,7 @@ const handleConnection = async (socket) => {
     }
 
     const findAndNotifyRider = async (ridersList) => {
+      console.log('riderlist in foody-->', ridersList)
       if (ridersList.length === 0) {
         const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
           tokens: [restro.restroDeviceToken],
@@ -393,7 +394,7 @@ const handleConnection = async (socket) => {
           const remainingRiders = ridersList.filter(rider => rider._id.toString() !== riderOrder.riderId.toString());
           findAndNotifyRider(remainingRiders); // Recursive call to handle the next rider
         }
-      }, 90000);
+      }, 50000);
     };
 
     findAndNotifyRider(riders);
@@ -521,6 +522,7 @@ const handleConnection = async (socket) => {
     // Function to handle finding a new rider
     const findAndNotifyRider = async (excludedRiderIds = []) => {
       // Find available riders in the city excluding the rejected ones
+      console.log('excluded riders foody->', excludedRiderIds)
       const availableRiders = await Rider.find({
         city: data.city,
         availableStatus: true,
@@ -695,13 +697,13 @@ const handleConnection = async (socket) => {
         // Check if the new rider has responded within the timeout
         const updatedRiderOrder = await RiderAcceptReject.findById(newRiderOrder._id);
         if (!updatedRiderOrder?.status) {
-          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 90 seconds.`);
+          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 50 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
 
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
         }
-      }, 90000);
+      }, 50000);
     };
 
     // Start the process of finding and notifying a rider
@@ -718,6 +720,7 @@ const handleConnection = async (socket) => {
     console.log("Server data", data);
 
     const findAndNotifyRider = async (ridersList) => {
+      console.log('riderlist in cyr-->', ridersList)
       let nearestRider = null;
       let minDistance = Infinity;
 
@@ -750,6 +753,7 @@ const handleConnection = async (socket) => {
       io.emit("NoRiderFoundForCYR", {userId: data.Userdata._id})
         return;
       }
+
       console.log('riderDeviceToken:', nearestRider.deviceToken)
       const msg2 = await tiofyRiderApp.messaging().sendEachForMulticast({
         tokens: [nearestRider.deviceToken],
@@ -806,7 +810,7 @@ const handleConnection = async (socket) => {
           const remainingRiders = ridersList.filter(rider => rider._id.toString() !== riderOrder.riderId.toString());
           findAndNotifyRider(remainingRiders); // Recursive call to handle the next rider
         }
-      }, 90000);
+      }, 50000);
     };
 
     findAndNotifyRider(data.riders);
@@ -915,6 +919,7 @@ const handleConnection = async (socket) => {
     // Function to handle finding a new rider
     const findAndNotifyRider = async (excludedRiderIds = []) => {
       // Find available riders in the city excluding the rejected ones
+      console.log('ridersList in cyr when rejected excluded->', excludedRiderIds)
       const availableRiders = await Rider.find({
         city: data.city,
         availableStatus: true,
@@ -1025,7 +1030,7 @@ const handleConnection = async (socket) => {
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
         }
-      }, 90000);
+      }, 50000);
     };
 
     // Start the process of finding and notifying a rider
