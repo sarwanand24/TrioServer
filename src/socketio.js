@@ -39,7 +39,7 @@ const handleConnection = async (socket) => {
     const msg = await tiofyRestaurantApp.messaging().sendEachForMulticast({
       tokens: [data.deviceToken],
       notification: {
-        title: 'New Order Alert!',
+        title: 'New Order!',
         body: 'A customer just placed an order. Please confirm and start preparing it now.',
         imageUrl: 'https://png.pngtree.com/background/20230426/original/pngtree-chef-preparing-a-dish-in-a-restaurant-picture-image_2482776.jpg',
       },
@@ -852,7 +852,7 @@ const handleConnection = async (socket) => {
         },
       },
     });
-    console.log("Message", msg);
+    console.log("Message", msg, msg2.responses[0].error);
 
     const order = await CYROrders.create({
          bookedBy: data.userId,

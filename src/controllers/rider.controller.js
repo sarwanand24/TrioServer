@@ -112,7 +112,7 @@ const registerRider = asyncHandler(async (req, res) => {
    return res
       .status(200)
       .json(
-         new ApiResponse(200, { Rider: createdRider, accessToken }, "Rider Registered Successfully")
+         new ApiResponse(200, { Rider: createdRider, accessToken, refreshToken }, "Rider Registered Successfully")
       )
 
 })
