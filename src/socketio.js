@@ -852,7 +852,7 @@ const handleConnection = async (socket) => {
         },
       },
     });
-    console.log("Message", msg, msg2.responses[0].error);
+    console.log("Message", msg, msg.responses[0].error);
 
     const order = await CYROrders.create({
          bookedBy: data.userId,
