@@ -1264,7 +1264,7 @@ const getEarnings = asyncHandler(async (req, res) => {
 });
 
 const updateDetails = asyncHandler(async (req, res) => {
-  const { email, mobileNo } = req.body;
+  const { email, mobileNo, address, vehicleName, vehicleType, vehicleNumber } = req.body;
   const riderId = req.rider._id; 
 
   try {
@@ -1286,6 +1286,10 @@ const updateDetails = asyncHandler(async (req, res) => {
     // Update rider details if email is not already taken and mobileNo is provided
     rider.email = email || rider.email;
     rider.mobileNo = mobileNo || rider.mobileNo;
+    rider.address = address || rider.address;
+    rider.vehicleName = vehicleName || rider.vehicleName;
+    rider.vehicleType = vehicleType || rider.vehicleType;
+    rider.vehicleNo = vehicleNumber || rider.vehicleNo;
 
     await rider.save();
 
