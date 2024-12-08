@@ -400,7 +400,7 @@ const handleConnection = async (socket) => {
           clearTimeout(timeoutId); // Clear the timeout if the rider responds
         }
       }, 30000);
-      
+
     };
 
     findAndNotifyRider(riders);
@@ -460,7 +460,7 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in updating order")
     }
 
-    io.emit('OrderAcceptedbyRider', { orderId: order._id })
+    io.emit('OrderAcceptedbyRider', { orderId: order._id, riderId: order.rider })
 
     const restroOrder = await Restaurant.findByIdAndUpdate(
       rider.restaurantId,
@@ -898,7 +898,7 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in creating order")
     }
 
-    io.emit('CyrRideAcceptedbyRider', { orderId: order._id, userId: data.userId })
+    io.emit('CyrRideAcceptedbyRider', { orderId: order._id, userId: data.userId, riderId: order.rider })
 
     const riderOrder = await Rider.findByIdAndUpdate(
       rider.riderId,
