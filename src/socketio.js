@@ -384,17 +384,23 @@ const handleConnection = async (socket) => {
       });
 
       // Start timeout for rider response
-      setTimeout(async () => {
+      let timeoutId = setTimeout(async () => {
         const updatedRiderOrder = await RiderAcceptReject.findById(riderOrder._id);
+      
         if (!updatedRiderOrder?.status) {
           console.log(`Rider ${riderOrder.riderId} did not respond to the order within 90 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(riderOrder._id);
-
+      
           // Exclude the non-responsive rider and try again
           const remainingRiders = ridersList.filter(rider => rider._id.toString() !== riderOrder.riderId.toString());
           findAndNotifyRider(remainingRiders); // Recursive call to handle the next rider
+        } else {
+          // Terminate the timeout in the else block
+          console.log(`Rider ${riderOrder.riderId} responded with status: ${updatedRiderOrder.status}`);
+          clearTimeout(timeoutId); // Clear the timeout if the rider responds
         }
-      }, 50000);
+      }, 30000);
+      
     };
 
     findAndNotifyRider(riders);
@@ -699,16 +705,22 @@ const handleConnection = async (socket) => {
       });
 
       // Start timeout for the new rider's response
-      setTimeout(async () => {
+      const timeoutId = setTimeout(async () => {
         // Check if the new rider has responded within the timeout
         const updatedRiderOrder = await RiderAcceptReject.findById(newRiderOrder._id);
+      
         if (!updatedRiderOrder?.status) {
-          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 50 seconds.`);
+          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 30 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
+      
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
+        } else {
+          console.log(`Rider ${newRiderOrder.riderId} responded with status: ${updatedRiderOrder.status}`);
+          clearTimeout(timeoutId); // Terminate the timeout if the rider responds
         }
-      }, 50000);
+      }, 30000);
+      
     };
 
     // Start the process of finding and notifying a rider
@@ -805,17 +817,24 @@ const handleConnection = async (socket) => {
       // }); // this was just for fast, as data is also stored in accept/reject so dont need this
 
       // Start timeout for rider response
-      setTimeout(async () => {
+    
+      let timeoutId = setTimeout(async () => {
         const updatedRiderOrder = await RiderAcceptReject.findById(riderOrder._id);
+      
         if (!updatedRiderOrder?.status) {
           console.log(`Rider ${riderOrder.riderId} did not respond to the order within 90 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(riderOrder._id);
-
+      
           // Exclude the non-responsive rider and try again
           const remainingRiders = ridersList.filter(rider => rider._id.toString() !== riderOrder.riderId.toString());
           findAndNotifyRider(remainingRiders); // Recursive call to handle the next rider
+        } else {
+          // Terminate the timeout in the else block
+          console.log(`Rider ${riderOrder.riderId} responded with status: ${updatedRiderOrder.status}`);
+          clearTimeout(timeoutId); // Clear the timeout if the rider responds
         }
-      }, 50000);
+      }, 30000);
+      
     };
 
     findAndNotifyRider(data.riders);
@@ -1028,17 +1047,22 @@ const handleConnection = async (socket) => {
       }
 
       // Start timeout for the new rider's response
-      setTimeout(async () => {
+      const timeoutId = setTimeout(async () => {
         // Check if the new rider has responded within the timeout
         const updatedRiderOrder = await RiderAcceptReject.findById(newRiderOrder._id);
+      
         if (!updatedRiderOrder?.status) {
-          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 90 seconds.`);
+          console.log(`Rider ${newRiderOrder.riderId} did not respond to the order within 30 seconds.`);
           await RiderAcceptReject.findByIdAndDelete(newRiderOrder._id);
-
+      
           // Recursively find another nearest rider if the current rider didn't respond
           await findAndNotifyRider([...excludedRiderIds, nearestRider._id, newRiderOrder.riderId]);
+        } else {
+          console.log(`Rider ${newRiderOrder.riderId} responded with status: ${updatedRiderOrder.status}`);
+          clearTimeout(timeoutId); // Terminate the timeout if the rider responds
         }
-      }, 50000);
+      }, 30000);
+      
     };
 
     // Start the process of finding and notifying a rider
