@@ -86,7 +86,7 @@ router.route("/get-earnings").get(getEarnings);
 
 router.route("/earning-history").get(getEarningsHistory);
 
-router.route("/update-details").post(verifyRidersJWT, updateDetails);
+router.route("/update-details").put(verifyRidersJWT, updateDetails);
 
 router.route('/getPeakOrderZones/:city').get(peakOrderZones);
 
