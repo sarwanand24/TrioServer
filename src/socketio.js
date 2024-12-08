@@ -165,6 +165,7 @@ const handleConnection = async (socket) => {
         },
       },
     });
+    
     console.log("Message Rani Loves Nikhil", msg, msg.responses[0].errors);
 
     const restaurant = await Restaurant.findById(restro.restaurantId);

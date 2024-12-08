@@ -28,7 +28,6 @@ const riderSchema = new Schema(
         mobileNo: {
             type: Number,
             required: true,
-            unique: true
         },
         alternateMobileNo: {
             type: Number
@@ -53,6 +52,15 @@ const riderSchema = new Schema(
         },
         bankAccountNo: {
             type: Number
+        },
+        ifscCode: {
+            type: String
+        },
+        bankName: {
+            type: String
+        },
+        bankBranch: {
+            type: String
         },
         moneyEarned: {
             type: Number,
@@ -94,7 +102,7 @@ const riderSchema = new Schema(
         },
         availableStatus: {
             type: Boolean,
-            default: true
+            default: false
         },
         deviceToken: {
           type: String
@@ -110,6 +118,10 @@ const riderSchema = new Schema(
             type: String,
             required: true,
             default: 'Bike'
+        },
+        verified: {
+            type: Boolean,
+            default: false
         }
     }, {
     timestamps: true

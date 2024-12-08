@@ -31,7 +31,8 @@ const generateAccessAndRefreshTokens = async (riderId) => {
 const registerRider = asyncHandler(async (req, res) => {
 
    const { riderName, email, password, address, mobileNo, alternateMobileNo, profileImg, drivingLiscenceImg,
-       vehicleName, vehicleNo, aadharImg, city, vehicleType } = req.body;
+       vehicleName, vehicleNo, aadharImg, city, vehicleType, accountNumber, ifscCode,
+        bankName, branch } = req.body;
 
    let altMob;
    if(alternateMobileNo?.length) {
@@ -59,7 +60,7 @@ const registerRider = asyncHandler(async (req, res) => {
 
    const profilePhotoLocalPath = profileImg;
    const liscenceLocalPath = drivingLiscenceImg;
-   //const aadharLocalPath = aadharImg;
+   const aadharLocalPath = aadharImg;
    // const profilePhotoLocalPath = req.files?.profilePhoto[0]?.path;
    // const liscenceLocalPath = req.files?.drivingLiscence[0]?.path;
   // const aadharLocalPath = req.files?.aadharCard[0]?.path;
@@ -71,7 +72,7 @@ const registerRider = asyncHandler(async (req, res) => {
 
    const profilePhoto = await uploadOnCloudinary(profilePhotoLocalPath);
    const drivingLiscence = await uploadOnCloudinary(liscenceLocalPath);
-  // const aadharCard = await uploadOnCloudinary(aadharLocalPath);
+  const aadharCard = await uploadOnCloudinary(aadharLocalPath);
   console.log("Rani", drivingLiscence.url);
    if (!profilePhoto) {
       res.status(400).json(new ApiResponse(400, "Error in uploading profilePhoto file"))
@@ -81,10 +82,10 @@ const registerRider = asyncHandler(async (req, res) => {
       res.status(400).json(new ApiResponse(400, "Error in uploading driving Liscence file"))
       throw new ApiError(400, "Error in uploading drivingLiscence file")
    }
-  /*** if (!aadharCard) {
+   if (!aadharCard) {
       res.status(400).json(new ApiResponse(400, "Error in uploading aadhar Card file"))
       throw new ApiError(400, "Error in uploading aadharCard file")
-   }   ***/
+   }  
 
    const rider = await Rider.create({
       riderName,
@@ -98,7 +99,11 @@ const registerRider = asyncHandler(async (req, res) => {
       vehicleName,
       vehicleNo,
       vehicleType,
-      city
+      city,
+      bankAccountNo: accountNumber, 
+      ifscCode,
+      bankBranch: branch,
+      bankName
    })
 
    if (!rider) {
