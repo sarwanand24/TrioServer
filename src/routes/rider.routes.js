@@ -11,7 +11,7 @@ import {
     setDeviceToken,
     signoutRider,
     toggleAvailableStatus,
-    updateAccountDetails, updateDrivingLiscence, updateRiderLocation, updateRiderProfilePhoto
+    updateAccountDetails, updateDetails, updateDrivingLiscence, updateRiderLocation, updateRiderProfilePhoto
 }
     from "../controllers/rider.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -85,6 +85,8 @@ router.route("/toggle-availability").post(verifyRidersJWT, toggleAvailableStatus
 router.route("/get-earnings").get(getEarnings);
 
 router.route("/earning-history").get(getEarningsHistory);
+
+router.route("/update-details").post(verifyRidersJWT, updateDetails);
 
 router.route('/getPeakOrderZones/:city').get(peakOrderZones);
 

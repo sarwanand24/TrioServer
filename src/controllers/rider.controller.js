@@ -1263,6 +1263,40 @@ const getEarnings = asyncHandler(async (req, res) => {
   }
 });
 
+const updateDetails = asyncHandler(async (req, res) => {
+  const { email, mobileNo } = req.body;
+  const riderId = req.rider._id; 
+
+  try {
+    // Find the rider by the user ID
+    const rider = await Rider.findById(riderId);
+
+    if (!rider) {
+      return res.status(404).json({ message: 'Rider not found' });
+    }
+
+    // Check if the email is already taken by another rider
+    if (email) {
+      const existingEmail = await Rider.findOne({ email });
+      if (existingEmail && existingEmail._id.toString() !== rider._id.toString()) {
+        return res.status(400).json({ message: 'Email is already in use by another rider' });
+      }
+    }
+
+    // Update rider details if email is not already taken and mobileNo is provided
+    rider.email = email || rider.email;
+    rider.mobileNo = mobileNo || rider.mobileNo;
+
+    await rider.save();
+
+    // Respond with success
+    res.json({ message: 'Rider updated successfully', data: rider });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+})
+
  
 export {
    registerRider,
@@ -1295,5 +1329,6 @@ export {
    toggleAvailableStatus,
    getEarnings,
    getEarningsHistory,
-   peakOrderZones
+   peakOrderZones,
+   updateDetails
 }
