@@ -515,7 +515,20 @@ const handleConnection = async (socket) => {
     const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.riderId);
 
     const prevRejectedRiderIds = riderRejected?.prevRejectedRiders || [];
-    prevRejectedRiderIds.push(riderRejected.riderId)   
+    prevRejectedRiderIds.push(riderRejected.riderId) 
+    
+    const rejectCount = await Rider.findByIdAndUpdate(
+      riderRejected.riderId,
+      {
+        $inc: { rejectCount: 1 }, // Increment rejectCount by 1
+      },
+      { new: true } // Return the updated document
+    );
+
+    if(!rejectCount){
+      throw new ApiError(400, "Error in increasing the rejectCount");
+    }
+    
 
     if (!riderRejected) {
       throw new ApiError(400, "Error in Deleting Accept/Reject");
@@ -938,7 +951,19 @@ const handleConnection = async (socket) => {
     const riderRejected = await RiderAcceptReject.findByIdAndDelete(data.orderId);
 
     const prevRejectedRiderIds = riderRejected?.prevRejectedRiders || [];
-    prevRejectedRiderIds.push(riderRejected.riderId)  
+    prevRejectedRiderIds.push(riderRejected.riderId) 
+    
+    const rejectCount = await Rider.findByIdAndUpdate(
+      riderRejected.riderId,
+      {
+        $inc: { rejectCount: 1 }, // Increment rejectCount by 1
+      },
+      { new: true } // Return the updated document
+    );
+
+    if(!rejectCount){
+      throw new ApiError(400, "Error in increasing the rejectCount");
+    }
 
     if (!riderRejected) {
       throw new ApiError(400, "Error in Deleting Accept/Reject");

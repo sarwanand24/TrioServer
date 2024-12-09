@@ -122,6 +122,10 @@ const riderSchema = new Schema(
         verified: {
             type: Boolean,
             default: false
+        },
+        rejectCount: {
+            type: Number,
+            default: 0
         }
     }, {
     timestamps: true
