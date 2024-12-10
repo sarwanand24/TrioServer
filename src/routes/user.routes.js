@@ -33,7 +33,9 @@ import {
     uploadhotelDashboardImage,
     getAllHotelsCity,
     getAllHotels,
-    getAllFees
+    getAllFees,
+    getCyrOfferImages,
+    uploadCyrOfferImage
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -118,6 +120,10 @@ router.post('/carousel-images', upload.single("imageUrl"), uploadCarouselImage);
 router.get('/offer-images', getOfferImages);
 
 router.post('/offer-images',upload.single("imageUrl"), uploadOfferImage);
+
+router.get('/cyr-offer-images', getCyrOfferImages);
+
+router.post('/cyr-offer-images',upload.single("imageUrl"), uploadCyrOfferImage);
 
 router.get('/food-carousel-images', getFoodCarouselImages);
 

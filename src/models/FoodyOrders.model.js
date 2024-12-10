@@ -22,7 +22,8 @@ const foodyOrdersSchema = new Schema(
             required: true
         },
         orderStatus: {
-            type: String
+            type: String,
+            default: 'Your order is getting prepared in the restaurant'
         },
         bill: {
             type: Number,

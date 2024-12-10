@@ -226,3 +226,10 @@ const hotelDashboardSchema = new mongoose.Schema({
 });
 
 export const hotelDashboardImage = mongoose.model('hotelDashboardImage', hotelDashboardSchema);
+
+const cyrOfferSchema = new mongoose.Schema({
+  imageUrl: { type: String, required: true },
+  title: { type: String } // Optional, you can store colors too
+});
+
+export const CyrOfferImage = mongoose.model('CyrOfferImage', cyrOfferSchema);
