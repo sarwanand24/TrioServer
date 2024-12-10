@@ -1959,6 +1959,41 @@ const getFoodCarouselImages = async (req, res) => {
    }
  };
 
+ const updateDetails = asyncHandler(async (req, res) => {
+   const { email, mobileNo, address } = req.body;
+   const userId = req.user._id; 
+ 
+   try {
+     // Find the user by the user ID
+     const user = await User.findById(userId);
+ 
+     if (!user) {
+       return res.status(404).json({ message: 'user not found' });
+     }
+ 
+     // Check if the email is already taken by another user
+     if (email) {
+       const existingEmail = await User.findOne({ email });
+       if (existingEmail && existingEmail._id.toString() !== user._id.toString()) {
+         return res.status(400).json({ message: 'Email is already in use by another user' });
+       }
+     }
+ 
+     // Update user details if email is not already taken and mobileNo is provided
+     user.email = email || user.email;
+     user.mobileNo = mobileNo || user.mobileNo;
+     user.address = address || user.address;
+ 
+     await user.save();
+ 
+     // Respond with success
+     res.json({ message: 'user updated successfully', data: user });
+   } catch (error) {
+     console.error(error);
+     res.status(500).json({ message: 'Server error' });
+   }
+ })
+
 
 export {
    registerUser,
@@ -2023,5 +2058,6 @@ export {
   getAllHotels,
   getAllFees,
   getCyrOfferImages,
-  uploadCyrOfferImage
+  uploadCyrOfferImage,
+  updateDetails
 }

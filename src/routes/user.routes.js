@@ -35,7 +35,8 @@ import {
     getAllHotels,
     getAllFees,
     getCyrOfferImages,
-    uploadCyrOfferImage
+    uploadCyrOfferImage,
+    updateDetails
 }
     from "../controllers/user.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -148,5 +149,7 @@ router.get('/hotel-dashboard-images', gethotelDashboardImages);
 router.post('/hotel-dashboard-images',upload.single("imageUrl"), uploadhotelDashboardImage);
 
 router.route("/get-all-fees").get(getAllFees);
+
+router.route("/update-details").put(verifyUsersJWT, updateDetails);
 
 export default router
