@@ -29,7 +29,6 @@ const restaurantSchema = new Schema(
         mobileNo: {
             type: Number,
             required: true,
-            unique: true
         },
         alternateMobileNo: {
             type: Number
@@ -65,6 +64,15 @@ const restaurantSchema = new Schema(
         ],
         bankAccountNo: {
             type: Number
+        },
+        ifscCode: {
+            type: String
+        },
+        bankName: {
+            type: String
+        },
+        bankBranch: {
+            type: String
         },
         ratings: {
             type: Number,
@@ -111,7 +119,11 @@ const restaurantSchema = new Schema(
         cuisineType: {
             type: String,
             default: 'NorthIndian'
-        }
+        },
+        verified: {
+            type: Boolean,
+            default: false
+        },
     }, {
     timestamps: true
 })

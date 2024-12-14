@@ -7,6 +7,7 @@ import {
     refreshAccessToken, registerRestaurant, removeNonVegFoods, removeOrderHistory, removeVegFoods, setDeviceToken, signoutRestaurant,
     toggleAvailableStatus,
     updateAccountDetails,
+    updateDetails,
     updateRestroLocation
 } from "../controllers/restaurant.controller.js";
 import { upload } from "../middlewares/multer.js";
@@ -61,5 +62,7 @@ router.route("/toggle-availability").post(verifyRestaurantsJWT, toggleAvailableS
 router.route("/get-earnings").get(getEarnings);
 
 router.route("/earning-history").get(getEarningsHistory);
+
+router.route("/update-details").put(verifyRestaurantsJWT, updateDetails);
 
 export default router

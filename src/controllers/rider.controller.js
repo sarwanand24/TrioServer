@@ -40,7 +40,7 @@ const registerRider = asyncHandler(async (req, res) => {
          alternateMobileNo
       }
    }
-
+   
    if (
       [riderName, email, password, address, mobileNo, vehicleName, vehicleNo].some((field) =>
          field?.trim === "")

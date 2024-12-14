@@ -42,7 +42,8 @@ const registerRestaurant = asyncHandler(async (req, res) => {
    //return res
 
    const { restaurantName, ownerName, email, password, address, mobileNo, alternateMobileNo,
-      restaurantPhotoImg, fssaiNo, fssaiExpiryDate, openingTime, closingTime, city } = req.body;
+      restaurantPhotoImg, fssaiNo, fssaiExpiryDate, openingTime, closingTime, city, cuisineType, accountNumber, ifscCode,
+      bankName, branch } = req.body;
 
    let altMob;
    if (alternateMobileNo?.length) {
@@ -91,7 +92,12 @@ const registerRestaurant = asyncHandler(async (req, res) => {
       alternateMobileNo: altMob?.alternateMobileNo || "",
       openingTime,
       closingTime,
-      city
+      city,
+      cuisineType,
+      bankAccountNo: accountNumber, 
+      ifscCode,
+      bankBranch: branch,
+      bankName
    })
 
    if (!restaurant) {
@@ -1078,6 +1084,45 @@ const getEarnings = asyncHandler(async (req, res) => {
    }
  });
 
+ const updateDetails = asyncHandler(async (req, res) => {
+   const { email, mobileNo, address, cuisineType, openingTime, closingTime, restaurantName } = req.body;
+   const restaurantId = req.restaurant._id; 
+ 
+   try {
+     // Find the restauarant by the user ID
+     const restaurant = await Restaurant.findById(restaurantId);
+ 
+     if (!restaurant) {
+       return res.status(404).json({ message: 'restaurant not found' });
+     }
+ 
+     // Check if the email is already taken by another restaurant
+     if (email) {
+       const existingEmail = await Restaurant.findOne({ email });
+       if (existingEmail && existingEmail._id.toString() !== restaurant._id.toString()) {
+         return res.status(400).json({ message: 'Email is already in use by another restaurant' });
+       }
+     }
+ 
+     // Update restaurant details if email is not already taken and mobileNo is provided
+     restaurant.email = email || restaurant.email;
+     restaurant.mobileNo = mobileNo || restaurant.mobileNo;
+     restaurant.address = address || restaurant.address;
+     restaurant.cuisineType = cuisineType || restaurant.cuisineType;
+     restaurant.openingTime = openingTime || restaurant.openingTime;
+     restaurant.closingTime = closingTime || restaurant.closingTime;
+     restaurant.restaurantName = restaurantName || restaurant.restaurantName;
+ 
+     await restaurant.save();
+ 
+     // Respond with success
+     res.json({ message: 'restaurant updated successfully', data: restaurant });
+   } catch (error) {
+     console.error(error);
+     res.status(500).json({ message: 'Server error' });
+   }
+ })
+
 export {
    registerRestaurant,
    loginRestaurant,
@@ -1107,5 +1152,6 @@ export {
    updateRestroLocation,
    toggleAvailableStatus,
    getEarnings,
-   getEarningsHistory
+   getEarningsHistory,
+   updateDetails
 }

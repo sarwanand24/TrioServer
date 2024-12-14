@@ -998,7 +998,7 @@ const handleConnection = async (socket) => {
           },
         });
         console.log("Message", msg2.responses[0].error);
-
+        io.emit("NoRiderFoundForCYR", {userId: riderRejected.userId})
         return;
       }
 
