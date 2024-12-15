@@ -107,7 +107,7 @@ const restaurantSchema = new Schema(
         },
         availableStatus: {
             type: Boolean,
-            default: true
+            default: false
         },
         deviceToken: {
           type: String
@@ -118,7 +118,7 @@ const restaurantSchema = new Schema(
         },
         cuisineType: {
             type: String,
-            default: 'NorthIndian'
+            default: 'Indian'
         },
         verified: {
             type: Boolean,

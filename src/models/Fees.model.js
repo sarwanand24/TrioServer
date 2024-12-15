@@ -8,11 +8,11 @@ const feesSchema = new Schema(
        },
        deliveryFeeCar: {
         type: Number,
-        default: 20.5
+        default: 35
        },
-       deliveryFeeAuto: {
+       deliveryFeeToto: {
         type: Number,
-        default: 15.5
+        default: 25
        },
        convinientFee: {
         type: Number,
