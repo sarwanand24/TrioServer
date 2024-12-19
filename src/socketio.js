@@ -876,6 +876,8 @@ const handleConnection = async (socket) => {
 
   socket.on("RiderAcceptedCyrOrder", async (data) => {
 
+    console.log('entry in acceptance by rider cyr------')
+
     const rider = await RiderAcceptReject.findByIdAndUpdate(
       data.orderId,
       {
@@ -884,6 +886,10 @@ const handleConnection = async (socket) => {
         }
       },
       { new: true })
+
+      if (!rider) {
+        throw new ApiError(400, "Error in Changing Status of Accept/Reject")
+      }
 
       const toggleAvailableStatus = await Rider.findByIdAndUpdate(
         new mongoose.Types.ObjectId(rider.riderId),
@@ -897,10 +903,26 @@ const handleConnection = async (socket) => {
           throw new ApiError(400, "Error in Changing Status of Availability of Rider")
         }
 
-    if (!rider) {
-      throw new ApiError(400, "Error in Changing Status of Accept/Reject")
-    }
     console.log("UserDeviceToken when rider accepted order", rider.userDeviceToken);
+    const order = await CYROrders.create({
+      bookedBy: data.userId,
+      rider: rider.riderId,
+      fromLocation: rider.fromLocation,
+      toLocation: rider.toLocation,
+      bill: rider.bill,
+      distance: rider.distance,
+      otp: data.otp,
+      riderEarning: data.riderEarning
+ })
+
+ if (!order) {
+   throw new ApiError(400, "Error in creating order")
+ }
+
+ io.emit('CyrRideAcceptedbyRider', { orderId: order._id, userId: data.userId, riderId: order.rider })
+
+ console.log('Success in io emit from here to rider for opening map-------')
+
     const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [rider.userDeviceToken],
       notification: {
@@ -916,23 +938,6 @@ const handleConnection = async (socket) => {
       },
     });
     console.log("Message", msg, msg.responses[0].error);
-
-    const order = await CYROrders.create({
-         bookedBy: data.userId,
-         rider: rider.riderId,
-         fromLocation: rider.fromLocation,
-         toLocation: rider.toLocation,
-         bill: rider.bill,
-         distance: rider.distance,
-         otp: data.otp,
-         riderEarning: data.riderEarning
-    })
-
-    if (!order) {
-      throw new ApiError(400, "Error in creating order")
-    }
-
-    io.emit('CyrRideAcceptedbyRider', { orderId: order._id, userId: data.userId, riderId: order.rider })
 
     const riderOrder = await Rider.findByIdAndUpdate(
       rider.riderId,
@@ -963,7 +968,7 @@ const handleConnection = async (socket) => {
     if (!userOrder) {
       throw new ApiError(400, "Error in adding Users order history")
     }
-
+     console.log('All functions executed.........')
   })
 
   socket.on("RiderRejectedCyrOrder", async (data) => {
