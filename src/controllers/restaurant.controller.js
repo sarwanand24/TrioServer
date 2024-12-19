@@ -566,7 +566,7 @@ const addVegFoods = asyncHandler(async (req, res) => {
   console.log(name, price, image, tiofyPriceFactor);
   
   if (
-   [name, image, price, tiofyPrice].some((field) =>
+   [name, image, price, tiofyPriceFactor].some((field) =>
       field?.trim === "")
 ) {
    res.status(400).json(new ApiResponse(400, "Didn't got the details"))
