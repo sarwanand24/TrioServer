@@ -562,8 +562,8 @@ const updateLatLong = asyncHandler(async (req, res) => {
 })
 
 const addVegFoods = asyncHandler(async (req, res) => {
-   const { name, image, price, tiofyPrice } = req.body;
-  console.log(name, price, image, tiofyPrice);
+   const { name, image, price, tiofyPriceFactor } = req.body;
+  console.log(name, price, image, tiofyPriceFactor);
   
   if (
    [name, image, price, tiofyPrice].some((field) =>
@@ -588,7 +588,7 @@ const addVegFoods = asyncHandler(async (req, res) => {
       name,
       image: foodPhoto.url,
       price,
-      tiofyPrice
+      tiofyPriceFactor
    })
 
    if (!vegfood) {
@@ -616,10 +616,10 @@ const addVegFoods = asyncHandler(async (req, res) => {
 })
 
 const addNonVegFoods = asyncHandler(async (req, res) => {
-   const { name, image, price, tiofyPrice } = req.body;
+   const { name, image, price, tiofyPriceFactor } = req.body;
 
    if (
-      [name, image, price, tiofyPrice].some((field) =>
+      [name, image, price, tiofyPriceFactor].some((field) =>
          field?.trim === "")
    ) {
       res.status(400).json(new ApiResponse(400, "Didn't got the details"))
@@ -641,7 +641,7 @@ const addNonVegFoods = asyncHandler(async (req, res) => {
       name,
       image: foodPhoto.url,
       price,
-      tiofyPrice
+      tiofyPriceFactor
    })
 
    if (!nonvegfood) {

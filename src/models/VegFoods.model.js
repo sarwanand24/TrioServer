@@ -16,7 +16,7 @@ const vegFoodsSchema = new Schema(
       },
       tiofyPriceFactor: {
         type: Number,
-        default: 1.2
+        default: 1
       }
    },{timestamps: true})
 
