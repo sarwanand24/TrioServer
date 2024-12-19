@@ -156,7 +156,13 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject");
     }
 
-    const order = await FoodyOrders.findById(restro.orderId)
+    const order = await FoodyOrders.findByIdAndUpdate(
+      restro.orderId,
+       {
+         $set: {
+          orderStatus: 'Restaurant Accepted Your Order.'
+         }
+    })
 
     if (!order) {
       throw new ApiError(400, "Error in Fetching Foody Orders")
