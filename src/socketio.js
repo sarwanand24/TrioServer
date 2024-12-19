@@ -51,6 +51,22 @@ const handleConnection = async (socket) => {
       },
     });
     console.log("Message Food Rani",msg, msg.responses[0].error);
+    const order = await FoodyOrders.create({
+      orderedBy: new mongoose.Types.ObjectId(data.userId),
+      restaurant: new mongoose.Types.ObjectId(data.restroId),
+      orderedFromLocation: data.userAddress,
+      bill: data.newTotalAmount,
+      items: data.newSelectedFoods,
+      restroEarning: data.newTotalRestroAmount,
+      riderEarning: data.riderEarning,
+      orderStatus: "Restaurant will soon accept your order.",
+      otp: data.otp
+    })
+
+    if (!order) {
+      throw new ApiError(400, "Error in creating order")
+    }
+
     const restro = await RestroAcceptReject.create({
       restaurantId: data.restroId,
       foodItems: data.newSelectedFoods,
@@ -62,7 +78,8 @@ const handleConnection = async (socket) => {
       userId: data.userId,
       riderEarning: data.riderEarning,
       restroDeviceToken: data.deviceToken,
-      otp: data.otp
+      otp: data.otp,
+      orderId: order?._id
     })
     console.log(restro);
 
@@ -84,6 +101,13 @@ const handleConnection = async (socket) => {
     if (!restro) {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject")
     }
+
+    const order = await FoodyOrders.findByIdAndDelete(restro.orderId)
+
+    if (!order) {
+      throw new ApiError(400, "Error in Deleting Foody Orders")
+    }
+
     console.log("UserDeviceToken", restro.userDeviceToken);
     const msg = await tiofyApp.messaging().sendEachForMulticast({
       tokens: [restro.userDeviceToken],
@@ -132,23 +156,13 @@ const handleConnection = async (socket) => {
       throw new ApiError(400, "Error in Changing Status of Accept/Reject");
     }
 
-    const order = await FoodyOrders.create({
-      orderedBy: new mongoose.Types.ObjectId(data.userId),
-      restaurant: new mongoose.Types.ObjectId(restro.restaurantId),
-      orderedFromLocation: restro.userAddress,
-      bill: data.bill,
-      items: data.foodItems,
-      restroEarning: data.restroBill,
-      riderEarning: data.riderEarning,
-      orderStatus: "Your Order is getting Prepared",
-      otp: restro.otp
-    })
+    const order = await FoodyOrders.findById(restro.orderId)
 
     if (!order) {
-      throw new ApiError(400, "Error in creating order")
+      throw new ApiError(400, "Error in Fetching Foody Orders")
     }
 
-    io.emit("OrderAcceptedbyRestaurant", { data, orderId: order._id });
+    // io.emit("OrderAcceptedbyRestaurant", { data, orderId: order._id });
 
     console.log("UserDeviceToken", restro.userDeviceToken);
     const msg = await tiofyApp.messaging().sendEachForMulticast({
@@ -166,7 +180,7 @@ const handleConnection = async (socket) => {
       },
     });
     
-    console.log("Message Rani Loves Nikhil", msg, msg.responses[0].errors);
+    console.log("Message Rani Loves Nikhil", msg, msg.responses[0].error);
 
     const restaurant = await Restaurant.findById(restro.restaurantId);
 

@@ -40,6 +40,10 @@ const restroAcceptRejectSchema = new Schema(
         status: {
             type: Boolean,
             default: false
+        },
+        orderId: {
+            type: Schema.Types.ObjectId,
+            ref: 'FoodyOrders'
         }
     },
     { timestamps: true })
