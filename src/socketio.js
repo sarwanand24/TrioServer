@@ -876,8 +876,6 @@ const handleConnection = async (socket) => {
 
   socket.on("RiderAcceptedCyrOrder", async (data) => {
 
-    console.log('entry in acceptance by rider cyr------')
-
     const rider = await RiderAcceptReject.findByIdAndUpdate(
       data.orderId,
       {
@@ -968,7 +966,7 @@ const handleConnection = async (socket) => {
     if (!userOrder) {
       throw new ApiError(400, "Error in adding Users order history")
     }
-     console.log('All functions executed.........')
+
   })
 
   socket.on("RiderRejectedCyrOrder", async (data) => {

@@ -575,18 +575,18 @@ const addVegFoods = asyncHandler(async (req, res) => {
 
    //  const foodLocalPath = image;  commented for test in postman
 
-   const foodLocalPath = req.file?.path;
+   // const foodLocalPath = req.file?.path;
 
-   const foodPhoto = await uploadOnCloudinary(foodLocalPath);
+   // const foodPhoto = await uploadOnCloudinary(foodLocalPath);
 
-   if (!foodPhoto) {
-      res.status(400).json(new ApiResponse(400, "Error in uploading food file"))
-      throw new ApiError(400, "Error in uploading food file")
-   }
+   // if (!foodPhoto) {
+   //    res.status(400).json(new ApiResponse(400, "Error in uploading food file"))
+   //    throw new ApiError(400, "Error in uploading food file")
+   // }
 
    const vegfood = await VegFoods.create({
       name,
-      image: foodPhoto.url,
+      image: image.startsWith("http://") ? image.replace("http://", "https://") : image,
       price,
       tiofyPriceFactor
    })
@@ -628,18 +628,18 @@ const addNonVegFoods = asyncHandler(async (req, res) => {
 
    //  const foodLocalPath = image;  commented for test in postman
 
-   const foodLocalPath = req.file?.path;
+   // const foodLocalPath = req.file?.path;
 
-   const foodPhoto = await uploadOnCloudinary(foodLocalPath);
+   // const foodPhoto = await uploadOnCloudinary(foodLocalPath);
 
-   if (!foodPhoto) {
-      res.status(400).json(new ApiResponse(400, "Error in uploading food file"))
-      throw new ApiError(400, "Error in uploading food file")
-   }
+   // if (!foodPhoto) {
+   //    res.status(400).json(new ApiResponse(400, "Error in uploading food file"))
+   //    throw new ApiError(400, "Error in uploading food file")
+   // }
 
    const nonvegfood = await NonVegFoods.create({
       name,
-      image: foodPhoto.url,
+      image: image.startsWith("http://") ? image.replace("http://", "https://") : image,
       price,
       tiofyPriceFactor
    })
