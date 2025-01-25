@@ -1231,9 +1231,17 @@ const getEarnings = asyncHandler(async (req, res) => {
         $group: {
           _id: '$fromLocation.placeName', // Group by the placeName in fromLocation
           orderCount: { $sum: 1 }, // Count the number of orders for each placeName
-          lat: '$fromLocation.lat',
-          long: '$fromLocation.long'
+          lat: { $first: '$fromLocation.lat' }, // Get the latitude of the first document in the group
+          long: { $first: '$fromLocation.long' },
         }
+      },
+      {
+        $project: {
+          placeName: '$_id', // Rename _id to placeName
+          orderCount: 1, // Include orderCount
+          lat: 1, // Include latitude
+          long: 1, // Include longitude
+        },
       },
       {
         $sort: { orderCount: -1 } // Sort by the number of orders in descending order
