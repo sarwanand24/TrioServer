@@ -2,7 +2,7 @@ import { Hotel } from "../models/Hotel.model.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { uploadOnCloudinary, uploadOnCloudinaryHotel } from "../utils/cloudinary.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
 import { HotelOrders } from "../models/HotelOrders.model.js";
@@ -37,7 +37,8 @@ const registerHotel = asyncHandler(async (req, res) => {
     //return res
 
     const { hotelName, ownerName, email, password, address, mobileNo, alternateMobileNo,
-        hotelPhotoImg, checkInTime, checkOutTime, price, isCoupleStayAllowed, isFamilyStayAllowed, city } = req.body;
+         checkInTime, checkOutTime, price, isCoupleStayAllowed, isFamilyStayAllowed, city, facilities, 
+    price3hr, price6hr, price12hr } = req.body;
 
     let altMob;
     if (alternateMobileNo?.length) {
@@ -47,12 +48,22 @@ const registerHotel = asyncHandler(async (req, res) => {
     }
 
     if (
-        [hotelName, ownerName, email, password, address, mobileNo, checkInTime, checkOutTime, price, isCoupleStayAllowed, isFamilyStayAllowed, city].some((field) =>
+        [hotelName, ownerName, email, password, address, mobileNo, checkInTime, checkOutTime, isCoupleStayAllowed, isFamilyStayAllowed, city].some((field) =>
             field?.trim === "")
     ) {
         res.status(400).json(new ApiResponse(400, "All fields are required"))
         throw new ApiError(400, "All fields are required")
     }
+
+        // Validate price fields based on stay options
+        // if (isCoupleStayAllowed && (!price3hr || !price6hr || !price12hr)) {
+        //     res.status(400).json(new ApiResponse(400, "Couple Stay prices (3hr, 6hr, 12hr) are required"));
+        //     throw new ApiError(400, "Couple Stay prices (3hr, 6hr, 12hr) are required");
+        // }
+        // if (isFamilyStayAllowed && (!price || price <= 0)) {
+        //     res.status(400).json(new ApiResponse(400, "Family Stay price is required"));
+        //     throw new ApiError(400, "Family Stay price is required");
+        // }
 
     const existedHotel = await Hotel.findOne({
         $or: [{ mobileNo }, { email }]
@@ -63,12 +74,19 @@ const registerHotel = asyncHandler(async (req, res) => {
         throw new ApiError(409, "Hotel already exists, Please Login!")
     }
 
-    //const HotelLocalPath = HotelPhotoImg;
-    const HotelLocalPath = req.file?.path;
-
-    const hotelPhoto = await uploadOnCloudinary(HotelLocalPath);
+    // const HotelLocalPath = hotelPhoto;
+    const hotelPhoto  = req.file?.path;
+    console.log('pathhhh----->', hotelPhoto)
 
     if (!hotelPhoto) {
+        console.log(hotelPhoto, 'rendiiii')
+        res.status(400).json(new ApiResponse(400, "HotelPhoto File is required"))
+        throw new ApiError(400, "HotelPhoto File is required")
+     }
+
+    const hotelPhotoImg = await uploadOnCloudinaryHotel(hotelPhoto);
+    console.log('image of hotel', hotelPhotoImg)
+    if (!hotelPhotoImg) {
         res.status(400).json(new ApiResponse(400, "Error in uploading Hotel file"))
         throw new ApiError(400, "Error in uploading Hotel file")
     }
@@ -79,7 +97,7 @@ const registerHotel = asyncHandler(async (req, res) => {
         email,
         password,
         address,
-        hotelPhoto: hotelPhoto.url,
+        hotelPhoto: hotelPhotoImg.url,
         mobileNo,
         alternateMobileNo: altMob?.alternateMobileNo || "",
         checkInTime,
@@ -87,7 +105,11 @@ const registerHotel = asyncHandler(async (req, res) => {
         isCoupleStayAllowed,
         isFamilyStayAllowed,
         city,
-        price
+        facilities,
+        price: isFamilyStayAllowed ? price : null,
+        price3hr: isCoupleStayAllowed ? price3hr : null,
+        price6hr: isCoupleStayAllowed ? price6hr : null,
+        price12hr: isCoupleStayAllowed ? price12hr : null,
     })
 
     if (!hotel) {
@@ -278,11 +300,27 @@ const getOrderHistory = asyncHandler(async (req, res) => {
  })
 
  const getCurrentHotel = asyncHandler(async (req, res) => {
-    //return all info of the user in the db
-    return res
-       .status(200)
-       .json(new ApiResponse(200, req.hotel, "User Details fetched Successfully"))
- })
+    try {
+      const { hotelId } = req.params; // Assuming the hotel ID is passed as a route parameter
+      const hotel = await Hotel.findById(hotelId);
+  
+      if (!hotel) {
+        return res
+          .status(404)
+          .json(new ApiResponse(404, null, "Hotel not found"));
+      }
+
+      console.log('HOtel fpund------->', hotel)
+  
+      return res
+        .status(200)
+        .json(new ApiResponse(200, hotel, "Hotel details fetched successfully"));
+    } catch (error) {
+      return res
+        .status(500)
+        .json(new ApiResponse(500, null, "An error occurred while fetching the hotel details"));
+    }
+  });
 
  const updateHotelData = asyncHandler(async (req, res) => {
     try {

@@ -19,6 +19,6 @@ router.route("/updateHotel/:hotelId").put(updateHotelData)
 
 router.route("/toggleRoomStatus").patch(verifyHotelsJWT, toggleRoomStatus)
 
-router.route("/getCurrentHotel").get(verifyHotelsJWT, getCurrentHotel)
+router.route("/:hotelId").get(getCurrentHotel)
 
 export default router

@@ -10,7 +10,7 @@ const app = express();
 //     'https://trioserver.onrender.com',
 //     'http://localhost:3000',
 //     'http://localhost:2024',
-//     'https://7651-2409-4061-208a-95b0-5c9a-c178-a896-8e2f.ngrok-free.app'
+//     'https://24ed-2409-40e1-1008-5f11-e430-a2c2-1f26-6bcc.ngrok-free.app'
 // ];
 
 // app.use(cors({
