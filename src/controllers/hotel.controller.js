@@ -75,7 +75,7 @@ const registerHotel = asyncHandler(async (req, res) => {
     }
 
     // const HotelLocalPath = hotelPhoto;
-    const hotelPhoto  = req.file?.path;
+    const hotelPhoto  = req.file?.buffer;
     console.log('pathhhh----->', hotelPhoto)
 
     if (!hotelPhoto) {
