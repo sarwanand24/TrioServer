@@ -149,7 +149,7 @@ const loginHotel = asyncHandler(async (req, res) => {
        throw new ApiError(400, "hotel doesn't exists")
     }
  
-    const BREVO_API_KEY = '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';
+    const BREVO_API_KEY = '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';
  
     try {
        const response = await axios.post(
